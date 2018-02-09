@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     //RecyclerView components
     private RecyclerView recipesView;
-    private RecipeAdapter recipesAdapter;
+    private RecyclerViewAdapter recipesAdapter;
     private List<RecipeModel> recipesList;
 
     @Override
@@ -42,30 +42,58 @@ public class MainActivity extends AppCompatActivity {
             recipesView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));//INSERT PORTRAIT LAYOUT MANAGER
 
         //setup RecyclerView adapter
-        recipesAdapter = new RecipeAdapter(recipesList);
+        recipesAdapter = new RecyclerViewAdapter(recipesList);
         recipesView.setAdapter(recipesAdapter);
     }
 
     /**
      * Allows integration between the list of recipe objects and the recyclerview
      */
-    class RecipeAdapter
-            extends RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder> {
+    class RecyclerViewAdapter
+            extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHoldler> {
 
-        RecipeAdapter(List<RecipeModel> list) {
+        private final int BASIC = 0, COMPLEX = 1;
+
+        RecyclerViewAdapter(List<RecipeModel> list) {
             recipesList = list;
         }
 
         @Override
-        public RecipeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.recipe_card_layout, parent, false);
-            return new RecipeViewHolder(layoutView);
+        public ViewHoldler onCreateViewHolder(ViewGroup parent, int viewType) {
+            View layoutView;
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+
+            switch (viewType) {
+                case COMPLEX:
+                    layoutView = inflater.inflate(R.layout.recipe_card_complex_layout, parent, false);
+                    break;
+                default:
+                    layoutView = inflater.inflate(R.layout.recipe_card_layout, parent, false);
+                    break;
+
+            }
+            return new ViewHoldler(layoutView);
         }
 
         @Override
-        public void onBindViewHolder(RecipeViewHolder holder, int position) {
+        public void onBindViewHolder(ViewHoldler holder, int position) {
             //Set ViewHolder views to corresponding item's data in recipesList at position
+            switch (holder.getItemViewType()) {
+                case COMPLEX:
 
+                    break;
+                default:
+
+                    break;
+            }
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (recipesList.get(position).hasPhoto())
+                return COMPLEX;
+            else
+                return BASIC;
         }
 
         @Override
@@ -76,12 +104,45 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Hold individual list element view
          */
-        class RecipeViewHolder extends RecyclerView.ViewHolder
+        class ViewHoldler extends RecyclerView.ViewHolder
                 implements View.OnClickListener, View.OnLongClickListener {
 
             //View elements here you're showing
 
-            RecipeViewHolder(View itemView) {
+            ViewHoldler(View itemView) {
+                super(itemView);
+                //Initialise views here
+
+                //Optionally setup click listeners
+                itemView.setOnClickListener(this);
+                itemView.setOnLongClickListener(this);
+            }
+
+            //OPTIONAL
+            @Override
+            public void onClick(View view) {
+                //Click the list element
+            }
+
+            //OPTIONAL
+            @Override
+            public boolean onLongClick(View view) {
+                //Long click the list element
+
+                //Return has method handled the click
+                return true;
+            }
+        }
+
+        /**
+         * Hold individual list element view, includes photo of recipe
+         */
+        class ViewHoldlerPhoto extends RecyclerView.ViewHolder
+                implements View.OnClickListener, View.OnLongClickListener {
+
+            //View elements here you're showing
+
+            ViewHoldlerPhoto(View itemView) {
                 super(itemView);
                 //Initialise views here
 
