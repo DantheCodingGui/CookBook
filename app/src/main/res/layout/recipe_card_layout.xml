@@ -6,35 +6,66 @@
     android:layout_height="wrap_content"
     app:cardCornerRadius="5dp"
     app:cardBackgroundColor="@android:color/white"
-    app:cardElevation="5dp"
-    android:minHeight="100dp">
+    app:cardElevation="2dp"
+    android:layout_margin="5dp">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="10dp">
 
         <TextView
             android:id="@+id/txt_crd_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:textSize="25sp"
+            android:textSize="30sp"
             android:text="American Pancakes"/>
 
-        <TextView
-            android:id="@+id/txt_crd_cal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="245 Kcal"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/txt_crd_duration"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="20 mins"/>
+            <TextView
+                android:id="@+id/txt_crd_cal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:textSize="16sp"
+                android:text="245 Kcal"/>
 
+            <TextView
+                android:id="@+id/txt_crd_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_alignParentEnd="true"
+                android:textSize="16sp"
+                android:text="20 mins"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/txt_crd_ingredient_no"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:textSize="16sp"
+                android:text="5 ingredients"/>
+
+            <TextView
+                android:id="@+id/txt_crd_steps_no"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_alignParentEnd="true"
+                android:textSize="16sp"
+                android:text="6 steps"/>
+        </RelativeLayout>
     </LinearLayout>
 
 </android.support.v7.widget.CardView>

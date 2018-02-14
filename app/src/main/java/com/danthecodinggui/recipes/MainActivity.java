@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             //Set ViewHolder views to corresponding item's data in recipesList at position
             switch (holder.getItemViewType()) {
                 case COMPLEX:
-
+                    //TODO bind views for both card types
                     break;
                 default:
 
