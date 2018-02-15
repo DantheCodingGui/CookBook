@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="5dp"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardElevation="2dp"
+    android:layout_margin="5dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/txt_crd_title"
+            style="@style/CardRecipeTitle"
+            tools:text="American Pancakes" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/txt_crd_ingredient_no"
+                style="@style/CardText"
+                tools:text="5 ingredients"/>
+
+            <TextView
+                android:id="@+id/txt_crd_steps_no"
+                style="@style/CardText"
+                android:layout_alignParentEnd="true"
+                tools:text="6 steps"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/txt_crd_cal"
+                style="@style/CardText"
+                tools:text="245 Kcal"/>
+
+            <TextView
+                android:id="@+id/txt_crd_duration"
+                style="@style/CardText"
+                android:layout_alignParentEnd="true"
+                tools:text="20 mins"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

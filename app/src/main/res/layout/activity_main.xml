@@ -4,12 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.danthecodinggui.recipes.MainActivity"
+    tools:context="com.danthecodinggui.recipes.view.MainActivity"
     android:orientation="vertical">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvw_recipes"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        tools:itemCount="5"
+        tools:listitem="@layout/recipe_card_photo_basic"/>
 
 </LinearLayout>
