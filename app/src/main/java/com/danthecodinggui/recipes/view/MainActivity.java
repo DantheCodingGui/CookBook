@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -157,12 +159,14 @@ public class MainActivity extends AppCompatActivity {
                 itemView.setOnLongClickListener(this);
             }
 
+            protected int getCardId() {
+                return R.id.crd_basic;
+            }
+
             @Override
             public void onClick(View view) {
                 //TODO implement transition to view activity
-                Intent viewRecipe = new Intent(getApplicationContext(), ViewRecipeActivity.class);
-                viewRecipe.putExtra("Title", title.getText());
-                startActivity(viewRecipe);
+                ViewRecipe(title.getText().toString(), getCardId());
             }
 
             @Override
@@ -186,6 +190,11 @@ public class MainActivity extends AppCompatActivity {
                 calories = itemView.findViewById(R.id.txt_crd_cal);
                 timeInMins = itemView.findViewById(R.id.txt_crd_duration);
             }
+
+            @Override
+            protected int getCardId() {
+                return R.id.crd_complex;
+            }
         }
 
         /**
@@ -199,6 +208,11 @@ public class MainActivity extends AppCompatActivity {
                 super(itemView);
 
                 preview = itemView.findViewById(R.id.ivw_crd_preview);
+            }
+
+            @Override
+            protected int getCardId() {
+                return R.id.crd_basic_photo;
             }
         }
 
@@ -214,6 +228,21 @@ public class MainActivity extends AppCompatActivity {
 
                 preview = itemView.findViewById(R.id.ivw_crd_preview);
             }
+
+            @Override
+            protected int getCardId() {
+                return R.id.crd_complex_photo;
+            }
         }
+    }
+
+    private void ViewRecipe(String recipeTitle, int id) {
+        Intent viewRecipe = new Intent(getApplicationContext(), ViewRecipeActivity.class);
+
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                this, findViewById(id), getString(R.string.transition_home_to_view));
+
+        viewRecipe.putExtra("Title", recipeTitle);
+        ActivityCompat.startActivity(this, viewRecipe, options.toBundle());
     }
 }

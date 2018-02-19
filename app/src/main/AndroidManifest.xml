@@ -21,8 +21,7 @@
         <activity
             android:name=".view.ViewRecipeActivity"
             android:theme="@style/ViewRecipeTheme"
-            android:parentActivityName=".view.MainActivity"
-            />
+            android:parentActivityName=".view.MainActivity" />
 
         <meta-data
             android:name="preloaded_fonts"

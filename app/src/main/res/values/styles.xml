@@ -6,6 +6,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowContentTransitions">true</item>
     </style>
 
     <!-- Base application theme. -->
@@ -28,6 +29,7 @@
         <item name="cardElevation">2dp</item>
         <item name="cardPreventCornerOverlap">true</item>
         <item name="cardUseCompatPadding">true</item>
+        <item name="android:transitionName">@string/transition_home_to_view</item>
     </style>
 
     <style name="CardRecipeTitle">
