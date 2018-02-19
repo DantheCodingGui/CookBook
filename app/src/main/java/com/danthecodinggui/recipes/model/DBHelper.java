@@ -26,11 +26,18 @@ class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        //TODO add creation SQL Statement
+        db.execSQL(DBContract.RecipeEntry.CREATE);
+        db.execSQL(DBContract.IngredientEntry.CREATE);
+        db.execSQL(DBContract.MethodStepEntry.CREATE);
+        db.execSQL(DBContract.RecipeIngredientEntry.CREATE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersionNo, int newVersionNo) {
         //TODO actually write this properly this time
+        db.execSQL("DROP TABLE IF EXISTS " + DBContract.RecipeEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DBContract.IngredientEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DBContract.MethodStepEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DBContract.RecipeIngredientEntry.TABLE_NAME);
     }
 }
