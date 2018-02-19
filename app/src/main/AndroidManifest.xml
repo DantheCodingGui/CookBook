@@ -7,30 +7,26 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".view.MainActivity">
+        android:supportsRtl="true">
+        <activity
+            android:name=".view.MainActivity"
+            android:theme="@style/HomeTheme"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".view.ViewRecipeActivity"
+            android:theme="@style/ViewRecipeTheme"
+            android:parentActivityName=".view.MainActivity"
+            />
 
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
-
-        <activity
-            android:name=".view.ViewRecipeActivity"
-            android:label="@string/title_activity_view_recipe"
-            android:theme="@style/AppTheme.NoActionBar" />
-
-        <provider
-            android:name=".model.RecipeProvider"
-            android:authorities="com.danthecodinggui.recipes"
-            android:enabled="true"
-            android:exported="false"></provider>
     </application>
 
 </manifest>

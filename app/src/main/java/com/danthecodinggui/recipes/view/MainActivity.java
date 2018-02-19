@@ -1,5 +1,6 @@
 package com.danthecodinggui.recipes.view;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -109,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
                     ((ComplexViewHoldler)holder).calories.setText(String.valueOf(recipesList.get(position).getCalories()));
                     ((ComplexViewHoldler)holder).timeInMins.setText(String.valueOf(recipesList.get(position).getTimeInMins()));
                     ((ComplexPhotoViewHolder)holder).preview.setImageBitmap(recipesList.get(position).getPreview());
+                    //TODO Use glide here for image loading
                     break;
             }
         }
@@ -158,6 +160,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //TODO implement transition to view activity
+                Intent viewRecipe = new Intent(getApplicationContext(), ViewRecipeActivity.class);
+                viewRecipe.putExtra("Title", title.getText());
+                startActivity(viewRecipe);
             }
 
             @Override

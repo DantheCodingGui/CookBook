@@ -8,15 +8,18 @@ import android.net.Uri;
 
 public class RecipeProvider extends ContentProvider {
 
+    private static final int RECIPE_TABLE = 100;
 
-    //private static final UriMatcher uriMatcher;
+    private static final UriMatcher uriMatcher;
 
     static {
-
+        uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        uriMatcher.addURI(ProviderContract.CONTENT_AUTHORITY, ProviderContract.PATH_RECIPES, RECIPE_TABLE);
     }
 
-    public RecipeProvider() {
-    }
+    private DBHelper dbHelper;
+
+    public RecipeProvider() {}
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -39,8 +42,8 @@ public class RecipeProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        // TODO: Implement this to initialize your content provider on startup.
-        return false;
+        dbHelper = DBHelper.getInstance(getContext());
+        return true;
     }
 
     @Override

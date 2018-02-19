@@ -3,15 +3,9 @@ package com.danthecodinggui.recipes.model;
 import android.net.Uri;
 
 /**
- * Contract for database communication
+ * Contract for database interaction
  */
 final class DBContract {
-
-    static final String CONTENT_AUTHORITY = "com.danthecodinggui.recipes";
-
-    static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
-
-    static final String PATH_RECIPES = "Recipes";
 
     //Empty constructor in case anyone instantiates class
     DBContract() {}
