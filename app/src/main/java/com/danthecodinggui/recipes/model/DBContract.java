@@ -24,6 +24,7 @@ final class DBContract {
         static final String TABLE_NAME = "Recipes";
 
         static final String RECIPE_ID = "_id";
+        static final String VIEW_ORDER = "ViewOrder";
         static final String TITLE = "Title";
         static final String CALORIES = "Calories";
         static final String DURATION = "Duration";
@@ -31,6 +32,7 @@ final class DBContract {
 
         static final String CREATE = "CREATE TABLE " + TABLE_NAME + "(" +
                 RECIPE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                VIEW_ORDER + "INTEGER NOT NULL, " +
                 TITLE + " TEXT NOT NULL, " +
                 CALORIES + " INTEGER, " +
                 DURATION + " INTEGER, " +

@@ -24,7 +24,13 @@
         <activity
             android:name=".view.ViewRecipeActivity"
             android:label="@string/title_activity_view_recipe"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <provider
+            android:name=".model.RecipeProvider"
+            android:authorities="com.danthecodinggui.recipes"
+            android:enabled="true"
+            android:exported="false"></provider>
     </application>
 
 </manifest>
