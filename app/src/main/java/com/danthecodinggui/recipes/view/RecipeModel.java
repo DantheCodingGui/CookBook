@@ -3,9 +3,9 @@ package com.danthecodinggui.recipes.view;
 import android.graphics.Bitmap;
 
 /**
- * Recyclerview model
+ * MainActivity RecylerView model
  */
-public class RecipeModel {
+class RecipeModel {
 
     private boolean hasFullRecipe;
     private boolean hasPhoto;
@@ -19,14 +19,14 @@ public class RecipeModel {
     private int calories;
     private int timeInMins;
 
-    public RecipeModel(String title, int ingredientsNo, int stepsNo) {
+    RecipeModel(String title, int ingredientsNo, int stepsNo) {
         hasPhoto = hasFullRecipe = false;
         this.title = title;
         this.ingredientsNo = ingredientsNo;
         this.stepsNo = stepsNo;
     }
 
-    public RecipeModel(String title, int ingredientsNo, int stepsNo, int calories, int timeInMins) {
+    RecipeModel(String title, int ingredientsNo, int stepsNo, int calories, int timeInMins) {
         hasPhoto = false;
         hasFullRecipe = true;
         this.title = title;
@@ -36,7 +36,7 @@ public class RecipeModel {
         this.timeInMins = timeInMins;
     }
 
-    public RecipeModel(String title, int ingredientsNo, int stepsNo, Bitmap preview) {
+    RecipeModel(String title, int ingredientsNo, int stepsNo, Bitmap preview) {
         hasFullRecipe = false;
         hasPhoto = true;
         this.title = title;
@@ -45,7 +45,7 @@ public class RecipeModel {
         this.preview = preview;
     }
 
-    public RecipeModel(String title, int ingredientsNo, int stepsNo, int calories, int timeInMins, Bitmap preview) {
+    RecipeModel(String title, int ingredientsNo, int stepsNo, int calories, int timeInMins, Bitmap preview) {
         hasPhoto = true;
         hasFullRecipe = true;
         this.title = title;
@@ -60,7 +60,7 @@ public class RecipeModel {
      * States whether or not recipe record includes time and/or Calorie information
      * @return
      */
-    public boolean hasFullRecipe() {
+    boolean hasFullRecipe() {
         return hasFullRecipe;
     }
 
@@ -68,49 +68,49 @@ public class RecipeModel {
      * States whether or not recipe record includes an attached photo or the completed dish
      * @return
      */
-    public boolean hasPhoto() {
+    boolean hasPhoto() {
         return hasPhoto;
     }
 
-    public String getTitle() {
+    String getTitle() {
         return title;
     }
-    public void setTitle(String title) {
+    void setTitle(String title) {
         this.title = title;
     }
 
-    public int getIngredientsNo() {
+    int getIngredientsNo() {
         return ingredientsNo;
     }
-    public void setIngredientsNo(int ingredientsNo) {
+    void setIngredientsNo(int ingredientsNo) {
         this.ingredientsNo = ingredientsNo;
     }
 
-    public int getStepsNo() {
+    int getStepsNo() {
         return stepsNo;
     }
-    public void setStepsNo(int stepsNo) {
+    void setStepsNo(int stepsNo) {
         this.stepsNo = stepsNo;
     }
 
-    public Bitmap getPreview() {
+    Bitmap getPreview() {
         return preview;
     }
-    public void setPreview(Bitmap preview) {
+    void setPreview(Bitmap preview) {
         this.preview = preview;
     }
 
-    public int getCalories() {
+    int getCalories() {
         return calories;
     }
-    public void setCalories(int calories) {
+    void setCalories(int calories) {
         this.calories = calories;
     }
 
-    public int getTimeInMins() {
+    int getTimeInMins() {
         return timeInMins;
     }
-    public void setTimeInMins(int timeInMins) {
+    void setTimeInMins(int timeInMins) {
         this.timeInMins = timeInMins;
     }
 }

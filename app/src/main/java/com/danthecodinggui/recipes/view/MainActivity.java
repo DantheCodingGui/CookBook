@@ -1,10 +1,6 @@
 package com.danthecodinggui.recipes.view;
 
-//Also need data model with get/set methods,
-//list item layout (i.e. CardView?) and Gradle
-
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -43,17 +39,18 @@ public class MainActivity extends AppCompatActivity {
 
         recipesList = new ArrayList<>();
 
-        //conditionally set RecyclerView layout manager depending on screen orientation
+        //Conditionally set RecyclerView layout manager depending on screen orientation
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE)
-            recipesView.setLayoutManager(new GridLayoutManager(getApplicationContext(), 2));//INSERT LANDSCAPE LAYOUT MANAGER
+            recipesView.setLayoutManager(new GridLayoutManager(getApplicationContext(), 2));
         else
-            recipesView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));//INSERT PORTRAIT LAYOUT MANAGER
+            recipesView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
         //setup RecyclerView adapter
         recipesAdapter = new RecyclerViewAdapter(recipesList);
         recipesView.setAdapter(recipesAdapter);
 
+        //Example cards TODO remove later
         recipesList.add(new RecipeModel("Sushi Sliders", 5, 6,
                 10, 5, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
         recipesList.add(new RecipeModel("American Pancakes", 4, 7));
@@ -78,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         public BasicViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
+            //TODO change so each viewholder builds thenselves (probs a static method)
             switch (viewType) {
                 case COMPLEX:
                     return new ComplexViewHoldler(inflater.inflate(R.layout.recipe_card_complex, parent, false));
@@ -93,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 
+            //TODO change so that each viewholder binds their own data (will have to also do super())
             ((BasicViewHolder)holder).title.setText(recipesList.get(position).getTitle());
             ((BasicViewHolder)holder).ingredientsNo.setText(String.valueOf(recipesList.get(position).getIngredientsNo()));
             ((BasicViewHolder)holder).stepsNo.setText(String.valueOf(recipesList.get(position).getStepsNo()));
@@ -158,14 +157,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                //Click the list element
+                //TODO implement transition to view activity
             }
 
             @Override
             public boolean onLongClick(View view) {
-                //Long click the list element
-
-                //Return has method handled the click
+                //TODO implement drag/drop initiation
                 return true;
             }
         }

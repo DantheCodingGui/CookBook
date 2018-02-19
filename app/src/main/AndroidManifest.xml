@@ -24,7 +24,7 @@
         <activity
             android:name=".view.ViewRecipeActivity"
             android:label="@string/title_activity_view_recipe"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>
