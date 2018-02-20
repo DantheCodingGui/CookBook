@@ -1,5 +1,6 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -17,6 +18,10 @@ import android.widget.RelativeLayout;
 
 import com.danthecodinggui.recipes.R;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
 
     private RelativeLayout previewContainer;
@@ -29,34 +34,47 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         //TODO need to conditionally set this between recipe with/without photo, ie normal toolbar for no photo
         setContentView(R.layout.activity_view_recipe);
 
+        previewContainer = findViewById(R.id.rly_preview_container);
+        tabLayout = findViewById(R.id.tly_view_recipe);
+
         toolbar = findViewById(R.id.tbar_vw_recipe);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        //TODO change later to set based on database query
         CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.ctl_vw_recipe);
         collapsingToolbar.setTitle(getIntent().getStringExtra("Title"));
 
-        final AppBarLayout appBarLayout = findViewById(R.id.abl_view_recipe);
+        AppBarLayout appBarLayout = findViewById(R.id.abl_view_recipe);
         appBarLayout.addOnOffsetChangedListener(this);
 
-        previewContainer = findViewById(R.id.rly_preview_container);
-        tabLayout = findViewById(R.id.tly_view_recipe);
+        SetScrimColour(appBarLayout);
+        SetupTabLayout();
+    }
 
-        //Generates one colour from the recipe preview photo to use as toolbar colour
+    /**
+     * Generates one colour from the recipe preview photo to use as toolbar colour
+     */
+    private void SetScrimColour(final AppBarLayout appBar) {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
                 R.drawable.sample_image);
         Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
             @Override
             public void onGenerated(Palette palette) {
                 int mutedColor = palette.getMutedColor(R.attr.colorPrimary);
-                appBarLayout.setBackgroundColor(mutedColor);
+                appBar.setBackgroundColor(mutedColor);
             }
         });
+    }
 
+    /**
+     * Initialise ingredient/method tabs
+     */
+    private void SetupTabLayout() {
         TabLayout tabLayout = findViewById(R.id.tly_view_recipe);
-        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.tab_ingredients)));
-        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.tab_method)));
+        tabLayout.addTab(tabLayout.newTab());
+        tabLayout.addTab(tabLayout.newTab());
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         /*
         For adding icons to tabs later
@@ -65,8 +83,13 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         tabLayout.getTabAt(1).setIcon();
         */
 
+        List<String> tabTitles = new ArrayList<>(Arrays.asList(
+                getString(R.string.tab_ingredients),
+                getString(R.string.tab_method)));
+
         final ViewPager viewPager = findViewById(R.id.vpr_view_recipe);
-        final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
+        tabLayout.setupWithViewPager(viewPager);
+        final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount(), tabTitles);
         viewPager.setAdapter(adapter);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override

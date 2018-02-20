@@ -4,10 +4,10 @@
     android:layout_height="match_parent"
     tools:context="com.danthecodinggui.recipes.view.view_recipe.MethodTabFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvw_method"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Method steps here" />
+        tools:itemCount="5"/>
 
 </FrameLayout>
