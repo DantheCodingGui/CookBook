@@ -24,9 +24,9 @@
             android:id="@+id/ctl_vw_recipe"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:contentScrim="?attr/colorPrimary"
             app:expandedTitleMarginStart="@dimen/activity_margin_content"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:expandedTitleMarginBottom="50dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
             android:fitsSystemWindows="true"
             app:statusBarScrim="@android:color/transparent">
 
@@ -42,9 +42,16 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="160dp"
+                android:layout_height="150dp"
                 android:layout_gravity="bottom"
-                android:background="@drawable/scrim"/>
+                android:background="@drawable/bottom_scrim"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_gravity="top"
+                android:background="@drawable/top_scrim"
+                android:fitsSystemWindows="true"/>
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/tbar_vw_recipe"
