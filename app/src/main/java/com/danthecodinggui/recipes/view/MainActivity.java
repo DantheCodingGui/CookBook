@@ -3,6 +3,7 @@ package com.danthecodinggui.recipes.view;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -17,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -159,14 +161,10 @@ public class MainActivity extends AppCompatActivity {
                 itemView.setOnLongClickListener(this);
             }
 
-            protected int getCardId() {
-                return R.id.crd_basic;
-            }
-
             @Override
             public void onClick(View view) {
                 //TODO implement transition to view activity
-                ViewRecipe(title.getText().toString(), getCardId());
+                ViewRecipe(title.getText().toString());
             }
 
             @Override
@@ -190,11 +188,6 @@ public class MainActivity extends AppCompatActivity {
                 calories = itemView.findViewById(R.id.txt_crd_cal);
                 timeInMins = itemView.findViewById(R.id.txt_crd_duration);
             }
-
-            @Override
-            protected int getCardId() {
-                return R.id.crd_complex;
-            }
         }
 
         /**
@@ -207,12 +200,7 @@ public class MainActivity extends AppCompatActivity {
             BasicPhotoViewHolder(View itemView) {
                 super(itemView);
 
-                preview = itemView.findViewById(R.id.ivw_crd_preview);
-            }
-
-            @Override
-            protected int getCardId() {
-                return R.id.crd_basic_photo;
+                preview = itemView.findViewById(R.id.ivw_crd_basic_preview);
             }
         }
 
@@ -226,23 +214,27 @@ public class MainActivity extends AppCompatActivity {
             ComplexPhotoViewHolder(View itemView) {
                 super(itemView);
 
-                preview = itemView.findViewById(R.id.ivw_crd_preview);
-            }
-
-            @Override
-            protected int getCardId() {
-                return R.id.crd_complex_photo;
+                preview = itemView.findViewById(R.id.ivw_crd_complex_preview);
             }
         }
     }
 
-    private void ViewRecipe(String recipeTitle, int id) {
+    private void ViewRecipe(String recipeTitle) {
+
         Intent viewRecipe = new Intent(getApplicationContext(), ViewRecipeActivity.class);
-
-        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                this, findViewById(id), getString(R.string.transition_home_to_view));
-
         viewRecipe.putExtra("Title", recipeTitle);
-        ActivityCompat.startActivity(this, viewRecipe, options.toBundle());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            //TODO first check if card has image at all, if it does, get root view.image
+
+
+            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    this, findViewById(R.id.ivw_crd_basic_preview), getString(R.string.transition_image_preview));
+
+            viewRecipe.putExtra("Title", recipeTitle);
+            ActivityCompat.startActivity(this, viewRecipe, options.toBundle());
+        }
+        else
+            startActivity(viewRecipe);
     }
 }

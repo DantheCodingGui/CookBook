@@ -11,7 +11,7 @@
         android:orientation="vertical">
 
         <ImageView
-            android:id="@+id/ivw_crd_preview"
+            android:id="@+id/ivw_crd_complex_preview"
             style="@style/CardImagePreview"
             tools:src="@drawable/sample_image"/>
 

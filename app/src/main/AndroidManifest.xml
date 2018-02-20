@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".view.ViewRecipeActivity"
+            android:name=".view.view_recipe.ViewRecipeActivity"
             android:theme="@style/ViewRecipeTheme"
             android:parentActivityName=".view.MainActivity" />
 

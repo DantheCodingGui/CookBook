@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Recipes</string>
-    <string name="transition_home_to_view">RecipeCardToViewRecipeActivity</string>
+    <string name="transition_image_preview">CardToView_image_preview</string>
+    <string name="transition_recipe_title">CardToView_recipe_title</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="tab_ingredients">Ingredients</string>
+    <string name="tab_method">Method</string>
 </resources>
