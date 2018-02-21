@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.danthecodinggui.recipes.R;

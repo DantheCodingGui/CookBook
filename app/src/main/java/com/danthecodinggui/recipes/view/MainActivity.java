@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     //RecyclerView components
     private RecyclerView recipesView;
-    private RecyclerViewAdapter recipesAdapter;
+    private RecipesViewAdapter recipesAdapter;
     private List<RecipeModel> recipesList;
 
     @Override
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
             recipesView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
         //setup RecyclerView adapter
-        recipesAdapter = new RecyclerViewAdapter(recipesList);
+        recipesAdapter = new RecipesViewAdapter();
         recipesView.setAdapter(recipesAdapter);
 
         //Example cards TODO remove later
@@ -67,14 +67,10 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Allows integration between the list of recipe objects and the recyclerview
      */
-    class RecyclerViewAdapter
+    class RecipesViewAdapter
             extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private final int BASIC = 0, COMPLEX = 1, PHOTO_BASIC = 2, PHOTO_COMPLEX = 3;
-
-        RecyclerViewAdapter(List<RecipeModel> list) {
-            recipesList = list;
-        }
 
         @Override
         public BasicViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

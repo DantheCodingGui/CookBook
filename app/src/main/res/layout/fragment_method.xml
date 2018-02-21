@@ -8,6 +8,8 @@
         android:id="@+id/rvw_method"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:itemCount="5"/>
+        android:padding="20dp"
+        tools:itemCount="5"
+        tools:listItem="@layout/method_item"/>
 
 </FrameLayout>
