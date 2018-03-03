@@ -160,7 +160,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //TODO implement transition to view activity
-                ViewRecipe(title.getText().toString());
+                //TODO add flag to call stating photo/no photo to choose layout to inflate
+                //TODO make simpler viewrecipe layout without collapsingtoolbarlayout
+                ViewRecipe(view, title.getText().toString());
             }
 
             @Override
@@ -215,17 +217,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void ViewRecipe(String recipeTitle) {
+    private void ViewRecipe(View cardView, String recipeTitle) {
 
         Intent viewRecipe = new Intent(getApplicationContext(), ViewRecipeActivity.class);
         viewRecipe.putExtra("Title", recipeTitle);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //TODO first check if card has image at all, if it does, get root view.image
 
 
             ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                    this, findViewById(R.id.ivw_crd_basic_preview), getString(R.string.transition_image_preview));
+                    this, cardView.findViewById(R.id.ivw_crd_basic_preview), getString(R.string.transition_image_preview));
 
             viewRecipe.putExtra("Title", recipeTitle);
             ActivityCompat.startActivity(this, viewRecipe, options.toBundle());
