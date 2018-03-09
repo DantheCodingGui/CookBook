@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="txt_ingredients_no">
+        <item quantity="one">%1$d ingredient</item>
+        <item quantity="other">%1$d ingredients</item>
+    </plurals>
+    <plurals name="txt_method_steps_no">
+        <item quantity="one">%1$d step</item>
+        <item quantity="other">%1$d steps</item>
+    </plurals>
+    <plurals name="txt_calories">
+        <item quantity="one">%d calorie</item>
+        <item quantity="other">%d calories</item>
+    </plurals>
+</resources>

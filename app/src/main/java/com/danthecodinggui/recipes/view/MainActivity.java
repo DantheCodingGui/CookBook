@@ -2,6 +2,7 @@ package com.danthecodinggui.recipes.view;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
@@ -90,26 +91,44 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int pos) {
+
+            Resources res = getResources();
 
             //TODO change so that each viewholder binds their own data (will have to also do super())
-            ((BasicViewHolder)holder).title.setText(recipesList.get(position).getTitle());
-            ((BasicViewHolder)holder).ingredientsNo.setText(String.valueOf(recipesList.get(position).getIngredientsNo()));
-            ((BasicViewHolder)holder).stepsNo.setText(String.valueOf(recipesList.get(position).getStepsNo()));
+            ((BasicViewHolder)holder).title.setText(recipesList.get(pos).getTitle());
+
+            int ingredientsNo = recipesList.get(pos).getIngredientsNo();
+            String ingredientsString = res.getQuantityString(R.plurals.txt_ingredients_no, ingredientsNo, ingredientsNo);
+            ((BasicViewHolder)holder).ingredientsNo.setText(ingredientsString);
+
+            int stepsNo = recipesList.get(pos).getStepsNo();
+            String stepsString = res.getQuantityString(R.plurals.txt_method_steps_no, stepsNo, stepsNo);
+            ((BasicViewHolder)holder).stepsNo.setText(stepsString);
+
+            String kcalString;
+            int kcals;
 
             //TODO deal with null returns from getter methods as any complex data is optional to the user
             switch (holder.getItemViewType()) {
                 case COMPLEX:
-                    ((ComplexViewHoldler)holder).calories.setText(String.valueOf(recipesList.get(position).getCalories()));
-                    ((ComplexViewHoldler)holder).timeInMins.setText(String.valueOf(recipesList.get(position).getTimeInMins()));
+                    kcals = recipesList.get(pos).getCalories();
+                    kcalString = String.valueOf(res.getQuantityString(
+                            R.plurals.txt_calories, kcals, kcals));
+                    ((ComplexViewHoldler)holder).calories.setText(kcalString);
+                    ((ComplexViewHoldler)holder).timeInMins.setText(String.valueOf(recipesList.get(pos).getTimeInMins()));
                     break;
                 case PHOTO_BASIC:
-                    ((BasicPhotoViewHolder)holder).preview.setImageBitmap(recipesList.get(position).getPreview());
+                    ((BasicPhotoViewHolder)holder).preview.setImageBitmap(recipesList.get(pos).getPreview());
                     break;
                 case PHOTO_COMPLEX:
-                    ((ComplexViewHoldler)holder).calories.setText(String.valueOf(recipesList.get(position).getCalories()));
-                    ((ComplexViewHoldler)holder).timeInMins.setText(String.valueOf(recipesList.get(position).getTimeInMins()));
-                    ((ComplexPhotoViewHolder)holder).preview.setImageBitmap(recipesList.get(position).getPreview());
+                    kcals = recipesList.get(pos).getCalories();
+                    kcalString = String.valueOf(res.getQuantityString(
+                            R.plurals.txt_calories, kcals, kcals));
+                    ((ComplexViewHoldler)holder).calories.setText(kcalString);
+
+                    ((ComplexViewHoldler)holder).timeInMins.setText(String.valueOf(recipesList.get(pos).getTimeInMins()));
+                    ((ComplexPhotoViewHolder)holder).preview.setImageBitmap(recipesList.get(pos).getPreview());
                     //TODO Use glide here for image loading
                     break;
             }

@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:itemCount="5"
-        tools:listitem="@layout/recipe_card_photo_basic"/>
+        tools:listitem="@layout/recipe_card_photo_basic"
+        android:overScrollMode="never"/>
 
 </LinearLayout>

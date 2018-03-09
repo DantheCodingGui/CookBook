@@ -34,7 +34,6 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //TODO need to conditionally set this between recipe with/without photo, ie normal toolbar for no
         if (hasPhoto) {
             setContentView(R.layout.activity_view_recipe_photo);
             preview = findViewById(R.id.ivw_toolbar_preview);
@@ -48,7 +47,10 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
 
             SetScrimColour(appBarLayout);
 
-            setStatusBarCol(Color.TRANSPARENT);
+            //Set status bar colour
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.TRANSPARENT);
         }
         else
             setContentView(R.layout.activity_view_recipe);
@@ -129,11 +131,5 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         Float f = ((transitionSpace + verticalOffset) / transitionSpace) * 255;
         Log.d("graphics", "f: " + f.toString());
         preview.setImageAlpha(Math.round(f));
-    }
-
-    private void setStatusBarCol(int colour) {
-        Window window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(colour);
     }
 }
