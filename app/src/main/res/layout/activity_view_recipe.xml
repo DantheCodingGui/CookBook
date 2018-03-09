@@ -4,67 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context="com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/abl_view_recipe"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:clipChildren="false"
-        android:fitsSystemWindows="true">
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-        <android.support.design.widget.CollapsingToolbarLayout
-            android:id="@+id/ctl_vw_recipe"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/tbar_vw_recipe"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
-            app:expandedTitleMarginBottom="5dp"
-            app:collapsedTitleTextAppearance="@font/open_sans_light"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            android:clipChildren="false"
-            android:fitsSystemWindows="true"
-            app:contentScrim="@android:color/transparent"
-            app:statusBarScrim="@android:color/transparent">
-
-            <ImageView
-                android:id="@+id/ivw_toolbar_preview"
-                android:src="@drawable/sample_image"
-                android:layout_width="match_parent"
-                android:layout_height="361dp"
-                android:scaleType="centerCrop"
-                android:fitsSystemWindows="true"
-                android:transitionName="@string/transition_image_preview"
-                android:paddingBottom="?attr/actionBarSize"
-                app:layout_collapseMode="parallax"/>
-
-
-            <!--Gradient mask to make back button more visible-->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_gravity="top"
-                android:background="@drawable/top_scrim"
-                android:fitsSystemWindows="true"/>
-
-            <!--Gradient mask to make title text/tab buttons more visible-->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:layout_gravity="bottom"
-                android:layout_marginBottom="-57dp"
-                android:background="@drawable/bottom_scrim"/>
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/tbar_vw_recipe"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:minHeight="?attr/actionBarSize"
-                android:gravity="top"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
-
-        </android.support.design.widget.CollapsingToolbarLayout>
+            android:layout_height="?attr/actionBarSize"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tly_view_recipe"
@@ -72,6 +24,7 @@
             android:layout_height="?attr/actionBarSize"
             android:layout_gravity="bottom"
             app:tabGravity="center"
+            app:tabIndicatorColor="@android:color/white"
             app:tabMode="fixed"/>
 
     </android.support.design.widget.AppBarLayout>

@@ -3,6 +3,7 @@ package com.danthecodinggui.recipes.view.view_recipe;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import android.graphics.Color;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
@@ -12,8 +13,9 @@ import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
 import com.danthecodinggui.recipes.R;
 
@@ -23,19 +25,34 @@ import java.util.List;
 
 public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
 
-    //private RelativeLayout previewContainer;
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ImageView preview;
 
+    boolean hasPhoto = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //TODO need to conditionally set this between recipe with/without photo, ie normal toolbar for no photo
-        setContentView(R.layout.activity_view_recipe);
+        //TODO need to conditionally set this between recipe with/without photo, ie normal toolbar for no
+        if (hasPhoto) {
+            setContentView(R.layout.activity_view_recipe_photo);
+            preview = findViewById(R.id.ivw_toolbar_preview);
 
-        //previewContainer = findViewById(R.id.rly_preview_container);
-        preview = findViewById(R.id.ivw_toolbar_preview);
+            //TODO change later to set based on database query
+            CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.ctl_vw_recipe);
+            collapsingToolbar.setTitle(getIntent().getStringExtra("Title"));
+
+            AppBarLayout appBarLayout = findViewById(R.id.abl_view_recipe);
+            appBarLayout.addOnOffsetChangedListener(this);
+
+            SetScrimColour(appBarLayout);
+
+            setStatusBarCol(Color.TRANSPARENT);
+        }
+        else
+            setContentView(R.layout.activity_view_recipe);
+
         tabLayout = findViewById(R.id.tly_view_recipe);
 
         toolbar = findViewById(R.id.tbar_vw_recipe);
@@ -43,14 +60,6 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        //TODO change later to set based on database query
-        CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.ctl_vw_recipe);
-        collapsingToolbar.setTitle(getIntent().getStringExtra("Title"));
-
-        AppBarLayout appBarLayout = findViewById(R.id.abl_view_recipe);
-        appBarLayout.addOnOffsetChangedListener(this);
-
-        SetScrimColour(appBarLayout);
         SetupTabLayout();
     }
 
@@ -113,12 +122,18 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
 
     @Override
     public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+        //Will set the alpha of the image based on collapsing toolbar scroll
         int toolBarHeight = toolbar.getMeasuredHeight();
         int appBarHeight = appBarLayout.getMeasuredHeight();
-        float transitionSpace = (float) appBarHeight - toolBarHeight - tabLayout.getMeasuredHeight();
+        float transitionSpace = (float)appBarHeight - toolBarHeight;// - tabLayout.getMeasuredHeight() - 80;
         Float f = ((transitionSpace + verticalOffset) / transitionSpace) * 255;
         Log.d("graphics", "f: " + f.toString());
         preview.setImageAlpha(Math.round(f));
-        //previewContainer.getBackground().setAlpha(Math.round(f));
+    }
+
+    private void setStatusBarCol(int colour) {
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(colour);
     }
 }
