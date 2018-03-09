@@ -23,7 +23,7 @@ import java.util.List;
 
 public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
 
-    private RelativeLayout previewContainer;
+    //private RelativeLayout previewContainer;
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ImageView preview;
@@ -34,7 +34,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         //TODO need to conditionally set this between recipe with/without photo, ie normal toolbar for no photo
         setContentView(R.layout.activity_view_recipe);
 
-        previewContainer = findViewById(R.id.rly_preview_container);
+        //previewContainer = findViewById(R.id.rly_preview_container);
         preview = findViewById(R.id.ivw_toolbar_preview);
         tabLayout = findViewById(R.id.tly_view_recipe);
 
@@ -118,7 +118,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         float transitionSpace = (float) appBarHeight - toolBarHeight - tabLayout.getMeasuredHeight();
         Float f = ((transitionSpace + verticalOffset) / transitionSpace) * 255;
         Log.d("graphics", "f: " + f.toString());
-        //preview.setImageAlpha(Math.round(f));
-        previewContainer.getBackground().setAlpha(Math.round(f));
+        preview.setImageAlpha(Math.round(f));
+        //previewContainer.getBackground().setAlpha(Math.round(f));
     }
 }
