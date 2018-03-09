@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.danthecodinggui.recipes.R;
@@ -25,6 +26,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
     private RelativeLayout previewContainer;
     private Toolbar toolbar;
     private TabLayout tabLayout;
+    private ImageView preview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +35,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         setContentView(R.layout.activity_view_recipe);
 
         previewContainer = findViewById(R.id.rly_preview_container);
+        preview = findViewById(R.id.ivw_toolbar_preview);
         tabLayout = findViewById(R.id.tly_view_recipe);
 
         toolbar = findViewById(R.id.tbar_vw_recipe);
@@ -115,6 +118,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         float transitionSpace = (float) appBarHeight - toolBarHeight - tabLayout.getMeasuredHeight();
         Float f = ((transitionSpace + verticalOffset) / transitionSpace) * 255;
         Log.d("graphics", "f: " + f.toString());
+        //preview.setImageAlpha(Math.round(f));
         previewContainer.getBackground().setAlpha(Math.round(f));
     }
 }

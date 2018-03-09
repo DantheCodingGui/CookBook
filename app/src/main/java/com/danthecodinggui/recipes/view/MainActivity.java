@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
             BasicPhotoViewHolder(View itemView) {
                 super(itemView);
 
-                preview = itemView.findViewById(R.id.ivw_crd_basic_preview);
+                preview = itemView.findViewById(R.id.ivw_crd_preview);
             }
         }
 
@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
             ComplexPhotoViewHolder(View itemView) {
                 super(itemView);
 
-                preview = itemView.findViewById(R.id.ivw_crd_complex_preview);
+                preview = itemView.findViewById(R.id.ivw_crd_preview);
             }
         }
     }
@@ -225,12 +225,19 @@ public class MainActivity extends AppCompatActivity {
         if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //TODO first check if card has image at all, if it does, get root view.image
 
+            View imagePreview;
 
-            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                    this, cardView.findViewById(R.id.ivw_crd_basic_preview), getString(R.string.transition_image_preview));
+            //Recipe has an image associated with it
+            if ((imagePreview = cardView.findViewById(R.id.ivw_crd_preview)) != null) {
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        this, imagePreview, getString(R.string.transition_image_preview));
 
-            viewRecipe.putExtra("Title", recipeTitle);
-            ActivityCompat.startActivity(this, viewRecipe, options.toBundle());
+                viewRecipe.putExtra("Title", recipeTitle);
+                ActivityCompat.startActivity(this, viewRecipe, options.toBundle());
+            }
+            else {
+                //only transition from cardview not imageview
+            }
         }
         else
             startActivity(viewRecipe);

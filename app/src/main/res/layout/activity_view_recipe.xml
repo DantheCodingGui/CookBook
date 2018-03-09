@@ -20,6 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="250dp"
             app:expandedTitleMarginBottom="5dp"
+            app:collapsedTitleTextAppearance="@font/open_sans_light"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             android:clipChildren="false"
             android:fitsSystemWindows="true"
@@ -65,7 +66,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:minHeight="?attr/actionBarSize"
-                app:titleMarginTop="15dp"
                 android:gravity="top"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
@@ -88,6 +88,6 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-<!--need activity_margin_content in root for rest of view-->
+    <!--need activity_margin_content in root for rest of view-->
 
 </android.support.design.widget.CoordinatorLayout>
