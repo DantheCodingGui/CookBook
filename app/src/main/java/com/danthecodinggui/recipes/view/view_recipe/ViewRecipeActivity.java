@@ -88,12 +88,10 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-        /*
-        For adding icons to tabs later
-        TODO Once you're at this stage, look into animated icons like in telegramX
-        tabLayout.getTabAt(0).setIcon();
-        tabLayout.getTabAt(1).setIcon();
-        */
+
+        tabLayout.getTabAt(0).setIcon(R.drawable.ic_ingredients);
+        tabLayout.getTabAt(1).setIcon(R.drawable.ic_method);
+
 
         List<String> tabTitles = new ArrayList<>(Arrays.asList(
                 getString(R.string.tab_ingredients),

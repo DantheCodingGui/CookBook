@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.danthecodinggui.recipes.view.AddRecipeActivity">
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_add_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_add"
+        app:fabSize="normal"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:onClick="AnimateFab"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_add_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_photo"
+        android:visibility="invisible"
+        app:fabSize="mini"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="70dp" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_add_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_time"
+        android:visibility="invisible"
+        app:fabSize="mini"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="86dp" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_add_kcal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_calories"
+        android:visibility="invisible"
+        app:fabSize="mini"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="86dp"
+        android:layout_marginEnd="10dp" />
+
+</android.support.design.widget.CoordinatorLayout>

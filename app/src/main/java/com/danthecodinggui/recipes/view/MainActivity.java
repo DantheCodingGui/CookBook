@@ -91,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void AddRecipe(View view) {
         //TODO start new activity to add recipe
+        Intent addRecipe = new Intent(getApplicationContext(), AddRecipeActivity.class);
+        startActivity(addRecipe);
     }
 
     /**
