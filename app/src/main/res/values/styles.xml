@@ -58,4 +58,12 @@
         <item name="android:transitionName">@string/transition_image_preview</item>
     </style>
 
+    <style name="CardBody">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingStart">15dp</item>
+        <item name="android:paddingEnd">15dp</item>
+    </style>
+
 </resources>

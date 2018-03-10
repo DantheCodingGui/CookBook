@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recipesView;
     private RecipesViewAdapter recipesAdapter;
     private List<RecipeModel> recipesList;
+    private FloatingActionButton addRecipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         //Get display data from data sourced here
 
         recipesView = findViewById(R.id.rvw_recipes);
+        addRecipe = findViewById(R.id.fab_add_recipe);
 
         recipesList = new ArrayList<>();
 
@@ -56,6 +60,20 @@ public class MainActivity extends AppCompatActivity {
         recipesAdapter = new RecipesViewAdapter();
         recipesView.setAdapter(recipesAdapter);
 
+        //Show/hide floating action button on recyclerview scroll
+        recipesView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0 && addRecipe.getVisibility() == View.VISIBLE) {
+                    addRecipe.hide();
+                } else if (dy < 0 && addRecipe.getVisibility() != View.VISIBLE) {
+                    addRecipe.show();
+                }
+            }
+        });
+
         //Example cards TODO remove later
         recipesList.add(new RecipeModel("Sushi Sliders", 5, 6,
                 10, 5, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
@@ -63,6 +81,16 @@ public class MainActivity extends AppCompatActivity {
         recipesList.add(new RecipeModel("English Pancakes", 4, 7, 10, 3));
         recipesList.add(new RecipeModel("Spag Bol", 4, 7, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
         recipesAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        //TODO inflate search icon in menu
+        return false;
+    }
+
+    public void AddRecipe(View view) {
+        //TODO start new activity to add recipe
     }
 
     /**
@@ -242,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
         viewRecipe.putExtra("Title", recipeTitle);
 
         if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            //TODO first check if card has image at all, if it does, get root view.image
+            //TODO get shared transitions working
 
             View imagePreview;
 
@@ -256,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
             }
             else {
                 //only transition from cardview not imageview
+
             }
         }
         else
