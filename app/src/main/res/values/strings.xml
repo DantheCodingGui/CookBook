@@ -9,4 +9,8 @@
 
     <string name="txt_time_to_make"></string>
     <string name="search_title">Search Recipes</string>
+    <string name="main_card_transition_name">transition_card</string>
+    <string name="txt_add_photo">Add Photo</string>
+    <string name="txt_add_time">Add Time to make</string>
+    <string name="txt_add_kcal">Add Calorie Count</string>
 </resources>

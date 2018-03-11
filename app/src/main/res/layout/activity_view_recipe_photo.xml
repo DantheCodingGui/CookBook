@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity">
+    tools:context="com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity"
+    android:id="@+id/view_recipe_root">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/abl_view_recipe"
@@ -34,7 +35,6 @@
                 android:layout_height="362dp"
                 android:scaleType="centerCrop"
                 android:fitsSystemWindows="true"
-                android:transitionName="@string/transition_image_preview"
                 android:paddingBottom="?attr/actionBarSize"
                 app:layout_collapseMode="parallax"/>
 
@@ -83,7 +83,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
-
-    <!--need activity_margin_content in root for rest of view-->
 
 </android.support.design.widget.CoordinatorLayout>

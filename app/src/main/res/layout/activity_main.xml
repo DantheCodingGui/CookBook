@@ -24,6 +24,7 @@
         android:layout_margin="16dp"
         app:layout_anchor="@+id/rvw_recipes"
         app:layout_anchorGravity="bottom|right|end"
-        android:onClick="AddRecipe"/>
+        android:onClick="AddRecipe"
+        android:transitionName="bg"/>
 
 </android.support.design.widget.CoordinatorLayout>

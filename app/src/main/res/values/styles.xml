@@ -22,7 +22,8 @@
     <style name="RecipeCard">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_margin">5dp</item>
+        <item name="android:layout_marginStart">5dp</item>
+        <item name="android:layout_marginEnd">5dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
         <item name="android:foreground">?android:attr/selectableItemBackground</item>
@@ -31,6 +32,7 @@
         <item name="cardElevation">2dp</item>
         <item name="cardPreventCornerOverlap">true</item>
         <item name="cardUseCompatPadding">true</item>
+        <item name="android:transitionName">test</item>
     </style>
 
     <style name="CardRecipeTitle">
@@ -39,7 +41,6 @@
         <item name="android:fontFamily">@font/open_sans_light</item>
         <item name="android:textSize">30sp</item>
         <item name="android:textStyle">bold</item>
-        <!--<item name="android:transitionName">@string/transition_recipe_title</item>-->
     </style>
 
     <style name="CardText">
@@ -55,7 +56,6 @@
         <item name="android:layout_height">200dp</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:scaleType">centerCrop</item>
-        <item name="android:transitionName">@string/transition_image_preview</item>
     </style>
 
     <style name="CardBody">
@@ -64,6 +64,16 @@
         <item name="android:orientation">vertical</item>
         <item name="android:paddingStart">15dp</item>
         <item name="android:paddingEnd">15dp</item>
+    </style>
+
+    <style name="FabTag">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:background">@drawable/rounded_corner</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
 </resources>

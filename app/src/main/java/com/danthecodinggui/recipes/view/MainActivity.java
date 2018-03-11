@@ -1,5 +1,7 @@
 package com.danthecodinggui.recipes.view;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -9,6 +11,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,6 +28,8 @@ import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
 
 /**
  * Display all stored recipes
@@ -92,7 +97,12 @@ public class MainActivity extends AppCompatActivity {
     public void AddRecipe(View view) {
         //TODO start new activity to add recipe
         Intent addRecipe = new Intent(getApplicationContext(), AddRecipeActivity.class);
-        startActivity(addRecipe);
+        ActivityOptions options = null;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this, android.util.Pair.create((View) view, "bg"));
+        }
+        startActivity(addRecipe, options.toBundle());
     }
 
     /**
@@ -135,6 +145,9 @@ public class MainActivity extends AppCompatActivity {
             int stepsNo = recipesList.get(pos).getStepsNo();
             String stepsString = res.getQuantityString(R.plurals.txt_method_steps_no, stepsNo, stepsNo);
             ((BasicViewHolder)holder).stepsNo.setText(stepsString);
+
+            //ViewCompat.setTransitionName(holder.itemView,
+             //       getString(R.string.main_card_transition_name) + "_" + Integer.toString(pos));
 
             String kcalString;
             int kcals;
@@ -269,27 +282,31 @@ public class MainActivity extends AppCompatActivity {
     private void ViewRecipe(View cardView, String recipeTitle) {
 
         Intent viewRecipe = new Intent(getApplicationContext(), ViewRecipeActivity.class);
+        ActivityOptions options = null;
         viewRecipe.putExtra("Title", recipeTitle);
 
-        if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //TODO get shared transitions working
 
+            String transitionName = ViewCompat.getTransitionName(cardView);
+            //viewRecipe.putExtra(CARD_TRANSITION_NAME, transitionName);
+            options = ActivityOptions.makeSceneTransitionAnimation(this, cardView, transitionName);
+            ActivityCompat.startActivity(this, viewRecipe, options.toBundle());
+            return;
+
+            /*
             View imagePreview;
 
             //Recipe has an image associated with it
             if ((imagePreview = cardView.findViewById(R.id.ivw_crd_preview)) != null) {
-                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                options = ActivityOptions.makeSceneTransitionAnimation(
                         this, imagePreview, getString(R.string.transition_image_preview));
-
-                viewRecipe.putExtra("Title", recipeTitle);
                 ActivityCompat.startActivity(this, viewRecipe, options.toBundle());
+                return;
             }
-            else {
-                //only transition from cardview not imageview
-
-            }
+            */
         }
-        else
-            startActivity(viewRecipe);
+        //Should just start activity normally
+        startActivity(viewRecipe);
     }
 }

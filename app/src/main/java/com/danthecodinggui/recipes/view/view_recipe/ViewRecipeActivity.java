@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import android.graphics.Color;
+import android.os.Build;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -22,6 +24,8 @@ import com.danthecodinggui.recipes.R;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
 
 public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
 
@@ -36,6 +40,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         super.onCreate(savedInstanceState);
         if (hasPhoto) {
             setContentView(R.layout.activity_view_recipe_photo);
+            //supportPostponeEnterTransition();
             preview = findViewById(R.id.ivw_toolbar_preview);
 
             //TODO change later to set based on database query
@@ -52,8 +57,15 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
         }
-        else
+        else {
             setContentView(R.layout.activity_view_recipe);
+            //supportPostponeEnterTransition();
+        }
+
+        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        //    String imageTransitionName = getIntent().getStringExtra(CARD_TRANSITION_NAME);
+        //    findViewById(R.id.view_recipe_root).setTransitionName(imageTransitionName);
+        //}
 
         tabLayout = findViewById(R.id.tly_view_recipe);
 
@@ -116,7 +128,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
 
     @Override
     public boolean onSupportNavigateUp() {
-        finish();
+        onBackPressed();
         return true;
     }
 

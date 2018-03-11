@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity">
+    tools:context="com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity"
+    android:id="@+id/view_recipe_root">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/abl_view_recipe"
