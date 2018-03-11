@@ -38,19 +38,23 @@ public class AddRecipeActivity extends AppCompatActivity {
         FloatingActionButton menuButton = new FloatingActionButton.Builder(this)
                 .setPosition(4)
                 .setContentView(menuIcon)
+                .setBackgroundDrawable(getDrawable(R.drawable.fab_selector))
                 .build();
 
         SubActionButton time = new SubActionButton.Builder(this)
                 .setContentView(timeIcon)
-                .setLayoutParams(new FloatingActionButton.LayoutParams(150, 150))
+                .setLayoutParams(new FloatingActionButton.LayoutParams(175, 175))
+                .setBackgroundDrawable(getDrawable(R.drawable.fab_selector))
                 .build();
         SubActionButton photo = new SubActionButton.Builder(this)
                 .setContentView(photoIcon)
-                .setLayoutParams(new FloatingActionButton.LayoutParams(150, 150))
+                .setLayoutParams(new FloatingActionButton.LayoutParams(175, 175))
+                .setBackgroundDrawable(getDrawable(R.drawable.fab_selector))
                 .build();
         SubActionButton kcal = new SubActionButton.Builder(this)
                 .setContentView(kcalIcon)
-                .setLayoutParams(new FloatingActionButton.LayoutParams(150, 150))
+                .setLayoutParams(new FloatingActionButton.LayoutParams(175, 175))
+                .setBackgroundDrawable(getDrawable(R.drawable.fab_selector))
                 .build();
 
         FloatingActionMenu menu = new FloatingActionMenu.Builder(this)
@@ -59,7 +63,7 @@ public class AddRecipeActivity extends AppCompatActivity {
                 .addSubActionView(kcal)
                 .setStartAngle(170)
                 .setEndAngle(285)
-                .setRadius(200)
+                .setRadius(250)
                 .enableAnimations()
                 .attachTo(menuButton)
                 .build();
