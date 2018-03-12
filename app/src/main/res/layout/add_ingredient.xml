@@ -10,17 +10,19 @@
     <ImageView
         android:layout_width="10dp"
         android:layout_height="10dp"
-        android:background="@drawable/bullet"
+        android:background="@drawable/bullet_faded"
         android:padding="5dp"
         android:layout_gravity="center"/>
 
-    <TextView
-        android:id="@+id/txt_method_item"
-        android:layout_width="match_parent"
+    <EditText
+        android:id="@+id/etxt_add_ingredient"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
         android:layout_marginStart="10dp"
-        android:textColor="@android:color/black"
-        android:text="@string/txt_ingredient_item"/>
+        android:textSize="16sp"
+        android:minWidth="200dp"
+        android:maxLength="40"
+        android:inputType="text"
+        android:background="@android:color/transparent"/>
 
 </LinearLayout>
