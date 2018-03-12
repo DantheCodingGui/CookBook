@@ -27,7 +27,8 @@
             android:resource="@array/preloaded_fonts" />
 
         <activity android:name=".view.AddRecipeActivity"
-            android:theme="@style/HomeTheme"/>
+            android:theme="@style/HomeTheme"
+            android:windowSoftInputMode="adjustPan|adjustResize"/>
     </application>
 
 </manifest>

@@ -58,6 +58,10 @@
                     android:text="@string/txt_add_ingredients"
                     android:textSize="18sp"/>
 
+                <android.support.v4.widget.Space
+                    android:layout_width="match_parent"
+                    android:layout_height="20dp" />
+
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/rvw_add_ingredients"
                     android:layout_width="match_parent"
@@ -78,12 +82,18 @@
                     android:text="@string/txt_add_method_step"
                     android:textSize="18sp"/>
 
+                <android.support.v4.widget.Space
+                    android:layout_width="match_parent"
+                    android:layout_height="20dp" />
+
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/rvw_add_method"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     tools:listitem="@layout/method_item"
                     tools:itemCount="5"/>
+
+                <include layout="@layout/add_step"/>
 
             </LinearLayout>
         </LinearLayout>

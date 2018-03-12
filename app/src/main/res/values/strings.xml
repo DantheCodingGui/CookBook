@@ -17,4 +17,5 @@
     <string name="txt_add_ingredients">Ingredients</string>
     <string name="txt_add_method_step">Steps</string>
     <string name="txt_ingredient_item">%s</string>
+    <string name="txt_method_step_item">%s</string>
 </resources>
