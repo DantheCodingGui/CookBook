@@ -23,6 +23,8 @@
         android:minWidth="200dp"
         android:maxLength="40"
         android:inputType="text"
-        android:background="@android:color/transparent"/>
+        android:background="@android:color/transparent"
+        android:focusable="true"
+        android:maxLines="1"/>
 
 </LinearLayout>

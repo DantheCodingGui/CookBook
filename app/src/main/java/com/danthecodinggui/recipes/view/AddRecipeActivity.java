@@ -2,6 +2,7 @@ package com.danthecodinggui.recipes.view;
 
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,6 +11,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -42,7 +44,7 @@ public class AddRecipeActivity extends AppCompatActivity {
         ingredientsAdapter = new IngredientsViewAdapter();
         ingredientsList = new ArrayList<>();
         ingredientsView.setAdapter(ingredientsAdapter);
-        ingredientsView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        ingredientsView.setLayoutManager(new NoScrollLinearLayout(getApplicationContext()));
 
         addIngredient = findViewById(R.id.etxt_add_ingredient);
         addIngredient.setOnKeyListener(newIngredientListener);
@@ -61,7 +63,7 @@ public class AddRecipeActivity extends AppCompatActivity {
         photoIcon.setImageDrawable(getDrawable(R.drawable.ic_photo));
 
         ImageView kcalIcon = new ImageView(getApplicationContext());
-        kcalIcon.setImageDrawable(getDrawable(R.drawable.ic_calories));
+        kcalIcon.setImageDrawable(getDrawable(R.drawable.ic_kcal));
 
         FloatingActionButton menuButton = new FloatingActionButton.Builder(this)
                 .setPosition(4)
@@ -123,6 +125,9 @@ public class AddRecipeActivity extends AppCompatActivity {
         ingredientsAdapter.notifyItemChanged(ingredientsList.size());
 
         addIngredient.getText().clear();
+
+        addIngredient.clearFocus();
+        addIngredient.requestFocus();
     }
 
     TextView.OnKeyListener newIngredientListener = new TextView.OnKeyListener() {
