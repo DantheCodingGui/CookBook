@@ -2,10 +2,9 @@ package com.danthecodinggui.recipes.view;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.content.Intent;
 import android.os.Build;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
@@ -16,14 +15,16 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
+import android.view.animation.RotateAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
-import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
-import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
-import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +34,15 @@ import static com.danthecodinggui.recipes.msc.IntentConstants.EXTRA_CIRCULAR_REV
 
 public class AddRecipeActivity extends AppCompatActivity {
 
-    View root;
-
+    private View root;
     private int revealX, revealY;
+
+    private FloatingActionButton openMenu;
+    private boolean openMenuOpen = false;
+
+    private FloatingActionButton addPhoto;
+    private FloatingActionButton addTime;
+    private FloatingActionButton addKcal;
 
     private static final int LIST_INGREDIENTS = 0;
     private static final int LIST_METHOD = 1;
@@ -54,6 +61,8 @@ public class AddRecipeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_recipe);
+
+        //TODO Dude, you need to change these from textviews to edit texts, people will want to edit these at some point
 
         ingredientsView = findViewById(R.id.rvw_add_ingredients);
         ingredientsAdapter = new IngredientsViewAdapter();
@@ -100,7 +109,11 @@ public class AddRecipeActivity extends AppCompatActivity {
             root.setVisibility(View.VISIBLE);
         }
 
-        BuildFabMenu();
+
+        openMenu = findViewById(R.id.fab_add_menu);
+        addPhoto = findViewById(R.id.fab_add_photo);
+        addTime = findViewById(R.id.fab_add_time);
+        addKcal = findViewById(R.id.fab_add_kcal);
     }
 
     protected void revealActivity(int x, int y) {
@@ -145,77 +158,6 @@ public class AddRecipeActivity extends AppCompatActivity {
 
             circularReveal.start();
         }
-    }
-
-    private void BuildFabMenu() {
-        final ImageView menuIcon = new ImageView(getApplicationContext());
-        menuIcon.setImageDrawable(getDrawable(R.drawable.ic_add));
-
-        ImageView timeIcon = new ImageView(getApplicationContext());
-        timeIcon.setImageDrawable(getDrawable(R.drawable.ic_time));
-
-        ImageView photoIcon = new ImageView(getApplicationContext());
-        photoIcon.setImageDrawable(getDrawable(R.drawable.ic_photo));
-
-        ImageView kcalIcon = new ImageView(getApplicationContext());
-        kcalIcon.setImageDrawable(getDrawable(R.drawable.ic_kcal));
-
-        FloatingActionButton menuButton = new FloatingActionButton.Builder(this)
-                .setPosition(4)
-                .setContentView(menuIcon)
-                .setBackgroundDrawable(getDrawable(R.drawable.fab_selector))
-                .build();
-        menuButton.setFocusable(false);
-
-        SubActionButton time = new SubActionButton.Builder(this)
-                .setContentView(timeIcon)
-                .setLayoutParams(new FloatingActionButton.LayoutParams(175, 175))
-                .setBackgroundDrawable(getDrawable(R.drawable.fab_selector))
-                .build();
-        time.setFocusable(false);
-        SubActionButton photo = new SubActionButton.Builder(this)
-                .setContentView(photoIcon)
-                .setLayoutParams(new FloatingActionButton.LayoutParams(175, 175))
-                .setBackgroundDrawable(getDrawable(R.drawable.fab_selector))
-                .build();
-        photo.setFocusable(false);
-        SubActionButton kcal = new SubActionButton.Builder(this)
-                .setContentView(kcalIcon)
-                .setLayoutParams(new FloatingActionButton.LayoutParams(175, 175))
-                .setBackgroundDrawable(getDrawable(R.drawable.fab_selector))
-                .build();
-        kcal.setFocusable(false);
-
-        FloatingActionMenu menu = new FloatingActionMenu.Builder(this)
-                .addSubActionView(time)
-                .addSubActionView(photo)
-                .addSubActionView(kcal)
-                .setStartAngle(170)
-                .setEndAngle(285)
-                .setRadius(250)
-                .enableAnimations()
-                .attachTo(menuButton)
-                .build();
-
-        menu.setStateChangeListener(new FloatingActionMenu.MenuStateChangeListener() {
-            @Override
-            public void onMenuOpened(FloatingActionMenu menu) {
-                // Rotate the icon of rightLowerButton 45 degrees clockwise
-                menuIcon.setRotation(0);
-                PropertyValuesHolder pvhR = PropertyValuesHolder.ofFloat(View.ROTATION, 135);
-                ObjectAnimator animation = ObjectAnimator.ofPropertyValuesHolder(menuIcon, pvhR);
-                animation.start();
-            }
-
-            @Override
-            public void onMenuClosed(FloatingActionMenu menu) {
-                // Rotate the icon of rightLowerButton 45 degrees counter-clockwise
-                menuIcon.setRotation(135);
-                PropertyValuesHolder pvhR = PropertyValuesHolder.ofFloat(View.ROTATION, 0);
-                ObjectAnimator animation = ObjectAnimator.ofPropertyValuesHolder(menuIcon, pvhR);
-                animation.start();
-            }
-        });
     }
 
     private void addItem(int listFlag) {
@@ -270,6 +212,56 @@ public class AddRecipeActivity extends AppCompatActivity {
             return false;
         }
     };
+
+    public void AnimateFabMenu(View view) {
+        if (openMenuOpen) {
+            openMenu.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_rotate_backwards));
+            AnimateFabItem(addPhoto);
+            AnimateFabItem(addTime);
+            AnimateFabItem(addKcal);
+            openMenuOpen = false;
+        }
+        else {
+            openMenu.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_rotate_forwards));
+            AnimateFabItem(addPhoto);
+            AnimateFabItem(addTime);
+            AnimateFabItem(addKcal);
+            openMenuOpen = true;
+        }
+    }
+
+    private void AnimateFabItem(FloatingActionButton menuItem) {
+        AnimationSet set = new AnimationSet(true);
+        Animation move;
+        Animation rotate;
+        Animation fade;
+
+        float fabMenuXDelta = (openMenu.getX() + openMenu.getWidth() / 2) - (menuItem.getX() + menuItem.getWidth() / 2);
+        float fabMenuYDelta = (openMenu.getY() + openMenu.getHeight() / 2) - (menuItem.getY() + menuItem.getHeight() / 2);
+
+        if (openMenuOpen) {
+            move = new TranslateAnimation(0.f, fabMenuXDelta, 0.f, fabMenuYDelta);
+            rotate = new RotateAnimation(0.f, 120.f, menuItem.getWidth() / 2, menuItem.getHeight() / 2);
+            fade = new AlphaAnimation(1.f, 0.f);
+
+            menuItem.setClickable(false);
+        }
+        else {
+            move = new TranslateAnimation(fabMenuXDelta, 0.f, fabMenuYDelta, 0.f);
+            rotate = new RotateAnimation(120.f, 0.f, menuItem.getWidth() / 2, menuItem.getHeight() / 2);
+            fade = new AlphaAnimation(0.f, 1.f);
+
+            menuItem.setClickable(true);
+        }
+
+        set.addAnimation(rotate);
+        set.addAnimation(move);
+        set.addAnimation(fade);
+        set.setDuration(300);
+        set.setFillAfter(true);
+
+        menuItem.startAnimation(set);
+    }
 
     class IngredientsViewAdapter extends RecyclerView.Adapter<IngredientsViewAdapter.IngredientViewHolder> {
 
