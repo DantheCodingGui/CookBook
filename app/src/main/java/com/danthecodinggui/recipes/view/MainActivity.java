@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -24,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.msc.IntentConstants;
 import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 
 import java.util.ArrayList;
@@ -95,14 +97,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void AddRecipe(View view) {
-        //TODO start new activity to add recipe
         Intent addRecipe = new Intent(getApplicationContext(), AddRecipeActivity.class);
-        ActivityOptions options = null;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this, android.util.Pair.create((View) view, "bg"));
+            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this, Pair.create(view, getString(R.string.add_transition)));
+            int revealX = (int) (view.getX() + view.getWidth() / 2);
+            int revealY = (int) (view.getY() + view.getHeight() / 2);
+
+            addRecipe.putExtra(IntentConstants.EXTRA_CIRCULAR_REVEAL_X, revealX);
+            addRecipe.putExtra(IntentConstants.EXTRA_CIRCULAR_REVEAL_Y, revealY);
+            ActivityCompat.startActivity(MainActivity.this, addRecipe, options.toBundle());
+            return;
         }
-        startActivity(addRecipe, options.toBundle());
+        startActivity(addRecipe);
     }
 
     /**

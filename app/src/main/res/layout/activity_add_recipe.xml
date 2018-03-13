@@ -4,12 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/background_light"
+    android:id="@+id/add_root"
     tools:context="com.danthecodinggui.recipes.view.AddRecipeActivity">
 
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:transitionName="bg">
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"

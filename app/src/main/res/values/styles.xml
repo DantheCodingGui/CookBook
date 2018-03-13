@@ -9,6 +9,12 @@
         <item name="android:windowContentTransitions">true</item>
     </style>
 
+    <style name="HomeTheme.Transparent" parent="HomeTheme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+
     <!-- Base application theme. -->
     <style name="ViewRecipeTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
