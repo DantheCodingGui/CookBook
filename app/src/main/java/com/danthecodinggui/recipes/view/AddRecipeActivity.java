@@ -240,23 +240,34 @@ public class AddRecipeActivity extends AppCompatActivity {
         float fabMenuYDelta = (openMenu.getY() + openMenu.getHeight() / 2) - (menuItem.getY() + menuItem.getHeight() / 2);
 
         if (openMenuOpen) {
-            move = new TranslateAnimation(0.f, fabMenuXDelta, 0.f, fabMenuYDelta);
-            rotate = new RotateAnimation(0.f, 120.f, menuItem.getWidth() / 2, menuItem.getHeight() / 2);
+            //move = new TranslateAnimation(0.f, fabMenuXDelta, 0.f, fabMenuYDelta);
+            //rotate = new RotateAnimation(0.f, 120.f, menuItem.getWidth() / 2, menuItem.getHeight() / 2);
+            rotate = new RotateAnimation(0.f, -150.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
             fade = new AlphaAnimation(1.f, 0.f);
+
+            set.addAnimation(rotate);
 
             menuItem.setClickable(false);
         }
         else {
-            move = new TranslateAnimation(fabMenuXDelta, 0.f, fabMenuYDelta, 0.f);
-            rotate = new RotateAnimation(120.f, 0.f, menuItem.getWidth() / 2, menuItem.getHeight() / 2);
+            Animation rotateBounce;
+
+            //move = new TranslateAnimation(fabMenuXDelta, 0.f, fabMenuYDelta, 0.f);
+            //rotate = new RotateAnimation(120.f, 0.f, menuItem.getWidth() / 2, menuItem.getHeight() / 2);
+            rotate = new RotateAnimation(-150.f, 10.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
+            rotateBounce = new RotateAnimation(0.f, -10.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
+            rotateBounce.setStartOffset(300);
+            rotateBounce.setDuration(50);
             fade = new AlphaAnimation(0.f, 1.f);
+
+            set.addAnimation(rotate);
+            set.addAnimation(rotateBounce);
 
             menuItem.setClickable(true);
         }
 
-        set.addAnimation(rotate);
-        set.addAnimation(move);
-        set.addAnimation(fade);
+        //set.addAnimation(move);
+        //set.addAnimation(fade);
         set.setDuration(300);
         set.setFillAfter(true);
 
