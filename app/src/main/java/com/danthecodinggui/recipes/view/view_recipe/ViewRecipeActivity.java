@@ -71,10 +71,8 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
 
         toolbar = findViewById(R.id.tbar_vw_recipe);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
+        if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        }
 
         SetupTabLayout();
     }

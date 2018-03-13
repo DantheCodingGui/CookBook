@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     tools:context="com.danthecodinggui.recipes.view.MainActivity">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/tbar_home_bar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        android:elevation="5dp"/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvw_recipes"
         android:layout_width="match_parent"
@@ -13,6 +22,28 @@
         tools:itemCount="5"
         tools:listitem="@layout/recipe_card_photo_basic"
         android:overScrollMode="never"/>
+
+    <!--View shown when RecyclerView filtered and no matches found-->
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="invisible"
+        android:padding="50dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/open_sans_light"
+            android:text="@string/txt_no_recipes"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_add_recipe"

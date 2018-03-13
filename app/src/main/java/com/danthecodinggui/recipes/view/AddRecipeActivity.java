@@ -20,7 +20,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.RotateAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -157,6 +156,10 @@ public class AddRecipeActivity extends AppCompatActivity {
             });
 
             circularReveal.start();
+
+            //Close menu if open
+            if (openMenuOpen)
+                AnimateFabMenu(null);
         }
     }
 
@@ -256,7 +259,7 @@ public class AddRecipeActivity extends AppCompatActivity {
             //rotate = new RotateAnimation(120.f, 0.f, menuItem.getWidth() / 2, menuItem.getHeight() / 2);
             rotate = new RotateAnimation(-150.f, 10.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
             rotateBounce = new RotateAnimation(0.f, -10.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
-            rotateBounce.setStartOffset(300);
+            rotateBounce.setStartOffset(250);
             rotateBounce.setDuration(50);
             fade = new AlphaAnimation(0.f, 1.f);
 

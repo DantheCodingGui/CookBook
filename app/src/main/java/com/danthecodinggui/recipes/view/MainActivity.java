@@ -17,12 +17,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.msc.IntentConstants;
@@ -81,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Toolbar toolbar = findViewById(R.id.tbar_home_bar);
+        setSupportActionBar(toolbar);
+
         //Example cards TODO remove later
         recipesList.add(new RecipeModel("Sushi Sliders", 5, 6,
                 10, 5, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
@@ -92,8 +98,20 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        //TODO inflate search icon in menu
-        return false;
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.menu_search:
+                Toast.makeText(getApplicationContext(), "Search clicked", Toast.LENGTH_SHORT).show();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void AddRecipe(View view) {
