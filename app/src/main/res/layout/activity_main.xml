@@ -28,6 +28,7 @@
         tools:itemCount="5"
         tools:listitem="@layout/recipe_card_photo_basic"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:layoutAnimation="@anim/layout_animation_enter_upwards"
         android:overScrollMode="never"/>
 
     <!--View shown when RecyclerView filtered and no matches found-->
