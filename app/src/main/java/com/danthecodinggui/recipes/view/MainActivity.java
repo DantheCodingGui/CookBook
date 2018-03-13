@@ -24,6 +24,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -79,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             recipesView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
         //setup RecyclerView adapter
-        recipesAdapter = new RecipesViewAdapter();
+        recipesAdapter = new RecipesViewAdapter(recipesList);
         recipesView.setAdapter(recipesAdapter);
 
         //Show/hide floating action button on recyclerview scroll
@@ -117,12 +118,12 @@ public class MainActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                recipesAdapter.getFilter().filter(query);
-                return true;
+                return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                recipesAdapter.getFilter().filter(newText);
                 return false;
             }
         });
@@ -166,6 +167,10 @@ public class MainActivity extends AppCompatActivity {
 
         private final int BASIC = 0, COMPLEX = 1, PHOTO_BASIC = 2, PHOTO_COMPLEX = 3;
 
+        RecipesViewAdapter(List<RecipeModel> list) {
+            filteredRecipesList = list;
+        }
+
         @Override
         public BasicViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
@@ -189,13 +194,13 @@ public class MainActivity extends AppCompatActivity {
             Resources res = getResources();
 
             //TODO change so that each viewholder binds their own data (will have to also do super())
-            ((BasicViewHolder)holder).title.setText(recipesList.get(pos).getTitle());
+            ((BasicViewHolder)holder).title.setText(filteredRecipesList.get(pos).getTitle());
 
-            int ingredientsNo = recipesList.get(pos).getIngredientsNo();
+            int ingredientsNo = filteredRecipesList.get(pos).getIngredientsNo();
             String ingredientsString = res.getQuantityString(R.plurals.txt_ingredients_no, ingredientsNo, ingredientsNo);
             ((BasicViewHolder)holder).ingredientsNo.setText(ingredientsString);
 
-            int stepsNo = recipesList.get(pos).getStepsNo();
+            int stepsNo = filteredRecipesList.get(pos).getStepsNo();
             String stepsString = res.getQuantityString(R.plurals.txt_method_steps_no, stepsNo, stepsNo);
             ((BasicViewHolder)holder).stepsNo.setText(stepsString);
 
@@ -208,23 +213,23 @@ public class MainActivity extends AppCompatActivity {
             //TODO deal with null returns from getter methods as any complex data is optional to the user
             switch (holder.getItemViewType()) {
                 case COMPLEX:
-                    kcals = recipesList.get(pos).getCalories();
+                    kcals = filteredRecipesList.get(pos).getCalories();
                     kcalString = String.valueOf(res.getQuantityString(
                             R.plurals.txt_calories, kcals, kcals));
                     ((ComplexViewHoldler)holder).calories.setText(kcalString);
-                    ((ComplexViewHoldler)holder).timeInMins.setText(String.valueOf(recipesList.get(pos).getTimeInMins()));
+                    ((ComplexViewHoldler)holder).timeInMins.setText(String.valueOf(filteredRecipesList.get(pos).getTimeInMins()));
                     break;
                 case PHOTO_BASIC:
-                    ((BasicPhotoViewHolder)holder).preview.setImageBitmap(recipesList.get(pos).getPreview());
+                    ((BasicPhotoViewHolder)holder).preview.setImageBitmap(filteredRecipesList.get(pos).getPreview());
                     break;
                 case PHOTO_COMPLEX:
-                    kcals = recipesList.get(pos).getCalories();
+                    kcals = filteredRecipesList.get(pos).getCalories();
                     kcalString = String.valueOf(res.getQuantityString(
                             R.plurals.txt_calories, kcals, kcals));
                     ((ComplexViewHoldler)holder).calories.setText(kcalString);
 
-                    ((ComplexViewHoldler)holder).timeInMins.setText(String.valueOf(recipesList.get(pos).getTimeInMins()));
-                    ((ComplexPhotoViewHolder)holder).preview.setImageBitmap(recipesList.get(pos).getPreview());
+                    ((ComplexViewHoldler)holder).timeInMins.setText(String.valueOf(filteredRecipesList.get(pos).getTimeInMins()));
+                    ((ComplexPhotoViewHolder)holder).preview.setImageBitmap(filteredRecipesList.get(pos).getPreview());
                     //TODO Use glide here for image loading
                     break;
             }
@@ -232,8 +237,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getItemViewType(int position) {
-            boolean isComplex = recipesList.get(position).hasFullRecipe();
-            boolean hasPhoto = recipesList.get(position).hasPhoto();
+            boolean isComplex = filteredRecipesList.get(position).hasFullRecipe();
+            boolean hasPhoto = filteredRecipesList.get(position).hasPhoto();
 
             if (isComplex && hasPhoto)
                 return PHOTO_COMPLEX;
@@ -247,14 +252,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return recipesList.size();
-        }
-
-        void setFilter(List<RecipeModel> filteredList) {
-            recipesList = new ArrayList<>();
-            recipesList.addAll(filteredList);
-
-            notifyDataSetChanged();
+            return filteredRecipesList.size();
         }
 
         @Override
@@ -285,11 +283,11 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                    filteredRecipesList = (ArrayList<RecipeModel>) filterResults.values;
+                     filteredRecipesList = (ArrayList<RecipeModel>) filterResults.values;
 
-                    if (filteredRecipesList.size() == 0 && searchNoItems.getVisibility() == View.INVISIBLE)
+                    if (filteredRecipesList.size() == 0)
                         searchNoItems.setVisibility(View.VISIBLE);
-                    else if (searchNoItems.getVisibility() == View.VISIBLE)
+                    else
                         searchNoItems.setVisibility(View.INVISIBLE);
 
                     recipesAdapter.notifyDataSetChanged();
