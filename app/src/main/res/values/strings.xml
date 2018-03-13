@@ -20,4 +20,5 @@
     <string name="txt_method_step_item">%s</string>
     <string name="add_transition">add_recipe_transition</string>
     <string name="txt_no_recipes">Uh oh, can\'t seem to find that one...</string>
+    <string name="search_hint">Search Recipes</string>
 </resources>

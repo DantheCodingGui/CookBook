@@ -2,27 +2,35 @@ package com.danthecodinggui.recipes.view;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.transition.TransitionManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private List<RecipeModel> recipesList;
     private FloatingActionButton addRecipe;
 
+    private ConstraintLayout searchNoItems;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
 
         recipesView = findViewById(R.id.rvw_recipes);
         addRecipe = findViewById(R.id.fab_add_recipe);
+
+        searchNoItems = findViewById(R.id.csly_search_not_found);
 
         recipesList = new ArrayList<>();
 
@@ -99,6 +111,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        MenuItem searchItem = menu.findItem(R.id.menu_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                recipesAdapter.getFilter().filter(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
         return true;
     }
 
@@ -108,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.menu_search:
-                Toast.makeText(getApplicationContext(), "Search clicked", Toast.LENGTH_SHORT).show();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -134,7 +160,9 @@ public class MainActivity extends AppCompatActivity {
      * Allows integration between the list of recipe objects and the recyclerview
      */
     class RecipesViewAdapter
-            extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+            extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
+
+        List<RecipeModel> filteredRecipesList;
 
         private final int BASIC = 0, COMPLEX = 1, PHOTO_BASIC = 2, PHOTO_COMPLEX = 3;
 
@@ -220,6 +248,53 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return recipesList.size();
+        }
+
+        void setFilter(List<RecipeModel> filteredList) {
+            recipesList = new ArrayList<>();
+            recipesList.addAll(filteredList);
+
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence charSequence) {
+                    String charString = charSequence.toString();
+                    if (charString.isEmpty()) {
+                        filteredRecipesList = recipesList;
+                    }
+                    else {
+                        List<RecipeModel> filteredList = new ArrayList<>();
+                        for (RecipeModel row : recipesList) {
+
+                            if (row.getTitle().toLowerCase().contains(charString.toLowerCase())) {
+                                filteredList.add(row);
+                            }
+                        }
+
+                        filteredRecipesList = filteredList;
+                    }
+
+                    FilterResults filterResults = new FilterResults();
+                    filterResults.values = filteredRecipesList;
+                    return filterResults;
+                }
+
+                @Override
+                protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                    filteredRecipesList = (ArrayList<RecipeModel>) filterResults.values;
+
+                    if (filteredRecipesList.size() == 0 && searchNoItems.getVisibility() == View.INVISIBLE)
+                        searchNoItems.setVisibility(View.VISIBLE);
+                    else if (searchNoItems.getVisibility() == View.VISIBLE)
+                        searchNoItems.setVisibility(View.INVISIBLE);
+
+                    recipesAdapter.notifyDataSetChanged();
+                }
+            };
         }
 
         /**
