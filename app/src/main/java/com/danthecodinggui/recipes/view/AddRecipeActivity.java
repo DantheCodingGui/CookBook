@@ -8,8 +8,10 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
@@ -22,6 +24,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.RotateAnimation;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.danthecodinggui.recipes.R;
 
@@ -108,6 +111,12 @@ public class AddRecipeActivity extends AppCompatActivity {
             root.setVisibility(View.VISIBLE);
         }
 
+        Toolbar toolbar = findViewById(R.id.tbar_add);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         openMenu = findViewById(R.id.fab_add_menu);
         addPhoto = findViewById(R.id.fab_add_photo);
@@ -133,8 +142,17 @@ public class AddRecipeActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                unRevealActivity();
+                break;
+        }
+        return true;
+    }
+
+    @Override
     public void onBackPressed() {
-        super.onBackPressed();
         unRevealActivity();
     }
 

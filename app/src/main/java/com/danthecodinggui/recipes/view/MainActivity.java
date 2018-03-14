@@ -1,22 +1,21 @@
 package com.danthecodinggui.recipes.view;
 
-import android.app.Activity;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityOptions;
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.transition.TransitionManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -24,26 +23,26 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.msc.IntentConstants;
 import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
 
 /**
  * Display all stored recipes
@@ -97,13 +96,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Toolbar toolbar = findViewById(R.id.tbar_home_bar);
+        Toolbar toolbar = findViewById(R.id.tbar_home);
         setSupportActionBar(toolbar);
 
         //Example cards TODO remove later
+        recipesList.add(new RecipeModel("American Pancakes", 4, 7));
         recipesList.add(new RecipeModel("Sushi Sliders", 5, 6,
                 10, 5, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
-        recipesList.add(new RecipeModel("American Pancakes", 4, 7));
         recipesList.add(new RecipeModel("English Pancakes", 4, 7, 10, 3));
         recipesList.add(new RecipeModel("Spag Bol", 4, 7, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
         recipesAdapter.notifyDataSetChanged();
@@ -127,7 +126,54 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        initSearchView(menu);
+
         return true;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void circleReveal(int viewID, int posFromRight, boolean containsOverflow, final boolean isShow)
+    {
+        final View myView = findViewById(viewID);
+
+        int width=myView.getWidth();
+
+        if(posFromRight>0)
+            width-=(posFromRight*getResources().getDimensionPixelSize(R.dimen.abc_action_button_min_width_material))-(getResources().getDimensionPixelSize(R.dimen.abc_action_button_min_width_material)/ 2);
+
+        if(containsOverflow)
+            width-=getResources().getDimensionPixelSize(R.dimen.abc_action_button_min_width_overflow_material);
+
+        int cx=width;
+        int cy=myView.getHeight()/2;
+
+        Animator anim;
+        if(isShow)
+            anim = ViewAnimationUtils.createCircularReveal(myView, cx, cy, 0,(float)width);
+        else
+            anim = ViewAnimationUtils.createCircularReveal(myView, cx, cy, (float)width, 0);
+
+        anim.setDuration((long)220);
+
+        // make the view invisible when the animation is done
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if(!isShow)
+                {
+                    super.onAnimationEnd(animation);
+                    myView.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+        // make the view visible and start the animation
+        if(isShow)
+            myView.setVisibility(View.VISIBLE);
+
+        // start the animation
+        anim.start();
     }
 
     @Override
@@ -141,7 +187,43 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void initSearchView(Menu menu)
+    {
+        final SearchView searchView =
+                (SearchView) menu.findItem(R.id.menu_search).getActionView();
 
+        // Set hint and the text colors
+
+        EditText txtSearch = (searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text));
+        txtSearch.setHint("Search..");
+        txtSearch.setHintTextColor(Color.LTGRAY);
+        txtSearch.setTextColor(getResources().getColor(R.color.colorPrimary));
+
+        // Set the cursor
+
+        AutoCompleteTextView searchTextView = searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        try {
+            Field mCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
+            mCursorDrawableRes.setAccessible(true);
+            mCursorDrawableRes.set(searchTextView, R.drawable.search_cursor); //This sets the cursor resource ID to 0 or @null which will make it visible on white background
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                circleReveal(R.id.tbar_home, 1, false, true);
+            }
+        });
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                circleReveal(R.id.tbar_home, 1, false, false);
+                return true;
+            }
+        });
+    }
 
     public void AddRecipe(View view) {
         Intent addRecipe = new Intent(getApplicationContext(), AddRecipeActivity.class);
