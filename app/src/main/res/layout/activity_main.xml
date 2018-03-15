@@ -15,6 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
+            app:titleTextColor="@android:color/white"
             android:theme="@style/SearchView"
             app:collapseIcon="@drawable/ic_arrow_back"
             app:layout_scrollFlags="scroll|enterAlways|snap"

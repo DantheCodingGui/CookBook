@@ -89,6 +89,8 @@
         <item name="android:background">@drawable/rounded_corner</item>
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@android:color/white</item>
+        <item name="android:visibility">invisible</item>
+        <item name="android:elevation">5dp</item>
     </style>
 
 </resources>

@@ -47,6 +47,10 @@ public class AddRecipeActivity extends AppCompatActivity {
     private FloatingActionButton addTime;
     private FloatingActionButton addKcal;
 
+    private TextView addPhotoTag;
+    private TextView addTimeTag;
+    private TextView addKcalTag;
+
     private static final int LIST_INGREDIENTS = 0;
     private static final int LIST_METHOD = 1;
 
@@ -71,6 +75,10 @@ public class AddRecipeActivity extends AppCompatActivity {
         addPhoto = findViewById(R.id.fab_add_photo);
         addTime = findViewById(R.id.fab_add_time);
         addKcal = findViewById(R.id.fab_add_kcal);
+
+        addPhotoTag = findViewById(R.id.txt_add_photo);
+        addTimeTag = findViewById(R.id.txt_add_time);
+        addKcalTag = findViewById(R.id.txt_add_kcal);
 
         optionalPreview = findViewById(R.id.imv_add_preview);
 
@@ -250,20 +258,26 @@ public class AddRecipeActivity extends AppCompatActivity {
             openMenu.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_rotate_backwards));
             //TODO change this to list that you iterate through
             AnimateFabItem(addPhoto);
+            AnimateFabItem(addPhotoTag);
             AnimateFabItem(addTime);
+            AnimateFabItem(addTimeTag);
             AnimateFabItem(addKcal);
+            AnimateFabItem(addKcalTag);
             openMenuOpen = false;
         }
         else {
             openMenu.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_rotate_forwards));
             AnimateFabItem(addPhoto);
+            AnimateFabItem(addPhotoTag);
             AnimateFabItem(addTime);
+            AnimateFabItem(addTimeTag);
             AnimateFabItem(addKcal);
+            AnimateFabItem(addKcalTag);
             openMenuOpen = true;
         }
     }
 
-    private void AnimateFabItem(FloatingActionButton menuItem) {
+    private void AnimateFabItem(View menuItem) {
         AnimationSet set = new AnimationSet(true);
         Animation rotate;
 
@@ -283,7 +297,7 @@ public class AddRecipeActivity extends AppCompatActivity {
             rotate = new RotateAnimation(-150.f, 10.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
             rotateBounce = new RotateAnimation(0.f, -10.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
             rotateBounce.setStartOffset(250);
-            rotateBounce.setDuration(50);
+            rotateBounce.setDuration(500);
 
             set.addAnimation(rotate);
             set.addAnimation(rotateBounce);
