@@ -14,9 +14,9 @@
             android:id="@+id/tbar_home"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorAccent"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            android:background="@color/colorPrimary"
+            android:theme="@style/SearchView"
+            app:collapseIcon="@drawable/ic_arrow_back"
             app:layout_scrollFlags="scroll|enterAlways|snap"
             android:elevation="5dp"/>
     </android.support.design.widget.AppBarLayout>

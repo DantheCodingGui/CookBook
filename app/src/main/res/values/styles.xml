@@ -25,6 +25,15 @@
         <item name="android:navigationBarColor">#00000000</item>
     </style>
 
+    <style name="SearchView">
+        <item name="layout">@layout/toolbar_search_view</item>
+        <item name="colorControlNormal">@color/material_light_active_icon</item>
+        <item name="colorControlHighlight">@color/material_ripple_light</item>
+        <item name="android:maxWidth">9999dp</item>
+        <item name="android:queryBackground">@android:color/transparent</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
     <style name="RecipeCard">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>

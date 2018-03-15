@@ -23,6 +23,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.RotateAnimation;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,10 +60,19 @@ public class AddRecipeActivity extends AppCompatActivity {
     private List<String> methodList;
     private EditText addStep;
 
+    private ImageView optionalPreview;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_recipe);
+
+        openMenu = findViewById(R.id.fab_add_menu);
+        addPhoto = findViewById(R.id.fab_add_photo);
+        addTime = findViewById(R.id.fab_add_time);
+        addKcal = findViewById(R.id.fab_add_kcal);
+
+        optionalPreview = findViewById(R.id.imv_add_preview);
 
         //TODO Dude, you need to change these from textviews to edit texts, people will want to edit these at some point
 
@@ -118,10 +128,11 @@ public class AddRecipeActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        openMenu = findViewById(R.id.fab_add_menu);
-        addPhoto = findViewById(R.id.fab_add_photo);
-        addTime = findViewById(R.id.fab_add_time);
-        addKcal = findViewById(R.id.fab_add_kcal);
+        SetupImageView();
+    }
+
+    private void SetupImageView() {
+
     }
 
     protected void revealActivity(int x, int y) {
@@ -130,7 +141,7 @@ public class AddRecipeActivity extends AppCompatActivity {
 
             // create the animator for this view (the start radius is zero)
             Animator circularReveal = ViewAnimationUtils.createCircularReveal(root, x, y, 0, finalRadius);
-            circularReveal.setDuration(400);
+            circularReveal.setDuration(300);
             circularReveal.setInterpolator(new AccelerateInterpolator());
 
             // make the view visible and start the animation
@@ -164,7 +175,7 @@ public class AddRecipeActivity extends AppCompatActivity {
             Animator circularReveal = ViewAnimationUtils.createCircularReveal(
                     root, revealX, revealY, finalRadius, 0);
 
-            circularReveal.setDuration(400);
+            circularReveal.setDuration(300);
             circularReveal.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -237,6 +248,7 @@ public class AddRecipeActivity extends AppCompatActivity {
     public void AnimateFabMenu(View view) {
         if (openMenuOpen) {
             openMenu.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_rotate_backwards));
+            //TODO change this to list that you iterate through
             AnimateFabItem(addPhoto);
             AnimateFabItem(addTime);
             AnimateFabItem(addKcal);
@@ -253,18 +265,13 @@ public class AddRecipeActivity extends AppCompatActivity {
 
     private void AnimateFabItem(FloatingActionButton menuItem) {
         AnimationSet set = new AnimationSet(true);
-        Animation move;
         Animation rotate;
-        Animation fade;
 
         float fabMenuXDelta = (openMenu.getX() + openMenu.getWidth() / 2) - (menuItem.getX() + menuItem.getWidth() / 2);
         float fabMenuYDelta = (openMenu.getY() + openMenu.getHeight() / 2) - (menuItem.getY() + menuItem.getHeight() / 2);
 
         if (openMenuOpen) {
-            //move = new TranslateAnimation(0.f, fabMenuXDelta, 0.f, fabMenuYDelta);
-            //rotate = new RotateAnimation(0.f, 120.f, menuItem.getWidth() / 2, menuItem.getHeight() / 2);
             rotate = new RotateAnimation(0.f, -150.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
-            fade = new AlphaAnimation(1.f, 0.f);
 
             set.addAnimation(rotate);
 
@@ -273,13 +280,10 @@ public class AddRecipeActivity extends AppCompatActivity {
         else {
             Animation rotateBounce;
 
-            //move = new TranslateAnimation(fabMenuXDelta, 0.f, fabMenuYDelta, 0.f);
-            //rotate = new RotateAnimation(120.f, 0.f, menuItem.getWidth() / 2, menuItem.getHeight() / 2);
             rotate = new RotateAnimation(-150.f, 10.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
             rotateBounce = new RotateAnimation(0.f, -10.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
             rotateBounce.setStartOffset(250);
             rotateBounce.setDuration(50);
-            fade = new AlphaAnimation(0.f, 1.f);
 
             set.addAnimation(rotate);
             set.addAnimation(rotateBounce);
@@ -287,8 +291,6 @@ public class AddRecipeActivity extends AppCompatActivity {
             menuItem.setClickable(true);
         }
 
-        //set.addAnimation(move);
-        //set.addAnimation(fade);
         set.setDuration(300);
         set.setFillAfter(true);
 
