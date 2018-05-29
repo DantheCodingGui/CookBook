@@ -72,6 +72,8 @@ public class AddRecipeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_recipe);
 
         openMenu = findViewById(R.id.fab_add_menu);
+        //TODO maybe make a layout without photo to support devices without a camera
+        //if not then need to specify in the manifest that this needs a camera (although might be a bit stupid given context)
         addPhoto = findViewById(R.id.fab_add_photo);
         addTime = findViewById(R.id.fab_add_time);
         addKcal = findViewById(R.id.fab_add_kcal);

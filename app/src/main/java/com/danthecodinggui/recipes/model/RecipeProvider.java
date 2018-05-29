@@ -18,8 +18,11 @@ public class RecipeProvider extends ContentProvider {
     }
 
     private DBHelper dbHelper;
-
-    public RecipeProvider() {}
+    @Override
+    public boolean onCreate() {
+        dbHelper = new DBHelper(getContext());
+        return true;
+    }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -38,12 +41,6 @@ public class RecipeProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         // TODO: Implement this to handle requests to insert a new row.
         throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
-    public boolean onCreate() {
-        dbHelper = DBHelper.getInstance(getContext());
-        return true;
     }
 
     @Override
