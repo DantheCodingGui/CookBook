@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.graphics.ColorSpace;
 import android.net.Uri;
+import android.text.TextUtils;
 
 /**
  * Content provider for accessing all application data
@@ -86,7 +87,6 @@ public class RecipeProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
 
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
         SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
 
         switch (uriMatcher.match(uri)) {
@@ -127,6 +127,8 @@ public class RecipeProvider extends ContentProvider {
                 throw new IllegalArgumentException("Invalid URI for query: " + uri);
         }
 
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
         return qBuilder.query(
                 db,
                 projection,
@@ -141,8 +143,82 @@ public class RecipeProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
-        // TODO: Implement this to handle requests to update one or more rows.
-        throw new UnsupportedOperationException("Not yet implemented");
+
+        SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        int rowNumUpdated = 0;
+        String id;
+        String where;
+
+        switch (uriMatcher.match(uri)) {
+            case RECIPES_TABLE:
+                rowNumUpdated = db.update(
+                        ModelContract.RecipeEntry.TABLE_NAME,
+                        values,
+                        selection,
+                        selectionArgs
+                );
+                break;
+            case RECIPES_ITEM:
+                id = uri.getLastPathSegment();
+                where = ModelContract.RecipeEntry._ID + " = " + id;
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowNumUpdated = db.update(
+                        ModelContract.RecipeEntry.TABLE_NAME,
+                        values,
+                        where,
+                        selectionArgs
+                );
+                break;
+            case METHOD_TABLE:
+                rowNumUpdated = db.update(
+                        ModelContract.MethodStepEntry.TABLE_NAME,
+                        values,
+                        selection,
+                        selectionArgs
+                );
+                break;
+            case METHOD_ITEM:
+                id = uri.getLastPathSegment();
+                where = ModelContract.MethodStepEntry._ID + " = " + id;
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowNumUpdated = db.update(
+                        ModelContract.MethodStepEntry.TABLE_NAME,
+                        values,
+                        where,
+                        selectionArgs
+                );
+                break;
+            case RECIPE_INGREDIENTS_TABLE:
+                rowNumUpdated = db.update(
+                        ModelContract.IngredientEntry.TABLE_NAME,
+                        values,
+                        selection,
+                        selectionArgs
+                );
+                break;
+            case RECIPE_INGREDIENTS_ITEM:
+                id = uri.getLastPathSegment();
+                where = ModelContract.RecipeIngredientEntry._ID + " = " + id;
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowNumUpdated = db.update(
+                        ModelContract.RecipeIngredientEntry.TABLE_NAME,
+                        values,
+                        where,
+                        selectionArgs
+                );
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid URI for updating: " + uri);
+        }
+
+        return rowNumUpdated;
     }
 
     @Override
