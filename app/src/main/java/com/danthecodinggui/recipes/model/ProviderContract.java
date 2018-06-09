@@ -6,7 +6,7 @@ import android.provider.BaseColumns;
 /**
  * Contract for database interaction
  */
-final class ModelContract {
+final class ProviderContract {
 
     static final String CONTENT_AUTHORITY = "com.danthecodinggui.recipes.provider";
 
@@ -26,7 +26,7 @@ final class ModelContract {
     static final Uri RECIPE_INGREDIENTS_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPE_INGREDIENTS).build();
 
     //Empty constructor in case anyone instantiates class
-    ModelContract() {}
+    ProviderContract() {}
 
     /**
      * Core recipe data
@@ -50,17 +50,7 @@ final class ModelContract {
         static final String TABLE_NAME = "RecipeIngredients";
 
         static final String RECIPE_ID = "RecipeId";
-        static final String INGREDIENT_ID = "Ingredient";
-    }
-
-    /**
-     * List of currently stored ingredients
-     */
-    final class IngredientEntry implements BaseColumns {
-
-        static final String TABLE_NAME = "Ingredients";
-
-        static final String NAME = "Name";
+        static final String INGREDIENT_NAME = "IngredientName";
     }
 
     /**
