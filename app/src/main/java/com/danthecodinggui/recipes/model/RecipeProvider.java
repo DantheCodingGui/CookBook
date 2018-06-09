@@ -144,9 +144,8 @@ public class RecipeProvider extends ContentProvider {
     public int update(Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
 
-        SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        int rowNumUpdated = 0;
+        int rowNumUpdated;
         String id;
         String where;
 
@@ -223,7 +222,77 @@ public class RecipeProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        // TODO: Implement this to handle requests to delete one or more rows.
-        throw new UnsupportedOperationException("Not yet implemented");
+
+        //Same structure as update with changed var names and db methods
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        int rowNumDeleted;
+        String id;
+        String where;
+
+        switch (uriMatcher.match(uri)) {
+            case RECIPES_TABLE:
+                rowNumDeleted = db.delete(
+                        ModelContract.RecipeEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs
+                );
+                break;
+            case RECIPES_ITEM:
+                id = uri.getLastPathSegment();
+                where = ModelContract.RecipeEntry._ID + " = " + id;
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowNumDeleted = db.delete(
+                        ModelContract.RecipeEntry.TABLE_NAME,
+                        where,
+                        selectionArgs
+                );
+                break;
+            case METHOD_TABLE:
+                rowNumDeleted = db.delete(
+                        ModelContract.MethodStepEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs
+                );
+                break;
+            case METHOD_ITEM:
+                id = uri.getLastPathSegment();
+                where = ModelContract.MethodStepEntry._ID + " = " + id;
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowNumDeleted = db.delete(
+                        ModelContract.MethodStepEntry.TABLE_NAME,
+                        where,
+                        selectionArgs
+                );
+                break;
+            case RECIPE_INGREDIENTS_TABLE:
+                rowNumDeleted = db.delete(
+                        ModelContract.IngredientEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs
+                );
+                break;
+            case RECIPE_INGREDIENTS_ITEM:
+                id = uri.getLastPathSegment();
+                where = ModelContract.RecipeIngredientEntry._ID + " = " + id;
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowNumDeleted = db.delete(
+                        ModelContract.RecipeIngredientEntry.TABLE_NAME,
+                        where,
+                        selectionArgs
+                );
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid URI for deletion: " + uri);
+        }
+
+        return rowNumDeleted;
+
     }
 }
