@@ -19,7 +19,7 @@ class DBHelper extends SQLiteOpenHelper {
             DBSchema.RecipeEntry.TITLE + " TEXT NOT NULL, " +
             DBSchema.RecipeEntry.CALORIES_PER_PERSON + " INTEGER, " +
             DBSchema.RecipeEntry.DURATION + " INTEGER, " +
-            DBSchema.RecipeEntry.IMAGEPATH + " TEXT);";
+            DBSchema.RecipeEntry.IMAGE_PATH + " TEXT);";
 
     private static final String CREATE_INGREDIENT = "CREATE TABLE " +
             DBSchema.IngredientEntry.TABLE_NAME + "(" +

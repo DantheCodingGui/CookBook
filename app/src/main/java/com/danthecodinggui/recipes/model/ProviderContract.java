@@ -6,7 +6,7 @@ import android.provider.BaseColumns;
 /**
  * Contract for database interaction
  */
-final class ProviderContract {
+public final class ProviderContract {
 
     static final String CONTENT_AUTHORITY = "com.danthecodinggui.recipes.provider";
 
@@ -17,13 +17,16 @@ final class ProviderContract {
     static final String PATH_RECIPE_INGREDIENTS = "RecipeIngredients";
 
     //Base uri that all others build on
-    static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     //Public URIs to access tables
-    static final Uri RECIPES_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPES).build();
-    static final Uri INGREDIENTS_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_INGREDIENTS).build();
-    static final Uri METHOD_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_METHOD).build();
-    static final Uri RECIPE_INGREDIENTS_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPE_INGREDIENTS).build();
+    public static final Uri RECIPES_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPES).build();
+    public static final Uri INGREDIENTS_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_INGREDIENTS).build();
+    public static final Uri METHOD_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_METHOD).build();
+    public static final Uri RECIPE_INGREDIENTS_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPE_INGREDIENTS).build();
+
+    //Count records projection string
+    public static final String COUNT_PROJECTION = "count(" + BaseColumns._ID + ") AS count";
 
     //Empty constructor in case anyone instantiates class
     ProviderContract() {}
@@ -31,37 +34,37 @@ final class ProviderContract {
     /**
      * Core recipe data
      */
-    final class RecipeEntry implements BaseColumns {
+    public final class RecipeEntry implements BaseColumns {
 
-        static final String TABLE_NAME = "Recipes";
+        public static final String TABLE_NAME = "Recipes";
 
-        static final String VIEW_ORDER = "ViewOrder";
-        static final String TITLE = "Title";
-        static final String CALORIES_PER_PERSON = "Calories";
-        static final String DURATION = "Duration";
-        static final String IMAGEPATH = "ImagePath";
+        public static final String VIEW_ORDER = "ViewOrder";
+        public static final String TITLE = "Title";
+        public static final String CALORIES_PER_PERSON = "Calories";
+        public static final String DURATION = "Duration";
+        public static final String IMAGE_PATH = "ImagePath";
     }
 
     /**
      * List of ingredients for a particular recipe
      */
-    final class RecipeIngredientEntry implements BaseColumns {
+    public final class RecipeIngredientEntry implements BaseColumns {
 
-        static final String TABLE_NAME = "RecipeIngredients";
+        public static final String TABLE_NAME = "RecipeIngredients";
 
-        static final String RECIPE_ID = "RecipeId";
-        static final String INGREDIENT_NAME = "IngredientName";
+        public static final String RECIPE_ID = "RecipeId";
+        public static final String INGREDIENT_NAME = "IngredientName";
     }
 
     /**
      * Step in recipe method with associated recipe
      */
-    final class MethodStepEntry implements BaseColumns {
+    public final class MethodStepEntry implements BaseColumns {
 
-        static final String TABLE_NAME = "Steps";
+        public static final String TABLE_NAME = "Steps";
 
-        static final String RECIPE_ID = "Recipe";
-        static final String STEP_NO = "StepNo";
-        static final String TEXT = "Text";
+        public static final String RECIPE_ID = "Recipe";
+        public static final String STEP_NO = "StepNo";
+        public static final String TEXT = "Text";
     }
 }

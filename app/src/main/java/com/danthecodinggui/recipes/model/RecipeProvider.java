@@ -312,6 +312,10 @@ public class RecipeProvider extends ContentProvider {
                 );
                 break;
             case RECIPE_INGREDIENTS_TABLE:
+                /* TODO as we're using a view for ingredients, will need to handle references to
+                 ingredients when something is deleted, ie. check to see if deleted ingredients
+                 are still referenced in recipe-ingredients table
+                 */
                 rowNumDeleted = db.delete(
                         DBSchema.IngredientEntry.TABLE_NAME,
                         selection,

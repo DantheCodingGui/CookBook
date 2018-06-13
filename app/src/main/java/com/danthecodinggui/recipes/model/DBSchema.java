@@ -17,11 +17,11 @@ final class DBSchema {
 
         static final String TABLE_NAME = "Recipes";
 
-        static final String VIEW_ORDER = "ViewOrder";
         static final String TITLE = "Title";
         static final String CALORIES_PER_PERSON = "Calories";
         static final String DURATION = "Duration";
-        static final String IMAGEPATH = "ImagePath";
+        static final String VIEW_ORDER = "ViewOrder";
+        static final String IMAGE_PATH = "ImagePath";
     }
 
     /**

@@ -3,11 +3,15 @@ package com.danthecodinggui.recipes.view;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityOptions;
+import android.content.AsyncQueryHandler;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,6 +44,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.msc.IntentConstants;
 import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 
@@ -54,12 +59,17 @@ public class MainActivity extends AppCompatActivity {
     //RecyclerView components
     private RecyclerView recipesView;
     private RecipesViewAdapter recipesAdapter;
-    private List<RecipeModel> recipesList;
+    private List<RecipeViewModel> recipesList;
     private FloatingActionButton addRecipe;
 
     private ConstraintLayout searchNoItems;
 
     private Toolbar homeBar;
+
+    //Loader IDs
+    private static final int PREVIEWS_TOKEN = 101;
+    private static final int INGREDIENTS_TOKEN = 102;
+    private static final int METHOD_STEPS_TOKEN = 103;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,12 +113,91 @@ public class MainActivity extends AppCompatActivity {
         homeBar = findViewById(R.id.tbar_home);
         setSupportActionBar(homeBar);
 
+        //Initialise cursor loader
+        getLoaderManager().initLoader(PREVIEWS_TOKEN, null, new android.app.LoaderManager.LoaderCallbacks<Cursor>()
+        {
+
+            @Override
+            public android.content.Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+
+
+                switch (loaderId) {
+                    case PREVIEWS_TOKEN:
+
+                        //Get all data from recipe table
+                        String[] projRecipes = {
+                                ProviderContract.RecipeEntry._ID,
+                                ProviderContract.RecipeEntry.TITLE,
+                                ProviderContract.RecipeEntry.DURATION,
+                                ProviderContract.RecipeEntry.CALORIES_PER_PERSON,
+                                ProviderContract.RecipeEntry.VIEW_ORDER,
+                                ProviderContract.RecipeEntry.IMAGE_PATH
+                        };
+
+                        //Sort based on order in view list
+                        String sortOrder = ProviderContract.RecipeEntry.VIEW_ORDER + " ASC";
+
+                        return new CursorLoader(
+                                MainActivity.this.getApplicationContext(),
+                                ProviderContract.RECIPES_URI,
+                                projRecipes,
+                                null,
+                                null,
+                                sortOrder
+                        );
+                    case INGREDIENTS_TOKEN:
+
+                        String[] projIngredients = { ProviderContract.COUNT_PROJECTION };
+                        String selection = ProviderContract.RecipeIngredientEntry.RECIPE_ID + " = ?";
+
+                        //TODO need to loop this in list of recipe id's to count
+                        String[] selectionArgs = null;
+
+                        return new CursorLoader(
+                                MainActivity.this.getApplicationContext(),
+                                ProviderContract.RECIPE_INGREDIENTS_URI,
+                                projIngredients,
+                                selection,
+                                selectionArgs,
+                                null
+
+                        );
+                    case METHOD_STEPS_TOKEN:
+                        //should be a duplicate of above with different table names
+                        return null;
+                    default:
+                        return null;
+                }
+            }
+
+            @Override
+            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor cursor) {
+                switch (loader.getId()) {
+                    case PREVIEWS_TOKEN:
+
+                        break;
+                    case INGREDIENTS_TOKEN:
+
+                        break;
+                    case METHOD_STEPS_TOKEN:
+
+                        break;
+                }
+
+            }
+
+            @Override
+            public void onLoaderReset(android.content.Loader<Cursor> loader) {
+
+            }
+        });
+
         //Example cards TODO remove later
-        recipesList.add(new RecipeModel("American Pancakes", 4, 7));
-        recipesList.add(new RecipeModel("Sushi Sliders", 5, 6,
+        recipesList.add(new RecipeViewModel("American Pancakes", 4, 7));
+        recipesList.add(new RecipeViewModel("Sushi Sliders", 5, 6,
                 10, 5, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
-        recipesList.add(new RecipeModel("English Pancakes", 4, 7, 10, 3));
-        recipesList.add(new RecipeModel("Spag Bol", 4, 7, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
+        recipesList.add(new RecipeViewModel("English Pancakes", 4, 7, 10, 3));
+        recipesList.add(new RecipeViewModel("Spag Bol", 4, 7, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
         recipesAdapter.notifyDataSetChanged();
     }
 
@@ -259,17 +348,78 @@ public class MainActivity extends AppCompatActivity {
         startActivity(addRecipe);
     }
 
+    private class GetRecipePreviews extends AsyncQueryHandler {
+
+        List<RecipeViewModel> tempList;
+
+        public GetRecipePreviews(ContentResolver cr) {
+            super(cr);
+            tempList = new ArrayList<>();
+        }
+
+        @Override
+        protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+
+            RecipeViewModel temp;
+
+            switch (token) {
+                case PREVIEWS_TOKEN:
+
+                    String recipeTitle;
+                    int calories;
+                    int timeInMins;
+                    String imagePath;
+
+                    while (cursor.moveToNext()) {
+                        recipeTitle = cursor.getString(cursor.getColumnIndexOrThrow(
+                                ProviderContract.RecipeEntry.TITLE));
+                        // TODO following 3 may throw exception when values are null
+                        calories = cursor.getInt(cursor.getColumnIndexOrThrow(
+                                ProviderContract.RecipeEntry.CALORIES_PER_PERSON));
+                        timeInMins = cursor.getInt(cursor.getColumnIndexOrThrow(
+                                ProviderContract.RecipeEntry.DURATION));
+                        imagePath = cursor.getString(cursor.getColumnIndexOrThrow(
+                                ProviderContract.RecipeEntry.IMAGE_PATH));
+
+                        if
+                        //multiple nested if statements, decide what type of model object to create
+                        //temp = new RecipeViewModel(...)
+
+
+                        //async load image into Bitmap from filepath
+                        //start ingredient query, passing in temp as the cookie
+                    }
+                    cursor.close();
+
+
+                    //Now should know recipe id, so can use to get ingredients and method step counts
+                    break;
+                case INGREDIENTS_TOKEN:
+                    temp = (RecipeViewModel) cookie;
+                    //get count from query and add to temp object
+                    //start method step query
+                    break;
+                case METHOD_STEPS_TOKEN:
+                    temp = (RecipeViewModel) cookie;
+                    //get count from query and add to temp object
+                    //get bitmap from file, create callback that will then complete temp to list
+                    //add completed temp to viewmodel list and notify that an object has been added
+                    break;
+            }
+        }
+    }
+
     /**
      * Allows integration between the list of recipe objects and the recyclerview
      */
     class RecipesViewAdapter
             extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
 
-        List<RecipeModel> filteredRecipesList;
+        List<RecipeViewModel> filteredRecipesList;
 
         private final int BASIC = 0, COMPLEX = 1, PHOTO_BASIC = 2, PHOTO_COMPLEX = 3;
 
-        RecipesViewAdapter(List<RecipeModel> list) {
+        RecipesViewAdapter(List<RecipeViewModel> list) {
             filteredRecipesList = list;
         }
 
@@ -339,7 +489,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getItemViewType(int position) {
-            boolean isComplex = filteredRecipesList.get(position).hasFullRecipe();
+            boolean isComplex = filteredRecipesList.get(position).hasExtendedInfo();
             boolean hasPhoto = filteredRecipesList.get(position).hasPhoto();
 
             if (isComplex && hasPhoto)
@@ -367,8 +517,8 @@ public class MainActivity extends AppCompatActivity {
                         filteredRecipesList = recipesList;
                     }
                     else {
-                        List<RecipeModel> filteredList = new ArrayList<>();
-                        for (RecipeModel row : recipesList) {
+                        List<RecipeViewModel> filteredList = new ArrayList<>();
+                        for (RecipeViewModel row : recipesList) {
 
                             if (row.getTitle().toLowerCase().contains(charString.toLowerCase())) {
                                 filteredList.add(row);
@@ -385,7 +535,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                     filteredRecipesList = (ArrayList<RecipeModel>) filterResults.values;
+                     filteredRecipesList = (ArrayList<RecipeViewModel>) filterResults.values;
 
                     if (filteredRecipesList.size() == 0)
                         searchNoItems.setVisibility(View.VISIBLE);
