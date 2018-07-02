@@ -3,16 +3,19 @@ package com.danthecodinggui.recipes.view;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityOptions;
+import android.app.LoaderManager;
 import android.content.AsyncQueryHandler;
+import android.content.AsyncTaskLoader;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -44,6 +47,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.model.FileUtils;
 import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.msc.IntentConstants;
 import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
@@ -54,11 +58,12 @@ import java.util.List;
 /**
  * Display all stored recipes
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements LoaderManager.LoaderCallbacks<ArrayList<RecipeViewModel>> {
 
     //RecyclerView components
     private RecyclerView recipesView;
-    private RecipesViewAdapter recipesAdapter;
+    RecipesViewAdapter recipesAdapter;
     private List<RecipeViewModel> recipesList;
     private FloatingActionButton addRecipe;
 
@@ -191,14 +196,15 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
+/*
         //Example cards TODO remove later
-        recipesList.add(new RecipeViewModel("American Pancakes", 4, 7));
-        recipesList.add(new RecipeViewModel("Sushi Sliders", 5, 6,
+        recipesList.add(new RecipeViewModel("American Pancakes"));
+        recipesList.add(new RecipeViewModel("Sushi Sliders",
                 10, 5, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
-        recipesList.add(new RecipeViewModel("English Pancakes", 4, 7, 10, 3));
+        recipesList.add(new RecipeViewModel("English Pancakes", 10, 3, true));
         recipesList.add(new RecipeViewModel("Spag Bol", 4, 7, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
         recipesAdapter.notifyDataSetChanged();
+        */
     }
 
     @Override
@@ -348,65 +354,20 @@ public class MainActivity extends AppCompatActivity {
         startActivity(addRecipe);
     }
 
-    private class GetRecipePreviews extends AsyncQueryHandler {
+    @Override
+    public Loader<ArrayList<RecipeViewModel>> onCreateLoader(int id, Bundle bundle) {
+        return new GetRecipesLoader<ArrayList<RecipeViewModel>>(this);
+    }
 
-        List<RecipeViewModel> tempList;
+    @Override
+    public void onLoadFinished(Loader<ArrayList<RecipeViewModel>> loader,
+                               ArrayList<RecipeViewModel> recipeViewModels) {
 
-        public GetRecipePreviews(ContentResolver cr) {
-            super(cr);
-            tempList = new ArrayList<>();
-        }
+    }
 
-        @Override
-        protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+    @Override
+    public void onLoaderReset(Loader<ArrayList<RecipeViewModel>> loader) {
 
-            RecipeViewModel temp;
-
-            switch (token) {
-                case PREVIEWS_TOKEN:
-
-                    String recipeTitle;
-                    int calories;
-                    int timeInMins;
-                    String imagePath;
-
-                    while (cursor.moveToNext()) {
-                        recipeTitle = cursor.getString(cursor.getColumnIndexOrThrow(
-                                ProviderContract.RecipeEntry.TITLE));
-                        // TODO following 3 may throw exception when values are null
-                        calories = cursor.getInt(cursor.getColumnIndexOrThrow(
-                                ProviderContract.RecipeEntry.CALORIES_PER_PERSON));
-                        timeInMins = cursor.getInt(cursor.getColumnIndexOrThrow(
-                                ProviderContract.RecipeEntry.DURATION));
-                        imagePath = cursor.getString(cursor.getColumnIndexOrThrow(
-                                ProviderContract.RecipeEntry.IMAGE_PATH));
-
-                        if
-                        //multiple nested if statements, decide what type of model object to create
-                        //temp = new RecipeViewModel(...)
-
-
-                        //async load image into Bitmap from filepath
-                        //start ingredient query, passing in temp as the cookie
-                    }
-                    cursor.close();
-
-
-                    //Now should know recipe id, so can use to get ingredients and method step counts
-                    break;
-                case INGREDIENTS_TOKEN:
-                    temp = (RecipeViewModel) cookie;
-                    //get count from query and add to temp object
-                    //start method step query
-                    break;
-                case METHOD_STEPS_TOKEN:
-                    temp = (RecipeViewModel) cookie;
-                    //get count from query and add to temp object
-                    //get bitmap from file, create callback that will then complete temp to list
-                    //add completed temp to viewmodel list and notify that an object has been added
-                    break;
-            }
-        }
     }
 
     /**

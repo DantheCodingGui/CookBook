@@ -26,7 +26,7 @@ public final class ProviderContract {
     public static final Uri RECIPE_INGREDIENTS_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPE_INGREDIENTS).build();
 
     //Count records projection string
-    public static final String COUNT_PROJECTION = "count(" + BaseColumns._ID + ") AS count";
+    public static final String[] COUNT_PROJECTION = { "count(" + BaseColumns._ID + ") AS count" };
 
     //Empty constructor in case anyone instantiates class
     ProviderContract() {}
