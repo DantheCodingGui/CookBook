@@ -1,15 +1,18 @@
 package com.danthecodinggui.recipes.view;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -38,9 +41,11 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.msc.IntentConstants;
+import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 
 import java.util.ArrayList;
@@ -66,7 +71,7 @@ public class MainActivity extends AppCompatActivity
     private static final int PREVIEWS_TOKEN = 101;
 
     //Permission request codes
-    private static final int PERMISSION_READ_EXTERNAL = 201;
+    private static final int REQUEST_READ_EXTERNAL = 201;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,8 +115,8 @@ public class MainActivity extends AppCompatActivity
         homeBar = findViewById(R.id.tbar_home);
         setSupportActionBar(homeBar);
 
-        //Start grabbing records from content provider
-        getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
+        //Ask for read_storage permission before initialising loader
+        PermissionsHandler.AskForPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL);
 
 /*
         //Example cards TODO remove later
@@ -162,6 +167,19 @@ public class MainActivity extends AppCompatActivity
         });
 
         return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch(requestCode) {
+            case REQUEST_READ_EXTERNAL:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
+                else
+                    //TODO: handle permission denied (probably set dialog, if denied there ignore images)
+                    Toast.makeText(this, "Boo, permission denied!", Toast.LENGTH_SHORT).show();
+                    break;
+        }
     }
 
     public void animateSearchToolbar(int numberOfMenuIcon, boolean containsOverflow, boolean shouldShow) {
@@ -273,7 +291,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public android.support.v4.content.Loader<ArrayList<RecipeViewModel>> onCreateLoader(int id, Bundle args) {
-        return new GetRecipesLoader<ArrayList<RecipeViewModel>>(getApplicationContext());
+        return new GetRecipesLoader<ArrayList<RecipeViewModel>>(this);
     }
 
     @Override

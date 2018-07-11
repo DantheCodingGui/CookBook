@@ -1,5 +1,6 @@
 package com.danthecodinggui.recipes.view;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -103,8 +104,6 @@ public class GetRecipesLoader<D> extends AsyncTaskLoader {
             if (temp.hasPhoto()) {
                 String path = Integer.toString(
                         baseCursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.IMAGE_PATH));
-
-                PermissionsHandler.AskForPermission(getContext(), PermissionsHandler.PERMISSION_READ_EXTERNAL_STORAGE);
 
                 temp.setPreview(FileUtils.GetImageFromFilePath(path));
             }
