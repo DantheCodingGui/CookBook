@@ -3,10 +3,13 @@ package com.danthecodinggui.recipes.view;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.content.AsyncTaskLoader;
+import android.support.v4.content.AsyncTaskLoader;
+import android.util.Log;
 
 import com.danthecodinggui.recipes.model.FileUtils;
 import com.danthecodinggui.recipes.model.ProviderContract;
+import com.danthecodinggui.recipes.msc.LogTags;
+import com.danthecodinggui.recipes.msc.PermissionsHandler;
 
 import java.util.ArrayList;
 
@@ -16,6 +19,19 @@ public class GetRecipesLoader<D> extends AsyncTaskLoader {
 
     private ArrayList<RecipeViewModel> records;
 
+    //Content provider query data
+    private final String[] recipesProjection = {
+            ProviderContract.RecipeEntry._ID,
+            ProviderContract.RecipeEntry.VIEW_ORDER,
+            ProviderContract.RecipeEntry.TITLE,
+            ProviderContract.RecipeEntry.CALORIES_PER_PERSON,
+            ProviderContract.RecipeEntry.DURATION,
+            ProviderContract.RecipeEntry.IMAGE_PATH
+    };
+    private final String recipesSortOrder = ProviderContract.RecipeEntry.VIEW_ORDER + " ASC";
+    private final String ingreSel = ProviderContract.RecipeIngredientEntry.RECIPE_ID + " = ?";
+    private final String methodSel = ProviderContract.MethodStepEntry.RECIPE_ID + " = ?";
+
     public GetRecipesLoader(Context context) {
         super(context);
         contentResolver = context.getContentResolver();
@@ -23,42 +39,37 @@ public class GetRecipesLoader<D> extends AsyncTaskLoader {
     }
 
     @Override
+    protected void onStartLoading() {
+        //Cache records so can handle orientation changes and such
+        if (records != null)
+            deliverResult(records);
+        else
+            forceLoad();
+    }
+
+    @Override
     public ArrayList<RecipeViewModel> loadInBackground() {
 
-        //Call the content provider for the base data
-        String[] baseProjection = {
-                ProviderContract.RecipeEntry._ID,
-                ProviderContract.RecipeEntry.VIEW_ORDER,
-                ProviderContract.RecipeEntry.TITLE,
-                ProviderContract.RecipeEntry.CALORIES_PER_PERSON,
-                ProviderContract.RecipeEntry.DURATION,
-                ProviderContract.RecipeEntry.IMAGE_PATH
-        };
-
-        String baseSortOrder = ProviderContract.RecipeEntry.VIEW_ORDER + " ASC";
-
-        //Get all base values in list
+        //Query recipes table for all records
         Cursor baseCursor = contentResolver.query(
                 ProviderContract.RECIPES_URI,
-                baseProjection,
+                recipesProjection,
                 null,
                 null,
-                baseSortOrder
+                recipesSortOrder
         );
-
-
-        //Loop through all records
-        RecipeViewModel temp;
-
+        //Cursor for the ingredients/method queries afterwards
         Cursor countCursor;
+        //Temporary holder variable
+        RecipeViewModel temp;
 
         int recordsGathered = 0;
 
         while (baseCursor.moveToNext()) {
-            //Get base data
+            //Get base recipe data
             temp = BuildBaseModel(baseCursor);
 
-            String ingreSel = ProviderContract.RecipeIngredientEntry.RECIPE_ID + " = ?";
+            //Add ingredients data to record
             String[] countSelArgs = {Long.toString(baseCursor.getColumnIndexOrThrow(
                     ProviderContract.RecipeEntry._ID
             ))};
@@ -70,12 +81,12 @@ public class GetRecipesLoader<D> extends AsyncTaskLoader {
                     countSelArgs,
                     null
             );
+            if (countCursor == null)
+                Log.e(LogTags.CONTENT_PROVIDER, "Previews Loader: ingredients cursor is null");
+            else
+                temp = AddIngredientCount(countCursor, temp);
 
-            //Add ingredient count
-            temp = AddIngredientCount(countCursor, temp);
-
-            String methodSel = ProviderContract.MethodStepEntry.RECIPE_ID + " = ?";
-
+            //Add method data to record
             countCursor = contentResolver.query(
                     ProviderContract.RECIPE_INGREDIENTS_URI,
                     ProviderContract.COUNT_PROJECTION,
@@ -83,14 +94,18 @@ public class GetRecipesLoader<D> extends AsyncTaskLoader {
                     countSelArgs,
                     null
             );
+            if (countCursor == null)
+                Log.e(LogTags.CONTENT_PROVIDER, "Previews Loader: method cursor is null");
+            else
+                temp = AddStepsCount(countCursor, temp);
 
-            //Add method steps count
-            temp = AddStepsCount(countCursor, temp);
-
-            //load in image from memory
+            //Load in preview image
             if (temp.hasPhoto()) {
                 String path = Integer.toString(
                         baseCursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.IMAGE_PATH));
+
+                PermissionsHandler.AskForPermission(getContext(), PermissionsHandler.PERMISSION_READ_EXTERNAL_STORAGE);
+
                 temp.setPreview(FileUtils.GetImageFromFilePath(path));
             }
 
@@ -102,9 +117,14 @@ public class GetRecipesLoader<D> extends AsyncTaskLoader {
         }
         baseCursor.close();
 
-        return null;
+        return records;
     }
 
+    /**
+     * Decides what type of RecipeViewModel to build based on what data is saved in the table
+     * record
+     * @return The base RecipeViewModel constructed with the data found in the record
+     */
     private RecipeViewModel BuildBaseModel(Cursor cursor) {
 
         String recipeTitle = cursor.getString(cursor.getColumnIndexOrThrow(
@@ -133,7 +153,6 @@ public class GetRecipesLoader<D> extends AsyncTaskLoader {
                 else
                     return new RecipeViewModel(recipeTitle, timeInMins, false);
             } else {
-
                 if (noTime)
                     return new RecipeViewModel(recipeTitle, calories, false);
                 else

@@ -3,25 +3,18 @@ package com.danthecodinggui.recipes.view;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityOptions;
-import android.app.LoaderManager;
-import android.content.AsyncQueryHandler;
-import android.content.AsyncTaskLoader;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
@@ -47,8 +40,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
-import com.danthecodinggui.recipes.model.FileUtils;
-import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.msc.IntentConstants;
 import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 
@@ -73,8 +64,9 @@ public class MainActivity extends AppCompatActivity
 
     //Loader IDs
     private static final int PREVIEWS_TOKEN = 101;
-    private static final int INGREDIENTS_TOKEN = 102;
-    private static final int METHOD_STEPS_TOKEN = 103;
+
+    //Permission request codes
+    private static final int PERMISSION_READ_EXTERNAL = 201;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,84 +110,9 @@ public class MainActivity extends AppCompatActivity
         homeBar = findViewById(R.id.tbar_home);
         setSupportActionBar(homeBar);
 
-        //Initialise cursor loader
-        getLoaderManager().initLoader(PREVIEWS_TOKEN, null, new android.app.LoaderManager.LoaderCallbacks<Cursor>()
-        {
+        //Start grabbing records from content provider
+        getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
 
-            @Override
-            public android.content.Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
-
-
-                switch (loaderId) {
-                    case PREVIEWS_TOKEN:
-
-                        //Get all data from recipe table
-                        String[] projRecipes = {
-                                ProviderContract.RecipeEntry._ID,
-                                ProviderContract.RecipeEntry.TITLE,
-                                ProviderContract.RecipeEntry.DURATION,
-                                ProviderContract.RecipeEntry.CALORIES_PER_PERSON,
-                                ProviderContract.RecipeEntry.VIEW_ORDER,
-                                ProviderContract.RecipeEntry.IMAGE_PATH
-                        };
-
-                        //Sort based on order in view list
-                        String sortOrder = ProviderContract.RecipeEntry.VIEW_ORDER + " ASC";
-
-                        return new CursorLoader(
-                                MainActivity.this.getApplicationContext(),
-                                ProviderContract.RECIPES_URI,
-                                projRecipes,
-                                null,
-                                null,
-                                sortOrder
-                        );
-                    case INGREDIENTS_TOKEN:
-
-                        String[] projIngredients = { ProviderContract.COUNT_PROJECTION };
-                        String selection = ProviderContract.RecipeIngredientEntry.RECIPE_ID + " = ?";
-
-                        //TODO need to loop this in list of recipe id's to count
-                        String[] selectionArgs = null;
-
-                        return new CursorLoader(
-                                MainActivity.this.getApplicationContext(),
-                                ProviderContract.RECIPE_INGREDIENTS_URI,
-                                projIngredients,
-                                selection,
-                                selectionArgs,
-                                null
-
-                        );
-                    case METHOD_STEPS_TOKEN:
-                        //should be a duplicate of above with different table names
-                        return null;
-                    default:
-                        return null;
-                }
-            }
-
-            @Override
-            public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor cursor) {
-                switch (loader.getId()) {
-                    case PREVIEWS_TOKEN:
-
-                        break;
-                    case INGREDIENTS_TOKEN:
-
-                        break;
-                    case METHOD_STEPS_TOKEN:
-
-                        break;
-                }
-
-            }
-
-            @Override
-            public void onLoaderReset(android.content.Loader<Cursor> loader) {
-
-            }
-        });
 /*
         //Example cards TODO remove later
         recipesList.add(new RecipeViewModel("American Pancakes"));
@@ -355,20 +272,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public Loader<ArrayList<RecipeViewModel>> onCreateLoader(int id, Bundle bundle) {
-        return new GetRecipesLoader<ArrayList<RecipeViewModel>>(this);
+    public android.support.v4.content.Loader<ArrayList<RecipeViewModel>> onCreateLoader(int id, Bundle args) {
+        return new GetRecipesLoader<ArrayList<RecipeViewModel>>(getApplicationContext());
     }
 
     @Override
-    public void onLoadFinished(Loader<ArrayList<RecipeViewModel>> loader,
-                               ArrayList<RecipeViewModel> recipeViewModels) {
-
+    public void onLoadFinished(android.support.v4.content.Loader<ArrayList<RecipeViewModel>> loader, ArrayList<RecipeViewModel> data) {
+        //TODO if change loader to add items on the fly, will need to change below to add all elements
+        //instead of replacing it
+        recipesList = new ArrayList<>(data);
+        recipesAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onLoaderReset(Loader<ArrayList<RecipeViewModel>> loader) {
+    public void onLoaderReset(android.support.v4.content.Loader<ArrayList<RecipeViewModel>> loader) {}
 
-    }
 
     /**
      * Allows integration between the list of recipe objects and the recyclerview
