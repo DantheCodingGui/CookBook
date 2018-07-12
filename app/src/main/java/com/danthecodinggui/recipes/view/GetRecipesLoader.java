@@ -1,24 +1,24 @@
 package com.danthecodinggui.recipes.view;
 
-import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.support.v4.content.AsyncTaskLoader;
+import android.os.Handler;
 import android.util.Log;
 
-import com.danthecodinggui.recipes.model.FileUtils;
 import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.msc.LogTags;
-import com.danthecodinggui.recipes.msc.PermissionsHandler;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class GetRecipesLoader<D> extends AsyncTaskLoader {
+public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
+
+    private Handler uiThread;
 
     private ContentResolver contentResolver;
 
-    private ArrayList<RecipeViewModel> records;
+    private List<RecipeViewModel> records;
 
     //Content provider query data
     private final String[] recipesProjection = {
@@ -33,8 +33,8 @@ public class GetRecipesLoader<D> extends AsyncTaskLoader {
     private final String ingreSel = ProviderContract.RecipeIngredientEntry.RECIPE_ID + " = ?";
     private final String methodSel = ProviderContract.MethodStepEntry.RECIPE_ID + " = ?";
 
-    public GetRecipesLoader(Context context) {
-        super(context);
+    GetRecipesLoader(Context context, Handler uiThread, ProgressUpdateListener updateCallback, int loaderId) {
+        super(context, uiThread, updateCallback, loaderId);
         contentResolver = context.getContentResolver();
         records = new ArrayList<>();
     }
@@ -49,7 +49,7 @@ public class GetRecipesLoader<D> extends AsyncTaskLoader {
     }
 
     @Override
-    public ArrayList<RecipeViewModel> loadInBackground() {
+    public List<RecipeViewModel> loadInBackground() {
 
         //Query recipes table for all records
         Cursor baseCursor = contentResolver.query(
@@ -100,23 +100,27 @@ public class GetRecipesLoader<D> extends AsyncTaskLoader {
             else
                 temp = AddStepsCount(countCursor, temp);
 
+            /*
             //Load in preview image
             if (temp.hasPhoto()) {
                 String path = Integer.toString(
                         baseCursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.IMAGE_PATH));
 
                 temp.setPreview(FileUtils.GetImageFromFilePath(path));
-            }
+            }*/
 
             records.add(temp);
 
+            recordsGathered = records.size();
+
+            //In case there's a vast amount of records, update the ui every 10 loaded records
             if (recordsGathered % 10 == 0)
-                ;//call handler code to update ui with current list
-            recordsGathered++;
+                UpdateProgress(records.subList(recordsGathered - 10, recordsGathered - 1));
         }
         baseCursor.close();
 
-        return records;
+        //Return remaining records in list
+        return records.subList(recordsGathered - (recordsGathered % 10) - 1, recordsGathered - 1);
     }
 
     /**

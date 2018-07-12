@@ -13,9 +13,11 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
@@ -29,6 +31,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,11 +56,14 @@ import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.danthecodinggui.recipes.msc.LogTags.PERMISSIONS;
+
 /**
  * Display all stored recipes
  */
 public class MainActivity extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<ArrayList<RecipeViewModel>> {
+        implements LoaderManager.LoaderCallbacks<List<RecipeViewModel>>,
+        UpdatingAsyncTaskLoader.ProgressUpdateListener {
 
     //RecyclerView components
     private RecyclerView recipesView;
@@ -70,10 +76,11 @@ public class MainActivity extends AppCompatActivity
     private Toolbar homeBar;
 
     //If read external files permission denied, must avoid loading images from recipes
-    private boolean noImages = false;
+    private boolean noImage = false;
 
     //Loader IDs
     private static final int PREVIEWS_TOKEN = 101;
+    private static final int PREVIEW_IMAGES_TOKEN = 102;
 
     //Permission request codes
     private static final int REQUEST_READ_EXTERNAL = 201;
@@ -120,21 +127,31 @@ public class MainActivity extends AppCompatActivity
         homeBar = findViewById(R.id.tbar_home);
         setSupportActionBar(homeBar);
 
-        /*
         //Ask for read_storage permission before initialising loader
         int response = PermissionsHandler.AskForPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, false);
-        if (response == PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED)
-            noImages = true;
-*/
+        switch(response) {
+            case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
+                Toast.makeText(this, "Permission already granted!", Toast.LENGTH_SHORT).show();
+                getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
 
+                break;
+            case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
+                Log.v(PERMISSIONS, "Storage permission denied, app won't load images");
+                Toast.makeText(this, "Permission previously denied!", Toast.LENGTH_SHORT).show();
+                noImage = true;
+                break;
+        }
+
+        /*
         //Example cards TODO remove later
         recipesList.add(new RecipeViewModel("American Pancakes", false));
         recipesList.add(new RecipeViewModel("Sushi Sliders",
                 10, 5,true));
         recipesList.add(new RecipeViewModel("English Pancakes", 10, 3, true));
         recipesList.add(new RecipeViewModel("Spag Bol", 4, 7, true));
-        recipesAdapter.notifyDataSetChanged();
+        recipesAdapter.notifyDataSetChanged();#
+        */
 
     }
 
@@ -182,24 +199,25 @@ public class MainActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch(requestCode) {
             case REQUEST_READ_EXTERNAL:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
-                    Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show();
-                }
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    Toast.makeText(this, "Permission now granted!", Toast.LENGTH_SHORT).show();
                 else {
-                    //TODO: handle permission denied (probably set dialog, if denied there ignore images)
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setMessage(R.string.perm_dialog_read_external)
-                            .setPositiveButton(R.string.perm_dialog_butt_deny, new DialogInterface.OnClickListener() {
+                            .setNegativeButton(R.string.perm_dialog_butt_deny, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    //handle no images for recipes
-                                    Toast.makeText(MainActivity.this, "Boo, permission still denied!", Toast.LENGTH_SHORT).show();
+                                    noImage = true;
 
-                                    noImages = true;
+                                    //Alert the user how they can re-enable the feature
+                                    Snackbar.make(findViewById(R.id.cly_main_root),
+                                                    R.string.perm_snackbar_msg,
+                                                    Snackbar.LENGTH_LONG
+                                            )
+                                            .show();
                                 }
                             })
-                            .setNegativeButton(R.string.perm_dialog_butt_permit, new DialogInterface.OnClickListener() {
+                            .setPositiveButton(R.string.perm_dialog_butt_permit, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     PermissionsHandler.AskForPermission(MainActivity.this,
@@ -211,6 +229,8 @@ public class MainActivity extends AppCompatActivity
                 }
                     break;
         }
+
+        getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
     }
 
     public void animateSearchToolbar(int numberOfMenuIcon, boolean containsOverflow, boolean shouldShow) {
@@ -321,20 +341,35 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public android.support.v4.content.Loader<ArrayList<RecipeViewModel>> onCreateLoader(int id, Bundle args) {
-        return new GetRecipesLoader<ArrayList<RecipeViewModel>>(this);
+    public android.support.v4.content.Loader<List<RecipeViewModel>> onCreateLoader(int id, Bundle args) {
+        Handler uiThread = new Handler(getMainLooper());
+        switch(id) {
+            case PREVIEWS_TOKEN:
+                return new GetRecipesLoader(this, uiThread, this, PREVIEWS_TOKEN);
+            default:
+                return new GetRecipeImagesLoader(this, uiThread, this, PREVIEW_IMAGES_TOKEN);
+        }
     }
 
     @Override
-    public void onLoadFinished(android.support.v4.content.Loader<ArrayList<RecipeViewModel>> loader, ArrayList<RecipeViewModel> data) {
-        //TODO if change loader to add items on the fly, will need to change below to add all elements
-        //instead of replacing it
-        recipesList = new ArrayList<>(data);
-        recipesAdapter.notifyDataSetChanged();
+    public void onLoadFinished(android.support.v4.content.Loader<List<RecipeViewModel>> loader, List<RecipeViewModel> remainingRecords) {
+        recipesList.addAll(remainingRecords);
     }
 
     @Override
-    public void onLoaderReset(android.support.v4.content.Loader<ArrayList<RecipeViewModel>> loader) {}
+    public void onLoaderReset(android.support.v4.content.Loader<List<RecipeViewModel>> loader) {}
+
+    @Override
+    public <T> void onProgressUpdate(int loaderId, T updateValue) {
+        switch(loaderId) {
+            case PREVIEWS_TOKEN:
+                recipesList.addAll((List) updateValue);
+                break;
+            case PREVIEW_IMAGES_TOKEN:
+                //TODO: add implementation here
+                break;
+        }
+    }
 
 
     /**
@@ -418,7 +453,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public int getItemViewType(int position) {
             boolean isComplex = filteredRecipesList.get(position).hasExtendedInfo();
-            boolean hasPhoto = filteredRecipesList.get(position).hasPhoto() && !noImages;
+            boolean hasPhoto = filteredRecipesList.get(position).hasPhoto() && !noImage;
 
             if (isComplex && hasPhoto)
                 return PHOTO_COMPLEX;

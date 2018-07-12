@@ -26,4 +26,5 @@
         this functionality?</string>
     <string name="perm_dialog_butt_deny">Yes</string>
     <string name="perm_dialog_butt_permit">No</string>
+    <string name="perm_snackbar_msg">You can re-enable permissions in your device\'s settings</string>
 </resources>
