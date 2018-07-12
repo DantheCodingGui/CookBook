@@ -7,6 +7,9 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
+
+import static com.danthecodinggui.recipes.msc.LogTags.PERMISSIONS;
 
 /**
  * Reduces some boilerplate code concerning runtime permissions <br/>
@@ -35,6 +38,8 @@ public class PermissionsHandler{
      *
      * @param permission The permission being requested
      * @param requestId A unique id for the request to be used in identifying the request later.
+     * @param rationalOverride States whether user has denied a permission, and changed their mind
+     *                         after reading the rational dialog
      * @return The response code, being one of: <br/>
      * <ul>
      *     <li><code>PERMISSION_GRANTING</code> - The permission has not been granted yet, but now
@@ -49,9 +54,12 @@ public class PermissionsHandler{
      * </ul>
      *
      */
-    public static int AskForPermission(Context context, String permission, int requestId) {
+    public static int AskForPermission(Context context, String permission, int requestId,
+                                       boolean rationalOverride) {
 
         Activity srcActivity = (Activity) context;
+
+        Log.d(PERMISSIONS, "Permission " + permission + " requested by " + srcActivity.getLocalClassName());
 
         //Check to ensure that requested permission is one in which the application should be using
         boolean isValidPermission = false;
@@ -59,8 +67,10 @@ public class PermissionsHandler{
             if (p.equals(permission))
                 isValidPermission = true;
         }
-        if (!isValidPermission)
+        if (!isValidPermission) {
+            Log.e(PERMISSIONS, "Permission " + permission + " is invalid");
             return PERMISSION_INVALID;
+        }
 
         //Precaution to avoid unnecessary checks if not needed
         if (!runtimePermissions)
@@ -70,14 +80,20 @@ public class PermissionsHandler{
         if (ContextCompat.checkSelfPermission(context, permission)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(srcActivity, permission))
+            if (ActivityCompat.shouldShowRequestPermissionRationale(srcActivity, permission)
+                    && !rationalOverride) {
+                Log.i(PERMISSIONS, "Permission " + permission + " previously been denied");
                 return PERMISSION_PREVIOUSLY_DENIED;
+            }
             else {
                 ActivityCompat.requestPermissions(srcActivity, new String[]{permission}, requestId);
+                Log.i(PERMISSIONS, "Permission " + permission + " being granted");
                 return PERMISSION_GRANTING;
             }
         }
-        else
+        else {
+            Log.i(PERMISSIONS, "Permission " + permission + " already granted");
             return PERMISSION_ALREADY_GRANTED;
+        }
     }
 }

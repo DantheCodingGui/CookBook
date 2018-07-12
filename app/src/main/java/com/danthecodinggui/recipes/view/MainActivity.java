@@ -5,6 +5,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityOptions;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -21,6 +22,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -66,6 +68,9 @@ public class MainActivity extends AppCompatActivity
     private ConstraintLayout searchNoItems;
 
     private Toolbar homeBar;
+
+    //If read external files permission denied, must avoid loading images from recipes
+    private boolean noImages = false;
 
     //Loader IDs
     private static final int PREVIEWS_TOKEN = 101;
@@ -115,18 +120,22 @@ public class MainActivity extends AppCompatActivity
         homeBar = findViewById(R.id.tbar_home);
         setSupportActionBar(homeBar);
 
+        /*
         //Ask for read_storage permission before initialising loader
-        PermissionsHandler.AskForPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL);
+        int response = PermissionsHandler.AskForPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, false);
+        if (response == PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED)
+            noImages = true;
+*/
 
-/*
         //Example cards TODO remove later
-        recipesList.add(new RecipeViewModel("American Pancakes"));
+        recipesList.add(new RecipeViewModel("American Pancakes", false));
         recipesList.add(new RecipeViewModel("Sushi Sliders",
-                10, 5, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
+                10, 5,true));
         recipesList.add(new RecipeViewModel("English Pancakes", 10, 3, true));
-        recipesList.add(new RecipeViewModel("Spag Bol", 4, 7, BitmapFactory.decodeResource(getResources(), R.drawable.sample_image)));
+        recipesList.add(new RecipeViewModel("Spag Bol", 4, 7, true));
         recipesAdapter.notifyDataSetChanged();
-        */
+
     }
 
     @Override
@@ -173,11 +182,33 @@ public class MainActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch(requestCode) {
             case REQUEST_READ_EXTERNAL:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
-                else
+                    Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show();
+                }
+                else {
                     //TODO: handle permission denied (probably set dialog, if denied there ignore images)
-                    Toast.makeText(this, "Boo, permission denied!", Toast.LENGTH_SHORT).show();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage(R.string.perm_dialog_read_external)
+                            .setPositiveButton(R.string.perm_dialog_butt_deny, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    //handle no images for recipes
+                                    Toast.makeText(MainActivity.this, "Boo, permission still denied!", Toast.LENGTH_SHORT).show();
+
+                                    noImages = true;
+                                }
+                            })
+                            .setNegativeButton(R.string.perm_dialog_butt_permit, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    PermissionsHandler.AskForPermission(MainActivity.this,
+                                            Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, true);
+                                }
+                            })
+                            .create()
+                            .show();
+                }
                     break;
         }
     }
@@ -387,7 +418,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public int getItemViewType(int position) {
             boolean isComplex = filteredRecipesList.get(position).hasExtendedInfo();
-            boolean hasPhoto = filteredRecipesList.get(position).hasPhoto();
+            boolean hasPhoto = filteredRecipesList.get(position).hasPhoto() && !noImages;
 
             if (isComplex && hasPhoto)
                 return PHOTO_COMPLEX;

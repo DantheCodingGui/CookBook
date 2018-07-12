@@ -5,4 +5,5 @@ package com.danthecodinggui.recipes.msc;
  */
 public class LogTags {
     public static final String CONTENT_PROVIDER = "ContentProvider";
+    public static final String PERMISSIONS = "Permissions";
 }
