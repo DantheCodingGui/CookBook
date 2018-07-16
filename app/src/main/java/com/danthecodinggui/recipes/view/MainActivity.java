@@ -78,13 +78,11 @@ public class MainActivity extends AppCompatActivity
 
     //If read external files permission denied, must avoid loading images from recipes
     private boolean noImage = false;
-    private boolean readPermChecked = false;
 
     GetRecipesLoader recipesLoader;
 
     //Loader IDs
     private static final int PREVIEWS_TOKEN = 101;
-    private static final int PREVIEW_IMAGES_TOKEN = 102;
 
     //Permission request codes
     private static final int REQUEST_READ_EXTERNAL = 201;
@@ -337,12 +335,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public android.support.v4.content.Loader<List<RecipeViewModel>> onCreateLoader(int id, Bundle args) {
         Handler uiThread = new Handler(getMainLooper());
-        switch(id) {
-            case PREVIEWS_TOKEN:
-                return recipesLoader = new GetRecipesLoader(this, uiThread, this, this, PREVIEWS_TOKEN);
-            default:
-                return new GetRecipeImagesLoader(this, uiThread, this, PREVIEW_IMAGES_TOKEN);
-        }
+        return recipesLoader = new GetRecipesLoader(this, uiThread, this,
+                this, PREVIEWS_TOKEN);
     }
 
     @Override
@@ -350,10 +344,6 @@ public class MainActivity extends AppCompatActivity
         switch(loaderId) {
             case PREVIEWS_TOKEN:
                 UpdateRecipesList((List)updateValue);
-                //TODO: check here through list to see if any images exist
-                break;
-            case PREVIEW_IMAGES_TOKEN:
-                //TODO: add implementation here
                 break;
         }
     }
