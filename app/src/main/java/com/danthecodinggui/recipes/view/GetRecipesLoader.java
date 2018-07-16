@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.os.Handler;
 import android.util.Log;
 
+import com.danthecodinggui.recipes.model.FileUtils;
 import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.msc.LogTags;
 
@@ -20,6 +21,14 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
     private List<RecipeViewModel> records;
 
+    private static final int PERM_CODE_WAITING = 0;
+    private static final int PERM_CODE_GRANTED = 1;
+    private static final int PERM_CODE_DENIED = 2;
+
+    private int permResponseCode = PERM_CODE_WAITING;
+
+    private ImagePermissionsListener permissionsCallback;
+
     //Content provider query data
     private final String[] recipesProjection = {
             ProviderContract.RecipeEntry._ID,
@@ -33,10 +42,12 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
     private final String ingreSel = ProviderContract.RecipeIngredientEntry.RECIPE_ID + " = ?";
     private final String methodSel = ProviderContract.MethodStepEntry.RECIPE_ID + " = ?";
 
-    GetRecipesLoader(Context context, Handler uiThread, ProgressUpdateListener updateCallback, int loaderId) {
+    GetRecipesLoader(Context context, Handler uiThread, ProgressUpdateListener updateCallback,
+                     ImagePermissionsListener permissionCallback, int loaderId) {
         super(context, uiThread, updateCallback, loaderId);
         contentResolver = context.getContentResolver();
         records = new ArrayList<>();
+        this.permissionsCallback = permissionCallback;
     }
 
     @Override
@@ -100,14 +111,28 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
             else
                 temp = AddStepsCount(countCursor, temp);
 
-            /*
+
             //Load in preview image
             if (temp.hasPhoto()) {
-                String path = Integer.toString(
-                        baseCursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.IMAGE_PATH));
 
-                temp.setPreview(FileUtils.GetImageFromFilePath(path));
-            }*/
+                //TODO test speed, idk if blocking every time will slow loading down
+                AskForReadPermission();
+
+                //Busy wait until response
+                while (permResponseCode == PERM_CODE_WAITING)
+                    ;
+
+                if (permResponseCode == PERM_CODE_GRANTED) {
+                    //Load image into record
+                    String path = Integer.toString(
+                            baseCursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.IMAGE_PATH));
+
+                    temp.setPreview(FileUtils.GetImageFromFilePath(path));
+                }
+
+                //Reset value (just in case permission status changes whilst loading data)
+                permResponseCode = PERM_CODE_WAITING;
+            }
 
             records.add(temp);
 
@@ -121,6 +146,15 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
         //Return remaining records in list
         return records.subList(recordsGathered - (recordsGathered % 10) - 1, recordsGathered - 1);
+    }
+
+    private void AskForReadPermission() {
+        uiThread.post(new Runnable() {
+            @Override
+            public void run() {
+                permissionsCallback.onImagePermRequested();
+            }
+        });
     }
 
     /**
@@ -189,5 +223,16 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
                 cursor.getColumnIndexOrThrow(ProviderContract.RecipeIngredientEntry._COUNT)
         );
         return currentModel;
+    }
+
+    void onPermissionResponse(boolean permissionGranted) {
+        if (permissionGranted)
+            permResponseCode = PERM_CODE_GRANTED;
+        else
+            permResponseCode = PERM_CODE_DENIED;
+    }
+
+    interface ImagePermissionsListener {
+        void onImagePermRequested();
     }
 }

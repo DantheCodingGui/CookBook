@@ -63,7 +63,8 @@ import static com.danthecodinggui.recipes.msc.LogTags.PERMISSIONS;
  */
 public class MainActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<List<RecipeViewModel>>,
-        UpdatingAsyncTaskLoader.ProgressUpdateListener {
+        UpdatingAsyncTaskLoader.ProgressUpdateListener,
+        GetRecipesLoader.ImagePermissionsListener {
 
     //RecyclerView components
     private RecyclerView recipesView;
@@ -77,6 +78,9 @@ public class MainActivity extends AppCompatActivity
 
     //If read external files permission denied, must avoid loading images from recipes
     private boolean noImage = false;
+    private boolean readPermChecked = false;
+
+    GetRecipesLoader recipesLoader;
 
     //Loader IDs
     private static final int PREVIEWS_TOKEN = 101;
@@ -127,21 +131,7 @@ public class MainActivity extends AppCompatActivity
         homeBar = findViewById(R.id.tbar_home);
         setSupportActionBar(homeBar);
 
-        //Ask for read_storage permission before initialising loader
-        int response = PermissionsHandler.AskForPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, false);
-        switch(response) {
-            case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
-                Toast.makeText(this, "Permission already granted!", Toast.LENGTH_SHORT).show();
-                getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
-
-                break;
-            case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
-                Log.v(PERMISSIONS, "Storage permission denied, app won't load images");
-                Toast.makeText(this, "Permission previously denied!", Toast.LENGTH_SHORT).show();
-                noImage = true;
-                break;
-        }
+        getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
 
         /*
         //Example cards TODO remove later
@@ -199,14 +189,18 @@ public class MainActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch(requestCode) {
             case REQUEST_READ_EXTERNAL:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, "Permission now granted!", Toast.LENGTH_SHORT).show();
+                    recipesLoader.onPermissionResponse(true);
+                }
                 else {
+                    //Alert the user why this permission is needed
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setMessage(R.string.perm_dialog_read_external)
                             .setNegativeButton(R.string.perm_dialog_butt_deny, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                    recipesLoader.onPermissionResponse(false);
                                     noImage = true;
 
                                     //Alert the user how they can re-enable the feature
@@ -345,25 +339,18 @@ public class MainActivity extends AppCompatActivity
         Handler uiThread = new Handler(getMainLooper());
         switch(id) {
             case PREVIEWS_TOKEN:
-                return new GetRecipesLoader(this, uiThread, this, PREVIEWS_TOKEN);
+                return recipesLoader = new GetRecipesLoader(this, uiThread, this, this, PREVIEWS_TOKEN);
             default:
                 return new GetRecipeImagesLoader(this, uiThread, this, PREVIEW_IMAGES_TOKEN);
         }
     }
 
     @Override
-    public void onLoadFinished(android.support.v4.content.Loader<List<RecipeViewModel>> loader, List<RecipeViewModel> remainingRecords) {
-        recipesList.addAll(remainingRecords);
-    }
-
-    @Override
-    public void onLoaderReset(android.support.v4.content.Loader<List<RecipeViewModel>> loader) {}
-
-    @Override
     public <T> void onProgressUpdate(int loaderId, T updateValue) {
         switch(loaderId) {
             case PREVIEWS_TOKEN:
-                recipesList.addAll((List) updateValue);
+                UpdateRecipesList((List)updateValue);
+                //TODO: check here through list to see if any images exist
                 break;
             case PREVIEW_IMAGES_TOKEN:
                 //TODO: add implementation here
@@ -371,6 +358,41 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onLoadFinished(android.support.v4.content.Loader<List<RecipeViewModel>> loader, List<RecipeViewModel> remainingRecords) {
+        //Add the remaining records (not passed through onProgressUpdate) to recipeList
+        recipesList.addAll(remainingRecords);
+    }
+
+    private void UpdateRecipesList(List<RecipeViewModel> newRecords) {
+        recipesList.addAll(newRecords);
+        recipesAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onImagePermRequested() {
+        int response = PermissionsHandler.AskForPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, false);
+
+        //If permission status already decided, alert loader immediately
+        switch(response) {
+            case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
+                Toast.makeText(this, "Permission already granted!", Toast.LENGTH_SHORT).show();
+
+                recipesLoader.onPermissionResponse(true);
+                break;
+            case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
+                Log.v(PERMISSIONS, "Storage permission denied, app won't load images");
+                Toast.makeText(this, "Permission previously denied!", Toast.LENGTH_SHORT).show();
+
+                recipesLoader.onPermissionResponse(false);
+                noImage = true;
+                break;
+        }
+    }
+
+    @Override
+    public void onLoaderReset(android.support.v4.content.Loader<List<RecipeViewModel>> loader) {}
 
     /**
      * Allows integration between the list of recipe objects and the recyclerview

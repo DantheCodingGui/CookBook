@@ -12,6 +12,7 @@ public class GetRecipeImagesLoader extends UpdatingAsyncTaskLoader {
 
     @Override
     public Object loadInBackground() {
+        //should take in both the records and filepaths, complete the record and
         return null;
     }
 }
