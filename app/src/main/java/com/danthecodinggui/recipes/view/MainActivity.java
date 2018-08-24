@@ -49,12 +49,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.msc.AnimationUtils;
 import com.danthecodinggui.recipes.msc.IntentConstants;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static com.danthecodinggui.recipes.msc.LogTags.PERMISSIONS;
 
@@ -67,14 +73,15 @@ public class MainActivity extends AppCompatActivity
         GetRecipesLoader.ImagePermissionsListener {
 
     //RecyclerView components
-    private RecyclerView recipesView;
+    @BindView(R.id.rvw_recipes) RecyclerView recipesView;
     RecipesViewAdapter recipesAdapter;
     private List<RecipeViewModel> recipesList;
-    private FloatingActionButton addRecipe;
+    @BindView(R.id.fab_add_recipe) FloatingActionButton addRecipe;
 
-    private ConstraintLayout searchNoItems;
+    @BindView(R.id.txt_search_no_items) TextView searchNoItems;
+    @BindView(R.id.txt_no_items) TextView noItems;
 
-    private Toolbar homeBar;
+    @BindView(R.id.tbar_home) Toolbar homeBar;
 
     //If read external files permission denied, must avoid loading images from recipes
     private boolean noImage = false;
@@ -90,14 +97,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
+        setContentView(R.layout.activity_main);
         //Get display data from data sourced here
 
-        recipesView = findViewById(R.id.rvw_recipes);
-        addRecipe = findViewById(R.id.fab_add_recipe);
-
-        searchNoItems = findViewById(R.id.csly_search_not_found);
+        //Link Butterknife instance to Activity
+        ButterKnife.bind(this);
 
         recipesList = new ArrayList<>();
 
@@ -126,7 +131,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        homeBar = findViewById(R.id.tbar_home);
         setSupportActionBar(homeBar);
 
         getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
@@ -167,7 +171,8 @@ public class MainActivity extends AppCompatActivity
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 // Called when SearchView is collapsing
                 if (searchItem.isActionViewExpanded()) {
-                    animateSearchToolbar(1, false, false);
+                    AnimationUtils.animateSearchToolbar(MainActivity.this, homeBar, 1, false, false);
+                    searchNoItems.setVisibility(View.INVISIBLE);
                 }
                 return true;
             }
@@ -175,7 +180,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 // Called when SearchView is expanding
-                animateSearchToolbar(1, true, true);
+                AnimationUtils.animateSearchToolbar(MainActivity.this, homeBar, 1, true, true);
                 return true;
             }
         });
@@ -223,86 +228,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
-    }
-
-    public void animateSearchToolbar(int numberOfMenuIcon, boolean containsOverflow, boolean shouldShow) {
-
-        homeBar.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), android.R.color.white));
-
-        Resources res = getResources();
-
-        if (shouldShow) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                int width = homeBar.getWidth() -
-                        (containsOverflow ? res.getDimensionPixelSize(R.dimen.abc_action_button_min_width_overflow_material) : 0) -
-                        ((res.getDimensionPixelSize(R.dimen.abc_action_button_min_width_material) * numberOfMenuIcon) / 2);
-                Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(homeBar,
-                        isRightToLeft(res) ? homeBar.getWidth() - width : width, homeBar.getHeight() / 2, 0.0f, (float) width);
-                createCircularReveal.setDuration(250);
-                createCircularReveal.start();
-            }
-            else {
-                TranslateAnimation translateAnimation = new TranslateAnimation(0.0f, 0.0f, (float) (-homeBar.getHeight()), 0.0f);
-                translateAnimation.setDuration(220);
-                homeBar.clearAnimation();
-                homeBar.startAnimation(translateAnimation);
-            }
-        }
-        else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                int width = homeBar.getWidth() -
-                        (containsOverflow ? res.getDimensionPixelSize(R.dimen.abc_action_button_min_width_overflow_material) : 0) -
-                        ((res.getDimensionPixelSize(R.dimen.abc_action_button_min_width_material) * numberOfMenuIcon) / 2);
-                Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(homeBar,
-                        isRightToLeft(res) ? homeBar.getWidth() - width : width, homeBar.getHeight() / 2, (float) width, 0.0f);
-                createCircularReveal.setDuration(250);
-                createCircularReveal.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        homeBar.setBackgroundColor(getThemeColor(MainActivity.this, R.attr.colorPrimary));
-                    }
-                });
-                createCircularReveal.start();
-            }
-            else {
-                AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
-                Animation translateAnimation = new TranslateAnimation(0.0f, 0.0f, 0.0f, (float) (-homeBar.getHeight()));
-                AnimationSet animationSet = new AnimationSet(true);
-                animationSet.addAnimation(alphaAnimation);
-                animationSet.addAnimation(translateAnimation);
-                animationSet.setDuration(220);
-                animationSet.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        homeBar.setBackgroundColor(getThemeColor(MainActivity.this, R.attr.colorPrimary));
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-                homeBar.startAnimation(animationSet);
-            }
-        }
-    }
-
-    private boolean isRightToLeft(Resources resources) {
-        return resources.getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-    }
-
-    private static int getThemeColor(Context context, int id) {
-        Resources.Theme theme = context.getTheme();
-        TypedArray a = theme.obtainStyledAttributes(new int[]{id});
-        int result = a.getColor(0, 0);
-        a.recycle();
-        return result;
     }
 
     @Override
@@ -528,16 +453,14 @@ public class MainActivity extends AppCompatActivity
         class BasicViewHolder extends RecyclerView.ViewHolder
                 implements View.OnClickListener, View.OnLongClickListener {
 
-            TextView title;
-            TextView ingredientsNo;
-            TextView stepsNo;
+            @BindView(R.id.txt_crd_title) TextView title;
+            @BindView(R.id.txt_crd_ingredient_no) TextView ingredientsNo;
+            @BindView(R.id.txt_crd_steps_no) TextView stepsNo;
 
             BasicViewHolder(View itemView) {
                 super(itemView);
 
-                title = itemView.findViewById(R.id.txt_crd_title);
-                ingredientsNo = itemView.findViewById(R.id.txt_crd_ingredient_no);
-                stepsNo = itemView.findViewById(R.id.txt_crd_steps_no);
+                ButterKnife.bind(this, itemView);
 
                 //Optionally setup click listeners
                 itemView.setOnClickListener(this);
@@ -564,14 +487,13 @@ public class MainActivity extends AppCompatActivity
          */
         class ComplexViewHoldler extends BasicViewHolder {
 
-            TextView calories;
-            TextView timeInMins;
+            @BindView(R.id.txt_crd_cal) TextView calories;
+            @BindView(R.id.txt_crd_duration) TextView timeInMins;
 
             ComplexViewHoldler(View itemView) {
                 super(itemView);
 
-                calories = itemView.findViewById(R.id.txt_crd_cal);
-                timeInMins = itemView.findViewById(R.id.txt_crd_duration);
+                ButterKnife.bind(this, itemView);
             }
         }
 
@@ -580,12 +502,12 @@ public class MainActivity extends AppCompatActivity
          */
         class BasicPhotoViewHolder extends BasicViewHolder {
 
-            ImageView preview;
+            @BindView(R.id.ivw_crd_preview) ImageView preview;
 
             BasicPhotoViewHolder(View itemView) {
                 super(itemView);
 
-                preview = itemView.findViewById(R.id.ivw_crd_preview);
+                ButterKnife.bind(this, itemView);
             }
         }
 
@@ -594,12 +516,12 @@ public class MainActivity extends AppCompatActivity
          */
         class ComplexPhotoViewHolder extends ComplexViewHoldler {
 
-            ImageView preview;
+            @BindView(R.id.ivw_crd_preview) ImageView preview;
 
             ComplexPhotoViewHolder(View itemView) {
                 super(itemView);
 
-                preview = itemView.findViewById(R.id.ivw_crd_preview);
+                ButterKnife.bind(this, itemView);
             }
         }
     }

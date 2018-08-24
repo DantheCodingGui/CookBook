@@ -15,12 +15,15 @@ import com.danthecodinggui.recipes.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Holds list of steps for a given recipe
  */
 public class MethodTabFragment extends Fragment {
 
-    private RecyclerView methodStepsView;
+    @BindView(R.id.rvw_method) RecyclerView methodStepsView;
     private MethodViewAdapter methodStepsAdapter;
     private List<String> methodSteps;
 
@@ -32,7 +35,8 @@ public class MethodTabFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_method, container, false);
-        methodStepsView = view.findViewById(R.id.rvw_method);
+
+        ButterKnife.bind(this, view);
         return view;
     }
 
@@ -74,11 +78,11 @@ public class MethodTabFragment extends Fragment {
 
         class StepViewHolder extends RecyclerView.ViewHolder {
 
-            TextView step;
+            @BindView(R.id.txt_method_item) TextView step;
 
             StepViewHolder(View itemView) {
                 super(itemView);
-                step = itemView.findViewById(R.id.txt_method_item);
+                ButterKnife.bind(this, itemView);
             }
         }
     }

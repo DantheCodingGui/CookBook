@@ -8,7 +8,7 @@ abstract class UpdatingAsyncTaskLoader extends AsyncTaskLoader {
 
     private int loaderId;
 
-    private Handler uiThread;
+    Handler uiThread;
     private ProgressUpdateListener progressCallback;
 
     UpdatingAsyncTaskLoader(Context context, Handler uiThread,

@@ -15,12 +15,15 @@ import com.danthecodinggui.recipes.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * A simple {@link Fragment} subclass.
  */
 public class IngredientsTabFragment extends Fragment {
 
-    private RecyclerView ingredientsView;
+    @BindView(R.id.rvw_ingredients) RecyclerView ingredientsView;
     private IngredientsViewAdapter ingredientsAdapter;
     private List<String> ingredients;
 
@@ -30,7 +33,8 @@ public class IngredientsTabFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_ingredients, container, false);
-        ingredientsView = view.findViewById(R.id.rvw_ingredients);
+
+        ButterKnife.bind(this, view);
         return view;
     }
 
@@ -72,11 +76,11 @@ public class IngredientsTabFragment extends Fragment {
 
         class IngredientViewHolder extends RecyclerView.ViewHolder {
 
-            TextView ingredient;
+            @BindView(R.id.txt_method_item) TextView ingredient;
 
             IngredientViewHolder(View itemView) {
                 super(itemView);
-                ingredient = itemView.findViewById(R.id.txt_method_item);
+                ButterKnife.bind(this, itemView);
             }
         }
     }

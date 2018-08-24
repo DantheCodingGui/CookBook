@@ -25,23 +25,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
 
 public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
 
-    private Toolbar toolbar;
-    private TabLayout tabLayout;
-    private ImageView preview;
+    @BindView(R.id.tbar_vw_recipe) Toolbar toolbar;
+    @BindView(R.id.tly_view_recipe) TabLayout tabLayout;
+    @BindView(R.id.ivw_toolbar_preview) ImageView preview;
 
     boolean hasPhoto = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ButterKnife.bind(this);
+
         if (hasPhoto) {
             setContentView(R.layout.activity_view_recipe_photo);
             //supportPostponeEnterTransition();
-            preview = findViewById(R.id.ivw_toolbar_preview);
 
             //TODO change later to set based on database query
             CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.ctl_vw_recipe);
@@ -67,9 +72,6 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         //    findViewById(R.id.view_recipe_root).setTransitionName(imageTransitionName);
         //}
 
-        tabLayout = findViewById(R.id.tly_view_recipe);
-
-        toolbar = findViewById(R.id.tbar_vw_recipe);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -96,7 +98,6 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
      * Initialise ingredient/method tabs
      */
     private void SetupTabLayout() {
-        TabLayout tabLayout = findViewById(R.id.tly_view_recipe);
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);

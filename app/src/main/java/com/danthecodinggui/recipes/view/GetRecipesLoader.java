@@ -15,8 +15,6 @@ import java.util.List;
 
 public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
-    private Handler uiThread;
-
     private ContentResolver contentResolver;
 
     private List<RecipeViewModel> records;
@@ -148,6 +146,10 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         return records.subList(recordsGathered - (recordsGathered % 10) - 1, recordsGathered - 1);
     }
 
+    /**
+     * Ask the calling Activity for the READ_EXTERNAL_STORAGE permission, as one of the loaded records
+     * has one
+     */
     private void AskForReadPermission() {
         uiThread.post(new Runnable() {
             @Override
@@ -210,6 +212,10 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         }
     }
 
+    /**
+     * Add the number of ingredients to the current record being loaded
+     * @return The updated record
+     */
     private RecipeViewModel AddIngredientCount(Cursor cursor, RecipeViewModel currentModel) {
         cursor.moveToFirst();
         currentModel.setIngredientsNo(
@@ -217,6 +223,10 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         return currentModel;
     }
 
+    /**
+     * Add the number of steps in the method to the current record being loaded
+     * @return The updated record
+     */
     private RecipeViewModel AddStepsCount(Cursor cursor, RecipeViewModel currentModel) {
         cursor.moveToFirst();
         currentModel.setStepsNo(
@@ -225,6 +235,10 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         return currentModel;
     }
 
+    /**
+     * Unblocks Loader's background thread, the status of the permission requested is available
+     * @param permissionGranted Whether the requested permission has been granted
+     */
     void onPermissionResponse(boolean permissionGranted) {
         if (permissionGranted)
             permResponseCode = PERM_CODE_GRANTED;
@@ -233,6 +247,9 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
     }
 
     interface ImagePermissionsListener {
+        /**
+         * Loader has requested a permission from calling activity
+         */
         void onImagePermRequested();
     }
 }
