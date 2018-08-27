@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.danthecodinggui.recipes.model.FileUtils;
 import com.danthecodinggui.recipes.model.ProviderContract;
+import com.danthecodinggui.recipes.model.RecipeViewModel;
 import com.danthecodinggui.recipes.msc.LogTags;
 
 import java.util.ArrayList;

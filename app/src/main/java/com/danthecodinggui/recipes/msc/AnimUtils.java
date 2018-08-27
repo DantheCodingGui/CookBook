@@ -7,7 +7,9 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -15,7 +17,7 @@ import android.view.animation.TranslateAnimation;
 
 import com.danthecodinggui.recipes.R;
 
-public class AnimationUtils {
+public class AnimUtils {
 
     public static void animateSearchToolbar(final Activity activity, final Toolbar toolbar, int numberOfMenuIcon, boolean containsOverflow, boolean shouldShow) {
 
@@ -83,5 +85,48 @@ public class AnimationUtils {
                 toolbar.startAnimation(animationSet);
             }
         }
+    }
+
+    public static void revealAddActivity(Activity activity, View viewRoot, int x, int y) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            float finalRadius = (float) (Math.max(viewRoot.getWidth(), viewRoot.getHeight()) * 1.1);
+
+            // create the animator for this view (the start radius is zero)
+            Animator circularReveal = ViewAnimationUtils.createCircularReveal(viewRoot, x, y, 0, finalRadius);
+            circularReveal.setDuration(300);
+            circularReveal.setInterpolator(new AccelerateInterpolator());
+
+            // make the view visible and start the animation
+            viewRoot.setVisibility(View.VISIBLE);
+            circularReveal.start();
+        } else {
+            activity.finish();
+        }
+    }
+
+    public static boolean unRevealAddActivity(final Activity activity, final View viewRoot, int revealX, int revealY, boolean openMenuOpen) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            activity.finish();
+        } else {
+            float finalRadius = (float) (Math.max(viewRoot.getWidth(), viewRoot.getHeight()) * 1.1);
+            Animator circularReveal = ViewAnimationUtils.createCircularReveal(
+                    viewRoot, revealX, revealY, finalRadius, 0);
+
+            circularReveal.setDuration(300);
+            circularReveal.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    viewRoot.setVisibility(View.INVISIBLE);
+                    activity.finish();
+                }
+            });
+
+            circularReveal.start();
+
+            //Close menu if open
+            if (openMenuOpen)
+                return true;
+        }
+        return false;
     }
 }

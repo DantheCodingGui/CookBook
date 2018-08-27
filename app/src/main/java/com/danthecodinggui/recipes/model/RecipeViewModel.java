@@ -1,11 +1,11 @@
-package com.danthecodinggui.recipes.view;
+package com.danthecodinggui.recipes.model;
 
 import android.graphics.Bitmap;
 
 /**
  * MainActivity RecyclerView model
  */
-class RecipeViewModel {
+public class RecipeViewModel {
 
     private boolean hasPhoto;
     private boolean hasExtendedInfo;
@@ -19,7 +19,7 @@ class RecipeViewModel {
     private int calories;
     private int timeInMins;
 
-    RecipeViewModel(String title, Integer calories, int timeInMins, boolean hasPhoto) {
+    public RecipeViewModel(String title, Integer calories, int timeInMins, boolean hasPhoto) {
         this.title = title;
         this.calories = calories;
         this.timeInMins = timeInMins;
@@ -28,15 +28,15 @@ class RecipeViewModel {
         hasExtendedInfo = true;
     }
 
-    RecipeViewModel(String title, Integer calories, boolean hasPhoto) {
+    public RecipeViewModel(String title, Integer calories, boolean hasPhoto) {
         this(title,  calories, -1, hasPhoto);
     }
 
-    RecipeViewModel(String title, int timeInMins, boolean hasPhoto) {
+    public RecipeViewModel(String title, int timeInMins, boolean hasPhoto) {
         this(title, -1, timeInMins, hasPhoto);
     }
 
-    RecipeViewModel(String title, boolean hasPhoto) {
+    public RecipeViewModel(String title, boolean hasPhoto) {
         this(title, -1, -1, hasPhoto);
 
         hasExtendedInfo = false;
@@ -46,7 +46,7 @@ class RecipeViewModel {
      * States whether or not recipe record includes time and/or Calorie information
      * @return
      */
-    boolean hasExtendedInfo() {
+    public boolean hasExtendedInfo() {
         return hasExtendedInfo;
     }
 
@@ -54,49 +54,49 @@ class RecipeViewModel {
      * States whether or not recipe record includes an attached photo or the completed dish
      * @return
      */
-    boolean hasPhoto() {
+    public boolean hasPhoto() {
         return hasPhoto;
     }
 
-    String getTitle() {
+    public String getTitle() {
         return title;
     }
-    void setTitle(String title) {
+    public void setTitle(String title) {
         this.title = title;
     }
 
-    int getIngredientsNo() {
+    public int getIngredientsNo() {
         return ingredientsNo;
     }
-    void setIngredientsNo(int ingredientsNo) {
+    public void setIngredientsNo(int ingredientsNo) {
         this.ingredientsNo = ingredientsNo;
     }
 
-    int getStepsNo() {
+    public int getStepsNo() {
         return stepsNo;
     }
-    void setStepsNo(int stepsNo) {
+    public void setStepsNo(int stepsNo) {
         this.stepsNo = stepsNo;
     }
 
-    Bitmap getPreview() {
+    public Bitmap getPreview() {
         return preview;
     }
-    void setPreview(Bitmap preview) {
+    public void setPreview(Bitmap preview) {
         this.preview = preview;
     }
 
-    int getCalories() {
+    public int getCalories() {
         return calories;
     }
-    void setCalories(int calories) {
+    public void setCalories(int calories) {
         this.calories = calories;
     }
 
-    int getTimeInMins() {
+    public int getTimeInMins() {
         return timeInMins;
     }
-    void setTimeInMins(int timeInMins) {
+    public void setTimeInMins(int timeInMins) {
         this.timeInMins = timeInMins;
     }
 }

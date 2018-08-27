@@ -1,27 +1,21 @@
 package com.danthecodinggui.recipes.view;
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityOptions;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
+import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
@@ -30,18 +24,12 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.TranslateAnimation;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
@@ -49,12 +37,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.danthecodinggui.recipes.R;
-import com.danthecodinggui.recipes.msc.AnimationUtils;
+import com.danthecodinggui.recipes.databinding.ActivityMainBinding;
+import com.danthecodinggui.recipes.model.RecipeViewModel;
+import com.danthecodinggui.recipes.msc.AnimUtils;
 import com.danthecodinggui.recipes.msc.IntentConstants;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,21 +60,15 @@ public class MainActivity extends AppCompatActivity
         UpdatingAsyncTaskLoader.ProgressUpdateListener,
         GetRecipesLoader.ImagePermissionsListener {
 
-    //RecyclerView components
-    @BindView(R.id.rvw_recipes) RecyclerView recipesView;
+    ActivityMainBinding binding;
+
     RecipesViewAdapter recipesAdapter;
     private List<RecipeViewModel> recipesList;
-    @BindView(R.id.fab_add_recipe) FloatingActionButton addRecipe;
-
-    @BindView(R.id.txt_search_no_items) TextView searchNoItems;
-    @BindView(R.id.txt_no_items) TextView noItems;
-
-    @BindView(R.id.tbar_home) Toolbar homeBar;
 
     //If read external files permission denied, must avoid loading images from recipes
     private boolean noImage = false;
 
-    GetRecipesLoader recipesLoader;
+    private GetRecipesLoader recipesLoader;
 
     //Loader IDs
     private static final int PREVIEWS_TOKEN = 101;
@@ -98,52 +80,51 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
-        //Get display data from data sourced here
+        //setContentView(R.layout.activity_main);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        //Link Butterknife instance to Activity
-        ButterKnife.bind(this);
+        //Get display data from data sourced here
 
         recipesList = new ArrayList<>();
 
         //Conditionally set RecyclerView layout manager depending on screen orientation
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE)
-            recipesView.setLayoutManager(new GridLayoutManager(getApplicationContext(), 2));
+            binding.rvwRecipes.setLayoutManager(new GridLayoutManager(getApplicationContext(), 2));
         else
-            recipesView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+            binding.rvwRecipes.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
         //setup RecyclerView adapter
         recipesAdapter = new RecipesViewAdapter(recipesList);
-        recipesView.setAdapter(recipesAdapter);
+        binding.rvwRecipes.setAdapter(recipesAdapter);
 
         //Show/hide floating action button on recyclerview scroll
-        recipesView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        binding.rvwRecipes.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if (dy > 0 && addRecipe.getVisibility() == View.VISIBLE) {
-                    addRecipe.hide();
-                } else if (dy < 0 && addRecipe.getVisibility() != View.VISIBLE) {
-                    addRecipe.show();
+                if (dy > 0 && binding.fabAddRecipe.getVisibility() == View.VISIBLE) {
+                    binding.fabAddRecipe.hide();
+                } else if (dy < 0 && binding.fabAddRecipe.getVisibility() != View.VISIBLE) {
+                    binding.fabAddRecipe.show();
                 }
             }
         });
 
-        setSupportActionBar(homeBar);
+        setSupportActionBar(binding.tbarHome);
 
         getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
 
-        /*
+
         //Example cards TODO remove later
         recipesList.add(new RecipeViewModel("American Pancakes", false));
         recipesList.add(new RecipeViewModel("Sushi Sliders",
                 10, 5,true));
         recipesList.add(new RecipeViewModel("English Pancakes", 10, 3, true));
         recipesList.add(new RecipeViewModel("Spag Bol", 4, 7, true));
-        recipesAdapter.notifyDataSetChanged();#
-        */
+        recipesAdapter.notifyDataSetChanged();
+
 
     }
 
@@ -171,8 +152,8 @@ public class MainActivity extends AppCompatActivity
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 // Called when SearchView is collapsing
                 if (searchItem.isActionViewExpanded()) {
-                    AnimationUtils.animateSearchToolbar(MainActivity.this, homeBar, 1, false, false);
-                    searchNoItems.setVisibility(View.INVISIBLE);
+                    AnimUtils.animateSearchToolbar(MainActivity.this, binding.tbarHome, 1, false, false);
+                    binding.txtSearchNoItems.setVisibility(View.INVISIBLE);
                 }
                 return true;
             }
@@ -180,7 +161,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 // Called when SearchView is expanding
-                AnimationUtils.animateSearchToolbar(MainActivity.this, homeBar, 1, true, true);
+                AnimUtils.animateSearchToolbar(MainActivity.this, binding.tbarHome, 1, true, true);
                 return true;
             }
         });
@@ -438,9 +419,9 @@ public class MainActivity extends AppCompatActivity
                      filteredRecipesList = (ArrayList<RecipeViewModel>) filterResults.values;
 
                     if (filteredRecipesList.size() == 0)
-                        searchNoItems.setVisibility(View.VISIBLE);
+                        binding.txtSearchNoItems.setVisibility(View.VISIBLE);
                     else
-                        searchNoItems.setVisibility(View.INVISIBLE);
+                        binding.txtSearchNoItems.setVisibility(View.INVISIBLE);
 
                     recipesAdapter.notifyDataSetChanged();
                 }
@@ -453,9 +434,12 @@ public class MainActivity extends AppCompatActivity
         class BasicViewHolder extends RecyclerView.ViewHolder
                 implements View.OnClickListener, View.OnLongClickListener {
 
-            @BindView(R.id.txt_crd_title) TextView title;
-            @BindView(R.id.txt_crd_ingredient_no) TextView ingredientsNo;
-            @BindView(R.id.txt_crd_steps_no) TextView stepsNo;
+            @BindView(R.id.txt_crd_title)
+            TextView title;
+            @BindView(R.id.txt_crd_ingredient_no)
+            TextView ingredientsNo;
+            @BindView(R.id.txt_crd_steps_no)
+            TextView stepsNo;
 
             BasicViewHolder(View itemView) {
                 super(itemView);
@@ -487,8 +471,10 @@ public class MainActivity extends AppCompatActivity
          */
         class ComplexViewHoldler extends BasicViewHolder {
 
-            @BindView(R.id.txt_crd_cal) TextView calories;
-            @BindView(R.id.txt_crd_duration) TextView timeInMins;
+            @BindView(R.id.txt_crd_cal)
+            TextView calories;
+            @BindView(R.id.txt_crd_duration)
+            TextView timeInMins;
 
             ComplexViewHoldler(View itemView) {
                 super(itemView);
@@ -502,7 +488,8 @@ public class MainActivity extends AppCompatActivity
          */
         class BasicPhotoViewHolder extends BasicViewHolder {
 
-            @BindView(R.id.ivw_crd_preview) ImageView preview;
+            @BindView(R.id.ivw_crd_preview)
+            ImageView preview;
 
             BasicPhotoViewHolder(View itemView) {
                 super(itemView);
@@ -516,7 +503,8 @@ public class MainActivity extends AppCompatActivity
          */
         class ComplexPhotoViewHolder extends ComplexViewHoldler {
 
-            @BindView(R.id.ivw_crd_preview) ImageView preview;
+            @BindView(R.id.ivw_crd_preview)
+            ImageView preview;
 
             ComplexPhotoViewHolder(View itemView) {
                 super(itemView);

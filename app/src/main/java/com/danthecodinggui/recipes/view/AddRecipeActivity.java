@@ -1,10 +1,8 @@
 package com.danthecodinggui.recipes.view;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Build;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
@@ -13,21 +11,18 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.RotateAnimation;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.databinding.ActivityAddRecipeBinding;
+import com.danthecodinggui.recipes.msc.AnimUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,102 +32,71 @@ import static com.danthecodinggui.recipes.msc.IntentConstants.EXTRA_CIRCULAR_REV
 
 public class AddRecipeActivity extends AppCompatActivity {
 
-    private View root;
+    ActivityAddRecipeBinding binding;
+
     private int revealX, revealY;
 
-    private FloatingActionButton openMenu;
     private boolean openMenuOpen = false;
-
-    private FloatingActionButton addPhoto;
-    private FloatingActionButton addTime;
-    private FloatingActionButton addKcal;
-
-    private TextView addPhotoTag;
-    private TextView addTimeTag;
-    private TextView addKcalTag;
 
     private static final int LIST_INGREDIENTS = 0;
     private static final int LIST_METHOD = 1;
 
-    private RecyclerView ingredientsView;
     private IngredientsViewAdapter ingredientsAdapter;
     private List<String> ingredientsList;
-    private EditText addIngredient;
 
-    private RecyclerView methodView;
     private MethodViewAdapter methodAdapter;
     private List<String> methodList;
-    private EditText addStep;
-
-    private ImageView optionalPreview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_recipe);
-
-        openMenu = findViewById(R.id.fab_add_menu);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_add_recipe);
         //TODO maybe make a layout without photo to support devices without a camera
-        //if not then need to specify in the manifest that this needs a camera (although might be a bit stupid given context)
-        addPhoto = findViewById(R.id.fab_add_photo);
-        addTime = findViewById(R.id.fab_add_time);
-        addKcal = findViewById(R.id.fab_add_kcal);
 
-        addPhotoTag = findViewById(R.id.txt_add_photo);
-        addTimeTag = findViewById(R.id.txt_add_time);
-        addKcalTag = findViewById(R.id.txt_add_kcal);
-
-        optionalPreview = findViewById(R.id.imv_add_preview);
 
         //TODO Dude, you need to change these from textviews to edit texts, people will want to edit these at some point
 
-        ingredientsView = findViewById(R.id.rvw_add_ingredients);
         ingredientsAdapter = new IngredientsViewAdapter();
         ingredientsList = new ArrayList<>();
-        ingredientsView.setAdapter(ingredientsAdapter);
-        ingredientsView.setLayoutManager(new NoScrollLinearLayout(getApplicationContext()));
+        binding.rvwAddIngredients.setAdapter(ingredientsAdapter);
+        binding.rvwAddIngredients.setLayoutManager(new NoScrollLinearLayout(getApplicationContext()));
 
-        methodView = findViewById(R.id.rvw_add_method);
         methodAdapter = new MethodViewAdapter();
         methodList = new ArrayList<>();
-        methodView.setAdapter(methodAdapter);
-        methodView.setLayoutManager(new NoScrollLinearLayout(getApplicationContext()));
+        binding.rvwAddMethod.setAdapter(methodAdapter);
+        binding.rvwAddMethod.setLayoutManager(new NoScrollLinearLayout(getApplicationContext()));
 
-        addIngredient = findViewById(R.id.etxt_add_ingredient);
-        addIngredient.setOnKeyListener(newIngredientListener);
+        binding.incAddIngredient.etxtAddIngredient.setOnKeyListener(newIngredientListener);
 
-        addStep = findViewById(R.id.etxt_add_step);
-        addStep.setOnKeyListener(newStepListener);
+        binding.incAddStep.etxtAddStep.setOnKeyListener(newStepListener);
 
         final Intent intent = getIntent();
-        root = findViewById(R.id.add_root);
 
         if (savedInstanceState == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
                 intent.hasExtra(EXTRA_CIRCULAR_REVEAL_X) &&
                 intent.hasExtra(EXTRA_CIRCULAR_REVEAL_Y)) {
-            root.setVisibility(View.INVISIBLE);
+            binding.addRoot.setVisibility(View.INVISIBLE);
 
             revealX = intent.getIntExtra(EXTRA_CIRCULAR_REVEAL_X, 0);
             revealY = intent.getIntExtra(EXTRA_CIRCULAR_REVEAL_Y, 0);
 
 
-            ViewTreeObserver viewTreeObserver = root.getViewTreeObserver();
+            ViewTreeObserver viewTreeObserver = binding.addRoot.getViewTreeObserver();
             if (viewTreeObserver.isAlive()) {
                 viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        revealActivity(revealX, revealY);
-                        root.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        AnimUtils.revealAddActivity(AddRecipeActivity.this, binding.addRoot, revealX, revealY);
+                        binding.addRoot.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     }
                 });
             }
         }
         else {
-            root.setVisibility(View.VISIBLE);
+            binding.addRoot.setVisibility(View.VISIBLE);
         }
 
-        Toolbar toolbar = findViewById(R.id.tbar_add);
-        setSupportActionBar(toolbar);
+        setSupportActionBar(binding.tbarAdd);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -145,22 +109,7 @@ public class AddRecipeActivity extends AppCompatActivity {
 
     }
 
-    protected void revealActivity(int x, int y) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            float finalRadius = (float) (Math.max(root.getWidth(), root.getHeight()) * 1.1);
 
-            // create the animator for this view (the start radius is zero)
-            Animator circularReveal = ViewAnimationUtils.createCircularReveal(root, x, y, 0, finalRadius);
-            circularReveal.setDuration(300);
-            circularReveal.setInterpolator(new AccelerateInterpolator());
-
-            // make the view visible and start the animation
-            root.setVisibility(View.VISIBLE);
-            circularReveal.start();
-        } else {
-            finish();
-        }
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -177,29 +126,9 @@ public class AddRecipeActivity extends AppCompatActivity {
         unRevealActivity();
     }
 
-    protected void unRevealActivity() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            finish();
-        } else {
-            float finalRadius = (float) (Math.max(root.getWidth(), root.getHeight()) * 1.1);
-            Animator circularReveal = ViewAnimationUtils.createCircularReveal(
-                    root, revealX, revealY, finalRadius, 0);
-
-            circularReveal.setDuration(300);
-            circularReveal.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    root.setVisibility(View.INVISIBLE);
-                    finish();
-                }
-            });
-
-            circularReveal.start();
-
-            //Close menu if open
-            if (openMenuOpen)
-                AnimateFabMenu(null);
-        }
+    private void unRevealActivity() {
+        if (AnimUtils.unRevealAddActivity(this, binding.addRoot, revealX, revealY, openMenuOpen))
+            AnimateFabMenu(null);
     }
 
     private void addItem(int listFlag) {
@@ -209,12 +138,12 @@ public class AddRecipeActivity extends AppCompatActivity {
         RecyclerView.Adapter adapter;
 
         if (listFlag == LIST_INGREDIENTS) {
-            input = addIngredient;
+            input = binding.incAddIngredient.etxtAddIngredient;
             list = ingredientsList;
             adapter = ingredientsAdapter;
         }
         else {
-            input = addStep;
+            input = binding.incAddStep.etxtAddStep;
             list = methodList;
             adapter = methodAdapter;
         }
@@ -257,24 +186,24 @@ public class AddRecipeActivity extends AppCompatActivity {
 
     public void AnimateFabMenu(View view) {
         if (openMenuOpen) {
-            openMenu.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_rotate_backwards));
+            binding.fabAddMenu.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_rotate_backwards));
             //TODO change this to list that you iterate through
-            AnimateFabItem(addPhoto);
-            AnimateFabItem(addPhotoTag);
-            AnimateFabItem(addTime);
-            AnimateFabItem(addTimeTag);
-            AnimateFabItem(addKcal);
-            AnimateFabItem(addKcalTag);
+            AnimateFabItem(binding.fabAddPhoto);
+            AnimateFabItem(binding.txtAddPhoto);
+            AnimateFabItem(binding.fabAddTime);
+            AnimateFabItem(binding.txtAddTime);
+            AnimateFabItem(binding.fabAddKcal);
+            AnimateFabItem(binding.txtAddTime);
             openMenuOpen = false;
         }
         else {
-            openMenu.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_rotate_forwards));
-            AnimateFabItem(addPhoto);
-            AnimateFabItem(addPhotoTag);
-            AnimateFabItem(addTime);
-            AnimateFabItem(addTimeTag);
-            AnimateFabItem(addKcal);
-            AnimateFabItem(addKcalTag);
+            binding.fabAddMenu.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_rotate_forwards));
+            AnimateFabItem(binding.fabAddPhoto);
+            AnimateFabItem(binding.txtAddPhoto);
+            AnimateFabItem(binding.fabAddTime);
+            AnimateFabItem(binding.txtAddTime);
+            AnimateFabItem(binding.fabAddKcal);
+            AnimateFabItem(binding.txtAddTime);
             openMenuOpen = true;
         }
     }
@@ -283,11 +212,11 @@ public class AddRecipeActivity extends AppCompatActivity {
         AnimationSet set = new AnimationSet(true);
         Animation rotate;
 
-        float fabMenuXDelta = (openMenu.getX() + openMenu.getWidth() / 2) - (menuItem.getX() + menuItem.getWidth() / 2);
-        float fabMenuYDelta = (openMenu.getY() + openMenu.getHeight() / 2) - (menuItem.getY() + menuItem.getHeight() / 2);
+        float fabMenuXDelta = (binding.fabAddMenu.getX() + binding.fabAddMenu.getWidth() / 2) - (menuItem.getX() + menuItem.getWidth() / 2);
+        float fabMenuYDelta = (binding.fabAddMenu.getY() + binding.fabAddMenu.getHeight() / 2) - (menuItem.getY() + menuItem.getHeight() / 2);
 
         if (openMenuOpen) {
-            rotate = new RotateAnimation(0.f, -150.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
+            rotate = new RotateAnimation(0.f, -150.f, fabMenuXDelta + binding.fabAddMenu.getWidth() / 2, fabMenuYDelta + binding.fabAddMenu.getHeight() / 2);
 
             set.addAnimation(rotate);
 
@@ -296,8 +225,8 @@ public class AddRecipeActivity extends AppCompatActivity {
         else {
             Animation rotateBounce;
 
-            rotate = new RotateAnimation(-150.f, 10.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
-            rotateBounce = new RotateAnimation(0.f, -10.f, fabMenuXDelta + openMenu.getWidth() / 2, fabMenuYDelta + openMenu.getHeight() / 2);
+            rotate = new RotateAnimation(-150.f, 10.f, fabMenuXDelta + binding.fabAddMenu.getWidth() / 2, fabMenuYDelta + binding.fabAddMenu.getHeight() / 2);
+            rotateBounce = new RotateAnimation(0.f, -10.f, fabMenuXDelta + binding.fabAddMenu.getWidth() / 2, fabMenuYDelta + binding.fabAddMenu.getHeight() / 2);
             rotateBounce.setStartOffset(250);
             rotateBounce.setDuration(500);
 

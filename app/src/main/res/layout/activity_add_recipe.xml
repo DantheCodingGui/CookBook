@@ -1,194 +1,200 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/background_light"
-    android:id="@+id/add_root"
-    android:orientation="vertical"
-    tools:context="com.danthecodinggui.recipes.view.AddRecipeActivity">
-
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/tbar_add"
+<layout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/backToolbar"
-        android:theme="@style/ThemeOverlay.AppCompat.Light"
-        android:elevation="5dp"/>
+        android:layout_height="match_parent"
+        android:background="@android:color/background_light"
+        android:id="@+id/add_root"
+        android:orientation="vertical"
+        tools:context="com.danthecodinggui.recipes.view.AddRecipeActivity">
 
-    <android.support.design.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <ScrollView
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/tbar_add"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/backToolbar"
+            android:theme="@style/ThemeOverlay.AppCompat.Light"
+            android:elevation="5dp"/>
 
-            <LinearLayout
+        <android.support.design.widget.CoordinatorLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/til_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp">
-
-                    <EditText
-                        android:id="@+id/etxt_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:minWidth="200dp"
-                        android:maxLength="40"
-                        android:maxLines="1"
-                        android:inputType="text"
-                        android:hint="@string/title_hint"/>
-
-                </android.support.design.widget.TextInputLayout>
-
-                <ImageView
-                    android:id="@+id/imv_add_preview"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:maxHeight="200dp"
-                    android:adjustViewBounds="true"
-                    android:scaleType="centerCrop"
-                    tools:src="@drawable/sample_image"/>
-
-                <android.support.v4.widget.Space
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp" />
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="10dp">
+                    android:orientation="vertical">
 
-                    <TextView
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/til_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp">
+
+                        <EditText
+                            android:id="@+id/etxt_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="200dp"
+                            android:maxLength="40"
+                            android:maxLines="1"
+                            android:inputType="text"
+                            android:hint="@string/title_hint"/>
+
+                    </android.support.design.widget.TextInputLayout>
+
+                    <ImageView
+                        android:id="@+id/imv_add_preview"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/txt_add_ingredients"
-                        android:textSize="18sp"/>
+                        android:maxHeight="200dp"
+                        android:adjustViewBounds="true"
+                        android:scaleType="centerCrop"
+                        tools:src="@drawable/sample_image"/>
 
                     <android.support.v4.widget.Space
                         android:layout_width="match_parent"
                         android:layout_height="20dp" />
 
-                    <android.support.v7.widget.RecyclerView
-                        android:id="@+id/rvw_add_ingredients"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        tools:listitem="@layout/ingredient_item"
-                        tools:itemCount="5"/>
+                        android:orientation="vertical"
+                        android:padding="10dp">
 
-                    <!--RecyclerView item but with edittext to input new ingredients-->
-                    <include layout="@layout/add_ingredient"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/txt_add_ingredients"
+                            android:textSize="18sp"/>
 
-                    <android.support.v4.widget.Space
-                        android:layout_width="match_parent"
-                        android:layout_height="20dp" />
+                        <android.support.v4.widget.Space
+                            android:layout_width="match_parent"
+                            android:layout_height="20dp" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/txt_add_method_step"
-                        android:textSize="18sp"/>
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/rvw_add_ingredients"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            tools:listitem="@layout/ingredient_item"
+                            tools:itemCount="5"/>
 
-                    <android.support.v4.widget.Space
-                        android:layout_width="match_parent"
-                        android:layout_height="20dp" />
+                        <!--RecyclerView item but with edittext to input new ingredients-->
+                        <include
+                            android:id="@+id/inc_add_ingredient"
+                            layout="@layout/add_ingredient"/>
 
-                    <android.support.v7.widget.RecyclerView
-                        android:id="@+id/rvw_add_method"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        tools:listitem="@layout/method_item"
-                        tools:itemCount="5"/>
+                        <android.support.v4.widget.Space
+                            android:layout_width="match_parent"
+                            android:layout_height="20dp" />
 
-                    <include layout="@layout/add_step"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/txt_add_method_step"
+                            android:textSize="18sp"/>
 
+                        <android.support.v4.widget.Space
+                            android:layout_width="match_parent"
+                            android:layout_height="20dp" />
+
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/rvw_add_method"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            tools:listitem="@layout/method_item"
+                            tools:itemCount="5"/>
+
+                        <include
+                            android:id="@+id/inc_add_step"
+                            layout="@layout/add_step"/>
+
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-        </ScrollView>
+            </ScrollView>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_add_menu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_add"
-            app:fabSize="normal"
-            android:focusable="false"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            android:onClick="AnimateFabMenu"/>
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_add_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_add"
+                app:fabSize="normal"
+                android:focusable="false"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="@dimen/fab_margin"
+                android:onClick="AnimateFabMenu"/>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_add_photo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_photo"
-            android:visibility="invisible"
-            android:focusable="false"
-            app:fabSize="mini"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="70dp" />
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_add_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_photo"
+                android:visibility="invisible"
+                android:focusable="false"
+                app:fabSize="mini"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="70dp" />
 
-        <TextView
-            android:id="@+id/txt_add_photo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/FabTag"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="77dp"
-            android:layout_marginEnd="119dp"
-            android:text="@string/txt_add_photo"/>
+            <TextView
+                android:id="@+id/txt_add_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/FabTag"
+                android:layout_gravity="bottom|end"
+                android:layout_marginBottom="77dp"
+                android:layout_marginEnd="119dp"
+                android:text="@string/txt_add_photo"/>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_add_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_time"
-            android:visibility="invisible"
-            android:focusable="false"
-            app:fabSize="mini"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="10dp"
-            android:layout_marginEnd="86dp" />
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_add_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_time"
+                android:visibility="invisible"
+                android:focusable="false"
+                app:fabSize="mini"
+                android:layout_gravity="bottom|end"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="86dp" />
 
-        <TextView
-            android:id="@+id/txt_add_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/FabTag"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="17dp"
-            android:layout_marginEnd="135dp"
-            android:text="@string/txt_add_time"/>
+            <TextView
+                android:id="@+id/txt_add_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/FabTag"
+                android:layout_gravity="bottom|end"
+                android:layout_marginBottom="17dp"
+                android:layout_marginEnd="135dp"
+                android:text="@string/txt_add_time"/>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_add_kcal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_kcal"
-            android:visibility="invisible"
-            android:focusable="false"
-            app:fabSize="mini"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="86dp"
-            android:layout_marginEnd="10dp" />
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_add_kcal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_kcal"
+                android:visibility="invisible"
+                android:focusable="false"
+                app:fabSize="mini"
+                android:layout_gravity="bottom|end"
+                android:layout_marginBottom="86dp"
+                android:layout_marginEnd="10dp" />
 
-        <TextView
-            android:id="@+id/txt_add_kcal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/FabTag"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="135dp"
-            android:layout_marginEnd="10dp"
-            android:text="@string/txt_add_kcal"/>
+            <TextView
+                android:id="@+id/txt_add_kcal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/FabTag"
+                android:layout_gravity="bottom|end"
+                android:layout_marginBottom="135dp"
+                android:layout_marginEnd="10dp"
+                android:text="@string/txt_add_kcal"/>
 
-    </android.support.design.widget.CoordinatorLayout>
-</LinearLayout>
+        </android.support.design.widget.CoordinatorLayout>
+    </LinearLayout>
+</layout>

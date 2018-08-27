@@ -23,7 +23,8 @@ import butterknife.ButterKnife;
  */
 public class IngredientsTabFragment extends Fragment {
 
-    @BindView(R.id.rvw_ingredients) RecyclerView ingredientsView;
+    @BindView(R.id.rvw_ingredients)
+    RecyclerView ingredientsView;
     private IngredientsViewAdapter ingredientsAdapter;
     private List<String> ingredients;
 
@@ -76,7 +77,8 @@ public class IngredientsTabFragment extends Fragment {
 
         class IngredientViewHolder extends RecyclerView.ViewHolder {
 
-            @BindView(R.id.txt_method_item) TextView ingredient;
+            @BindView(R.id.txt_method_item)
+            TextView ingredient;
 
             IngredientViewHolder(View itemView) {
                 super(itemView);

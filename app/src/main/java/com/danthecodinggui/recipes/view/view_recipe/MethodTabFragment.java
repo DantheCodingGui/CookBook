@@ -23,7 +23,8 @@ import butterknife.ButterKnife;
  */
 public class MethodTabFragment extends Fragment {
 
-    @BindView(R.id.rvw_method) RecyclerView methodStepsView;
+    @BindView(R.id.rvw_method)
+    RecyclerView methodStepsView;
     private MethodViewAdapter methodStepsAdapter;
     private List<String> methodSteps;
 
@@ -78,7 +79,8 @@ public class MethodTabFragment extends Fragment {
 
         class StepViewHolder extends RecyclerView.ViewHolder {
 
-            @BindView(R.id.txt_method_item) TextView step;
+            @BindView(R.id.txt_method_item)
+            TextView step;
 
             StepViewHolder(View itemView) {
                 super(itemView);
