@@ -193,7 +193,7 @@ public class AddRecipeActivity extends AppCompatActivity {
             AnimateFabItem(binding.fabAddTime);
             AnimateFabItem(binding.txtAddTime);
             AnimateFabItem(binding.fabAddKcal);
-            AnimateFabItem(binding.txtAddTime);
+            AnimateFabItem(binding.txtAddKcal);
             openMenuOpen = false;
         }
         else {
@@ -203,7 +203,7 @@ public class AddRecipeActivity extends AppCompatActivity {
             AnimateFabItem(binding.fabAddTime);
             AnimateFabItem(binding.txtAddTime);
             AnimateFabItem(binding.fabAddKcal);
-            AnimateFabItem(binding.txtAddTime);
+            AnimateFabItem(binding.txtAddKcal);
             openMenuOpen = true;
         }
     }

@@ -32,7 +32,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
 
-    boolean hasPhoto = true;
+    boolean hasPhoto = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +67,8 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         else {
             binding = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe);
             //supportPostponeEnterTransition();
+
+            binding.setRecipe(new RecipeViewModel("Fish and Chips", true));
 
             setSupportActionBar(binding.tbarVwRecipe);
             if (getSupportActionBar() != null)

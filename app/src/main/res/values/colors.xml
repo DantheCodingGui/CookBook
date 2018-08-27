@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#009900</color>
+    <color name="colorPrimaryDark">#009900</color>
+    <color name="colorAccent">#006600</color>
     <color name="fab_label">#333333</color>
     <color name="black_faded">#77222222</color>
     <color name="backToolbar">#E2E2E2</color>
