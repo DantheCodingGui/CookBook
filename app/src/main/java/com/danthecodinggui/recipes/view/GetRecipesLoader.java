@@ -128,6 +128,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
                     temp.setPreview(FileUtils.GetImageFromFilePath(path));
                 }
+                //TODO check what happens if permission denied
 
                 //Reset value (just in case permission status changes whilst loading data)
                 permResponseCode = PERM_CODE_WAITING;

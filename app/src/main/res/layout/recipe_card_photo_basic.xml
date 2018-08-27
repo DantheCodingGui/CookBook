@@ -1,46 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/crd_basic_photo"
-    style="@style/RecipeCard">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <ImageView
-            android:id="@+id/ivw_crd_preview"
-            style="@style/CardImagePreview"
-            tools:src="@drawable/sample_image"/>
+<layout>
+    <data>
+        <variable
+            name="recipe"
+            type="com.danthecodinggui.recipes.model.RecipeViewModel"/>
+    </data>
+    <android.support.v7.widget.CardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/crd_basic_photo"
+        style="@style/RecipeCard">
 
         <LinearLayout
-            android:padding="5dp"
-            style="@style/CardBody">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/txt_crd_title"
-                style="@style/CardRecipeTitle"
-                tools:text="Sushi Sliders" />
+            <ImageView
+                android:id="@+id/ivw_crd_preview"
+                style="@style/CardImagePreview"
+                app:imageUri="@{recipe.getImagePreviewUri()}"
+                tools:src="@drawable/sample_image"/>
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/txt_crd_ingredient_no"
-                    style="@style/CardText"
-                    tools:text="5 ingredients"/>
+            <LinearLayout
+                android:padding="5dp"
+                style="@style/CardBody">
 
                 <TextView
-                    android:id="@+id/txt_crd_steps_no"
-                    style="@style/CardText"
-                    android:layout_alignParentEnd="true"
-                    tools:text="6 steps"/>
-            </RelativeLayout>
+                    android:id="@+id/txt_crd_title"
+                    style="@style/CardRecipeTitle"
+                    android:text="@{recipe.getTitle()}"
+                    tools:text="Sushi Sliders" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/txt_crd_ingredient_no"
+                        style="@style/CardText"
+                        tools:text="5 ingredients"/>
+
+                    <TextView
+                        android:id="@+id/txt_crd_steps_no"
+                        style="@style/CardText"
+                        android:layout_alignParentEnd="true"
+                        tools:text="6 steps"/>
+                </RelativeLayout>
+            </LinearLayout>
+
         </LinearLayout>
-
-    </LinearLayout>
-
-</android.support.v7.widget.CardView>
+    </android.support.v7.widget.CardView>
+</layout>

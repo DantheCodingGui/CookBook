@@ -13,6 +13,8 @@ public class FileUtils {
 
         //first need to ask for read external storage permission
 
+        //TODO consider using glide instead
+
         File publicDir = Environment.getExternalStorageDirectory();
         File imageFile = new File(publicDir + path);
         BitmapFactory.Options options = new BitmapFactory.Options();

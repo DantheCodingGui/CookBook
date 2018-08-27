@@ -2,6 +2,8 @@ package com.danthecodinggui.recipes.model;
 
 import android.graphics.Bitmap;
 
+import android.net.Uri;
+
 /**
  * MainActivity RecyclerView model
  */
@@ -15,6 +17,17 @@ public class RecipeViewModel {
     private int stepsNo = -1;
 
     private Bitmap preview;
+
+    public Uri getImagePreviewUri() {
+        return imagePreviewUri;
+    }
+
+    public void setImagePreviewUri(Uri imagePreviewUri) {
+        this.imagePreviewUri = imagePreviewUri;
+    }
+
+    private Uri imagePreviewUri;
+    //change to URI for glide to load w/ data binding
 
     private int calories;
     private int timeInMins;

@@ -83,7 +83,6 @@ public class MainActivity extends AppCompatActivity
         //setContentView(R.layout.activity_main);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        //Get display data from data sourced here
 
         recipesList = new ArrayList<>();
 
@@ -124,8 +123,6 @@ public class MainActivity extends AppCompatActivity
         recipesList.add(new RecipeViewModel("English Pancakes", 10, 3, true));
         recipesList.add(new RecipeViewModel("Spag Bol", 4, 7, true));
         recipesAdapter.notifyDataSetChanged();
-
-
     }
 
     @Override
@@ -188,7 +185,7 @@ public class MainActivity extends AppCompatActivity
                                     noImage = true;
 
                                     //Alert the user how they can re-enable the feature
-                                    Snackbar.make(findViewById(R.id.cly_main_root),
+                                    Snackbar.make(binding.clyMainRoot,
                                                     R.string.perm_snackbar_msg,
                                                     Snackbar.LENGTH_LONG
                                             )
