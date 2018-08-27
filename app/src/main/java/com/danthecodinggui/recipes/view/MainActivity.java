@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
+import android.databinding.ViewDataBinding;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,12 +33,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.danthecodinggui.recipes.BR;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityMainBinding;
+import com.danthecodinggui.recipes.databinding.RecipeCardBasicBinding;
+import com.danthecodinggui.recipes.databinding.RecipeCardComplexBinding;
+import com.danthecodinggui.recipes.databinding.RecipeCardPhotoBasicBinding;
+import com.danthecodinggui.recipes.databinding.RecipeCardPhotoComplexBinding;
 import com.danthecodinggui.recipes.model.RecipeViewModel;
 import com.danthecodinggui.recipes.msc.AnimUtils;
 import com.danthecodinggui.recipes.msc.IntentConstants;
@@ -46,9 +50,6 @@ import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 import static com.danthecodinggui.recipes.msc.LogTags.PERMISSIONS;
 
@@ -117,11 +118,11 @@ public class MainActivity extends AppCompatActivity
 
 
         //Example cards TODO remove later
-        recipesList.add(new RecipeViewModel("American Pancakes", false));
+        recipesList.add(new RecipeViewModel("American Pancakes"));
         recipesList.add(new RecipeViewModel("Sushi Sliders",
-                10, 5,true));
-        recipesList.add(new RecipeViewModel("English Pancakes", 10, 3, true));
-        recipesList.add(new RecipeViewModel("Spag Bol", 4, 7, true));
+                10, 5));
+        recipesList.add(new RecipeViewModel("English Pancakes", 10, 3));
+        recipesList.add(new RecipeViewModel("Spag Bol", 4, 7));
         recipesAdapter.notifyDataSetChanged();
     }
 
@@ -291,7 +292,7 @@ public class MainActivity extends AppCompatActivity
      * Allows integration between the list of recipe objects and the recyclerview
      */
     class RecipesViewAdapter
-            extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
+            extends RecyclerView.Adapter<RecipesViewAdapter.RecipeViewHolder> implements Filterable {
 
         List<RecipeViewModel> filteredRecipesList;
 
@@ -302,25 +303,31 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        public BasicViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public RecipeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-            //TODO change so each viewholder builds thenselves (probs a static method)
             switch (viewType) {
                 case COMPLEX:
-                    return new ComplexViewHoldler(inflater.inflate(R.layout.recipe_card_complex, parent, false));
+                    return new ComplexViewHolder(RecipeCardComplexBinding.inflate(inflater, parent, false));
                 case PHOTO_BASIC:
-                    return new BasicPhotoViewHolder(inflater.inflate(R.layout.recipe_card_photo_basic, parent, false));
+                    return new BasicPhotoViewHolder(RecipeCardPhotoBasicBinding.inflate(inflater, parent, false));
                 case PHOTO_COMPLEX:
-                    return new ComplexPhotoViewHolder(inflater.inflate(R.layout.recipe_card_photo_complex, parent, false));
+                    return new ComplexPhotoViewHolder(RecipeCardPhotoComplexBinding.inflate(inflater, parent, false));
                 default:
-                    return new BasicViewHolder(inflater.inflate(R.layout.recipe_card_basic, parent, false));
+                    return new BasicViewHolder(RecipeCardBasicBinding.inflate(inflater, parent, false));
             }
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int pos) {
+        public void onBindViewHolder(RecipeViewHolder holder, int pos) {
 
+            holder.bind(filteredRecipesList.get(pos));
+
+            //ViewCompat.setTransitionName(holder.itemView,
+            //       getString(R.string.main_card_transition_name) + "_" + Integer.toString(pos));
+
+
+            /*
             Resources res = getResources();
 
             //TODO change so that each viewholder binds their own data (will have to also do super())
@@ -334,8 +341,7 @@ public class MainActivity extends AppCompatActivity
             String stepsString = res.getQuantityString(R.plurals.txt_method_steps_no, stepsNo, stepsNo);
             ((BasicViewHolder)holder).stepsNo.setText(stepsString);
 
-            //ViewCompat.setTransitionName(holder.itemView,
-             //       getString(R.string.main_card_transition_name) + "_" + Integer.toString(pos));
+
 
             String kcalString;
             int kcals;
@@ -346,8 +352,8 @@ public class MainActivity extends AppCompatActivity
                     kcals = filteredRecipesList.get(pos).getCalories();
                     kcalString = String.valueOf(res.getQuantityString(
                             R.plurals.txt_calories, kcals, kcals));
-                    ((ComplexViewHoldler)holder).calories.setText(kcalString);
-                    ((ComplexViewHoldler)holder).timeInMins.setText(String.valueOf(filteredRecipesList.get(pos).getTimeInMins()));
+                    ((ComplexViewHolder)holder).calories.setText(kcalString);
+                    ((ComplexViewHolder)holder).timeInMins.setText(String.valueOf(filteredRecipesList.get(pos).getTimeInMins()));
                     break;
                 case PHOTO_BASIC:
                     ((BasicPhotoViewHolder)holder).preview.setImageBitmap(filteredRecipesList.get(pos).getPreview());
@@ -356,13 +362,14 @@ public class MainActivity extends AppCompatActivity
                     kcals = filteredRecipesList.get(pos).getCalories();
                     kcalString = String.valueOf(res.getQuantityString(
                             R.plurals.txt_calories, kcals, kcals));
-                    ((ComplexViewHoldler)holder).calories.setText(kcalString);
+                    ((ComplexViewHolder)holder).calories.setText(kcalString);
 
-                    ((ComplexViewHoldler)holder).timeInMins.setText(String.valueOf(filteredRecipesList.get(pos).getTimeInMins()));
+                    ((ComplexViewHolder)holder).timeInMins.setText(String.valueOf(filteredRecipesList.get(pos).getTimeInMins()));
                     ((ComplexPhotoViewHolder)holder).preview.setImageBitmap(filteredRecipesList.get(pos).getPreview());
                     //TODO Use glide here for image loading
                     break;
             }
+            */
         }
 
         @Override
@@ -425,90 +432,134 @@ public class MainActivity extends AppCompatActivity
             };
         }
 
-        /**
-         * Parent class with values all cards possess
-         */
-        class BasicViewHolder extends RecyclerView.ViewHolder
-                implements View.OnClickListener, View.OnLongClickListener {
+        class RecipeViewHolder extends RecyclerView.ViewHolder {
 
-            @BindView(R.id.txt_crd_title)
-            TextView title;
-            @BindView(R.id.txt_crd_ingredient_no)
-            TextView ingredientsNo;
-            @BindView(R.id.txt_crd_steps_no)
-            TextView stepsNo;
+            ViewDataBinding binding;
 
-            BasicViewHolder(View itemView) {
+            RecipeViewHolder(View itemView) {
                 super(itemView);
-
-                ButterKnife.bind(this, itemView);
-
-                //Optionally setup click listeners
-                itemView.setOnClickListener(this);
-                itemView.setOnLongClickListener(this);
             }
 
-            @Override
-            public void onClick(View view) {
-                //TODO implement transition to view activity
-                //TODO add flag to call stating photo/no photo to choose layout to inflate
-                //TODO make simpler viewrecipe layout without collapsingtoolbarlayout
-                ViewRecipe(view, title.getText().toString());
-            }
-
-            @Override
-            public boolean onLongClick(View view) {
-                //TODO implement drag/drop initiation
-                return true;
+            public void bind(RecipeViewModel item) {
+                binding.setVariable(BR.recipe, item);
+                binding.executePendingBindings();
             }
         }
 
-        /**
-         * Adds calorie and/or time to make information
-         */
-        class ComplexViewHoldler extends BasicViewHolder {
+        class BasicViewHolder extends RecipeViewHolder {
 
-            @BindView(R.id.txt_crd_cal)
-            TextView calories;
-            @BindView(R.id.txt_crd_duration)
-            TextView timeInMins;
+            BasicViewHolder(RecipeCardBasicBinding itemBinding) {
+                super(itemBinding.getRoot());
+                binding = itemBinding;
+            }
+        }
+        class ComplexViewHolder extends RecipeViewHolder {
 
-            ComplexViewHoldler(View itemView) {
-                super(itemView);
+            ComplexViewHolder(RecipeCardComplexBinding itemBinding) {
+                super(itemBinding.getRoot());
+                binding = itemBinding;
+            }
+        }
+        class BasicPhotoViewHolder extends RecipeViewHolder {
 
-                ButterKnife.bind(this, itemView);
+            BasicPhotoViewHolder(RecipeCardPhotoBasicBinding itemBinding) {
+                super(itemBinding.getRoot());
+                binding = itemBinding;
+            }
+        }
+        class ComplexPhotoViewHolder extends RecipeViewHolder {
+
+            ComplexPhotoViewHolder(RecipeCardPhotoComplexBinding itemBinding) {
+                super(itemBinding.getRoot());
+                binding = itemBinding;
             }
         }
 
-        /**
-         * Adds an image preview of the completed dish
-         */
-        class BasicPhotoViewHolder extends BasicViewHolder {
 
-            @BindView(R.id.ivw_crd_preview)
-            ImageView preview;
-
-            BasicPhotoViewHolder(View itemView) {
-                super(itemView);
-
-                ButterKnife.bind(this, itemView);
-            }
-        }
-
-        /**
-         * Adds an image preview of the completed dish
-         */
-        class ComplexPhotoViewHolder extends ComplexViewHoldler {
-
-            @BindView(R.id.ivw_crd_preview)
-            ImageView preview;
-
-            ComplexPhotoViewHolder(View itemView) {
-                super(itemView);
-
-                ButterKnife.bind(this, itemView);
-            }
-        }
+//        /**
+//         * Parent class with values all cards possess
+//         */
+//        class BasicViewHolder extends RecyclerView.ViewHolder
+//                implements View.OnClickListener, View.OnLongClickListener {
+//
+//            @BindView(R.id.txt_crd_title)
+//            TextView title;
+//            @BindView(R.id.txt_crd_ingredient_no)
+//            TextView ingredientsNo;
+//            @BindView(R.id.txt_crd_steps_no)
+//            TextView stepsNo;
+//
+//            BasicViewHolder(View itemView) {
+//                super(itemView);
+//
+//                ButterKnife.bind(this, itemView);
+//
+//                //Optionally setup click listeners
+//                itemView.setOnClickListener(this);
+//                itemView.setOnLongClickListener(this);
+//            }
+//
+//            @Override
+//            public void onClick(View view) {
+//                //TODO implement transition to view activity
+//                //TODO add flag to call stating photo/no photo to choose layout to inflate
+//                //TODO make simpler viewrecipe layout without collapsingtoolbarlayout
+//                ViewRecipe(view, title.getText().toString());
+//            }
+//
+//            @Override
+//            public boolean onLongClick(View view) {
+//                //TODO implement drag/drop initiation
+//                return true;
+//            }
+//        }
+//
+//        /**
+//         * Adds calorie and/or time to make information
+//         */
+//        class ComplexViewHolder extends BasicViewHolder {
+//
+//            @BindView(R.id.txt_crd_cal)
+//            TextView calories;
+//            @BindView(R.id.txt_crd_duration)
+//            TextView timeInMins;
+//
+//            ComplexViewHolder(View itemView) {
+//                super(itemView);
+//
+//                ButterKnife.bind(this, itemView);
+//            }
+//        }
+//
+//        /**
+//         * Adds an image preview of the completed dish
+//         */
+//        class BasicPhotoViewHolder extends BasicViewHolder {
+//
+//            @BindView(R.id.ivw_crd_preview)
+//            ImageView preview;
+//
+//            BasicPhotoViewHolder(View itemView) {
+//                super(itemView);
+//
+//                ButterKnife.bind(this, itemView);
+//            }
+//        }
+//
+//        /**
+//         * Adds an image preview of the completed dish
+//         */
+//        class ComplexPhotoViewHolder extends ComplexViewHolder {
+//
+//            @BindView(R.id.ivw_crd_preview)
+//            ImageView preview;
+//
+//            ComplexPhotoViewHolder(View itemView) {
+//                super(itemView);
+//
+//                ButterKnife.bind(this, itemView);
+//            }
+//        }
     }
 
     private void ViewRecipe(View cardView, String recipeTitle) {

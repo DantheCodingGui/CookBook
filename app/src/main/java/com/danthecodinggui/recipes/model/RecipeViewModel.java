@@ -9,14 +9,11 @@ import android.net.Uri;
  */
 public class RecipeViewModel {
 
-    private boolean hasPhoto;
-    private boolean hasExtendedInfo;
-
     private String title;
     private int ingredientsNo = -1;
     private int stepsNo = -1;
 
-    private Bitmap preview;
+    //private Bitmap preview;
 
     public Uri getImagePreviewUri() {
         return imagePreviewUri;
@@ -32,27 +29,36 @@ public class RecipeViewModel {
     private int calories;
     private int timeInMins;
 
-    public RecipeViewModel(String title, Integer calories, int timeInMins, boolean hasPhoto) {
+    public RecipeViewModel(String title, Integer calories, int timeInMins, Uri imagePreviewUri) {
         this.title = title;
         this.calories = calories;
         this.timeInMins = timeInMins;
-        this.hasPhoto = hasPhoto;
-
-        hasExtendedInfo = true;
+        this.imagePreviewUri = imagePreviewUri;
+    }
+    public RecipeViewModel(String title, Integer calories, int timeInMins) {
+        this(title,  calories, timeInMins, null);
     }
 
-    public RecipeViewModel(String title, Integer calories, boolean hasPhoto) {
-        this(title,  calories, -1, hasPhoto);
+    //With Image
+    public RecipeViewModel(String title, Integer calories, Uri imagePreviewUri) {
+        this(title,  calories, -1, imagePreviewUri);
+    }
+    public RecipeViewModel(String title, int timeInMins, Uri imagePreviewUri) {
+        this(title, -1, timeInMins, imagePreviewUri);
+    }
+    public RecipeViewModel(String title, Uri imagePreviewUri) {
+        this(title, -1, -1, imagePreviewUri);
     }
 
-    public RecipeViewModel(String title, int timeInMins, boolean hasPhoto) {
-        this(title, -1, timeInMins, hasPhoto);
+    //Without Image
+    public RecipeViewModel(String title, Integer calories) {
+        this(title,  calories, -1, null);
     }
-
-    public RecipeViewModel(String title, boolean hasPhoto) {
-        this(title, -1, -1, hasPhoto);
-
-        hasExtendedInfo = false;
+    public RecipeViewModel(String title, int timeInMins) {
+        this(title, -1, timeInMins, null);
+    }
+    public RecipeViewModel(String title) {
+        this(title, -1, -1, null);
     }
 
     /**
@@ -60,7 +66,7 @@ public class RecipeViewModel {
      * @return
      */
     public boolean hasExtendedInfo() {
-        return hasExtendedInfo;
+        return calories != -1 || timeInMins != -1;
     }
 
     /**
@@ -68,7 +74,7 @@ public class RecipeViewModel {
      * @return
      */
     public boolean hasPhoto() {
-        return hasPhoto;
+        return imagePreviewUri != null;
     }
 
     public String getTitle() {
@@ -92,12 +98,14 @@ public class RecipeViewModel {
         this.stepsNo = stepsNo;
     }
 
+    /*
     public Bitmap getPreview() {
         return preview;
     }
     public void setPreview(Bitmap preview) {
         this.preview = preview;
     }
+    */
 
     public int getCalories() {
         return calories;

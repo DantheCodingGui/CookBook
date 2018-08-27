@@ -46,7 +46,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
             //TODO change later to set based on database query
             //bindingPhoto.ctlVwRecipe.setTitle(getIntent().getStringExtra("Title"));
 
-            bindingPhoto.setRecipe(new RecipeViewModel("Fish and Chips", true));
+            bindingPhoto.setRecipe(new RecipeViewModel("Fish and Chips"));
 
             //todo maybe pass this in w/ data binding to make easier
             bindingPhoto.ablViewRecipe.addOnOffsetChangedListener(this);
@@ -68,7 +68,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
             binding = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe);
             //supportPostponeEnterTransition();
 
-            binding.setRecipe(new RecipeViewModel("Fish and Chips", true));
+            binding.setRecipe(new RecipeViewModel("Fish and Chips"));
 
             setSupportActionBar(binding.tbarVwRecipe);
             if (getSupportActionBar() != null)

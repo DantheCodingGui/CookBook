@@ -28,14 +28,14 @@
                 <TextView
                     android:id="@+id/txt_crd_ingredient_no"
                     style="@style/CardText"
-                    android:text="@{@plurals/txt_ingredients_no(recipe.getIngredientsNo())}"
+                    android:text="@{@plurals/txt_ingredients_no(recipe.getIngredientsNo(), recipe.getIngredientsNo())}"
                     tools:text="5 ingredients"/>
 
                 <TextView
                     android:id="@+id/txt_crd_steps_no"
                     style="@style/CardText"
                     android:layout_alignParentEnd="true"
-                    android:text="@{@plurals/txt_method_steps_no(recipe.getStepsNo())}"
+                    android:text="@{@plurals/txt_method_steps_no(recipe.getStepsNo(), recipe.getStepsNo())}"
                     tools:text="6 steps"/>
             </RelativeLayout>
         </LinearLayout>

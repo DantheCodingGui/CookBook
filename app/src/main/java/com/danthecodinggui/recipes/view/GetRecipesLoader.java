@@ -3,6 +3,7 @@ package com.danthecodinggui.recipes.view;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 
@@ -11,6 +12,7 @@ import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.RecipeViewModel;
 import com.danthecodinggui.recipes.msc.LogTags;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,7 +112,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
             else
                 temp = AddStepsCount(countCursor, temp);
 
-
+            /*
             //Load in preview image
             if (temp.hasPhoto()) {
 
@@ -133,6 +135,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
                 //Reset value (just in case permission status changes whilst loading data)
                 permResponseCode = PERM_CODE_WAITING;
             }
+            */
 
             records.add(temp);
 
@@ -190,26 +193,30 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         if (noImage) {
             if (noKcal) {
                 if (noTime)
-                    return new RecipeViewModel(recipeTitle, false);
+                    return new RecipeViewModel(recipeTitle);
                 else
-                    return new RecipeViewModel(recipeTitle, timeInMins, false);
+                    return new RecipeViewModel(recipeTitle, timeInMins);
             } else {
                 if (noTime)
-                    return new RecipeViewModel(recipeTitle, calories, false);
+                    return new RecipeViewModel(recipeTitle, calories);
                 else
-                    return new RecipeViewModel(recipeTitle, calories, timeInMins, false);
+                    return new RecipeViewModel(recipeTitle, calories, timeInMins);
             }
         } else {
+
+            Uri tempUri = Uri.fromFile(new File(cursor.getString(cursor.getColumnIndexOrThrow(
+                    ProviderContract.RecipeEntry.IMAGE_PATH))));
+
             if (noKcal) {
                 if (noTime)
-                    return new RecipeViewModel(recipeTitle, true);
+                    return new RecipeViewModel(recipeTitle, tempUri);
                 else
-                    return new RecipeViewModel(recipeTitle, timeInMins, true);
+                    return new RecipeViewModel(recipeTitle, timeInMins, tempUri);
             } else {
                 if (noTime)
-                    return new RecipeViewModel(recipeTitle, calories, true);
+                    return new RecipeViewModel(recipeTitle, calories, tempUri);
                 else
-                    return new RecipeViewModel(recipeTitle, calories, timeInMins, true);
+                    return new RecipeViewModel(recipeTitle, calories, timeInMins, tempUri);
             }
         }
     }
