@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.danthecodinggui.recipes.BR;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipeBinding;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipePhotoBinding;
@@ -48,7 +47,6 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
 
             bindingPhoto.setRecipe(new RecipeViewModel("Fish and Chips"));
 
-            //todo maybe pass this in w/ data binding to make easier
             bindingPhoto.ablViewRecipe.addOnOffsetChangedListener(this);
 
             SetScrimColour(bindingPhoto.ablViewRecipe);

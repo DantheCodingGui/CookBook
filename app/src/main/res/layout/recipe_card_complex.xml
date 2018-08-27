@@ -4,6 +4,7 @@
         <variable
             name="recipe"
             type="com.danthecodinggui.recipes.model.RecipeViewModel"/>
+        <import type="com.danthecodinggui.recipes.msc.StringUtils"/>
     </data>
     <android.support.v7.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -53,7 +54,7 @@
                     android:id="@+id/txt_crd_duration"
                     style="@style/CardText"
                     android:layout_alignParentEnd="true"
-                    android:text="@{String.valueOf(recipe.getTimeInMins())}"
+                    android:text="@{StringUtils.minsToHourMins(recipe.getTimeInMins())}"
                     tools:text="20 mins"/>
             </RelativeLayout>
         </LinearLayout>

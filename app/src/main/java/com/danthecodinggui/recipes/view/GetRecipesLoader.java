@@ -112,30 +112,29 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
             else
                 temp = AddStepsCount(countCursor, temp);
 
-            /*
+
             //Load in preview image
             if (temp.hasPhoto()) {
 
                 //TODO test speed, idk if blocking every time will slow loading down
                 AskForReadPermission();
 
-                //Busy wait until response
-                while (permResponseCode == PERM_CODE_WAITING)
-                    ;
-
-                if (permResponseCode == PERM_CODE_GRANTED) {
-                    //Load image into record
-                    String path = Integer.toString(
-                            baseCursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.IMAGE_PATH));
-
-                    temp.setPreview(FileUtils.GetImageFromFilePath(path));
-                }
-                //TODO check what happens if permission denied
-
-                //Reset value (just in case permission status changes whilst loading data)
-                permResponseCode = PERM_CODE_WAITING;
+//                //Busy wait until response
+//                while (permResponseCode == PERM_CODE_WAITING)
+//                    ;
+//
+//                if (permResponseCode == PERM_CODE_GRANTED) {
+//                    //Load image uri into record
+//                    String path = Integer.toString(
+//                            baseCursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.IMAGE_PATH));
+//
+//                    temp.setPreview(FileUtils.GetImageFromFilePath(path));
+//                }
+//                //TODO check what happens if permission denied
+//
+//                //Reset value (just in case permission status changes whilst loading data)
+//                permResponseCode = PERM_CODE_WAITING;
             }
-            */
 
             records.add(temp);
 

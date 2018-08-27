@@ -120,9 +120,9 @@ public class MainActivity extends AppCompatActivity
         //Example cards TODO remove later
         recipesList.add(new RecipeViewModel("American Pancakes"));
         recipesList.add(new RecipeViewModel("Sushi Sliders",
-                10, 5));
-        recipesList.add(new RecipeViewModel("English Pancakes", 10, 3));
-        recipesList.add(new RecipeViewModel("Spag Bol", 4, 7));
+                10, 1));
+        recipesList.add(new RecipeViewModel("English Pancakes", 10, 300));
+        recipesList.add(new RecipeViewModel("Spag Bol", 4, 700));
         recipesAdapter.notifyDataSetChanged();
     }
 
@@ -325,51 +325,6 @@ public class MainActivity extends AppCompatActivity
 
             //ViewCompat.setTransitionName(holder.itemView,
             //       getString(R.string.main_card_transition_name) + "_" + Integer.toString(pos));
-
-
-            /*
-            Resources res = getResources();
-
-            //TODO change so that each viewholder binds their own data (will have to also do super())
-            ((BasicViewHolder)holder).title.setText(filteredRecipesList.get(pos).getTitle());
-
-            int ingredientsNo = filteredRecipesList.get(pos).getIngredientsNo();
-            String ingredientsString = res.getQuantityString(R.plurals.txt_ingredients_no, ingredientsNo, ingredientsNo);
-            ((BasicViewHolder)holder).ingredientsNo.setText(ingredientsString);
-
-            int stepsNo = filteredRecipesList.get(pos).getStepsNo();
-            String stepsString = res.getQuantityString(R.plurals.txt_method_steps_no, stepsNo, stepsNo);
-            ((BasicViewHolder)holder).stepsNo.setText(stepsString);
-
-
-
-            String kcalString;
-            int kcals;
-
-            //TODO deal with null returns from getter methods as any complex data is optional to the user
-            switch (holder.getItemViewType()) {
-                case COMPLEX:
-                    kcals = filteredRecipesList.get(pos).getCalories();
-                    kcalString = String.valueOf(res.getQuantityString(
-                            R.plurals.txt_calories, kcals, kcals));
-                    ((ComplexViewHolder)holder).calories.setText(kcalString);
-                    ((ComplexViewHolder)holder).timeInMins.setText(String.valueOf(filteredRecipesList.get(pos).getTimeInMins()));
-                    break;
-                case PHOTO_BASIC:
-                    ((BasicPhotoViewHolder)holder).preview.setImageBitmap(filteredRecipesList.get(pos).getPreview());
-                    break;
-                case PHOTO_COMPLEX:
-                    kcals = filteredRecipesList.get(pos).getCalories();
-                    kcalString = String.valueOf(res.getQuantityString(
-                            R.plurals.txt_calories, kcals, kcals));
-                    ((ComplexViewHolder)holder).calories.setText(kcalString);
-
-                    ((ComplexViewHolder)holder).timeInMins.setText(String.valueOf(filteredRecipesList.get(pos).getTimeInMins()));
-                    ((ComplexPhotoViewHolder)holder).preview.setImageBitmap(filteredRecipesList.get(pos).getPreview());
-                    //TODO Use glide here for image loading
-                    break;
-            }
-            */
         }
 
         @Override
@@ -432,17 +387,35 @@ public class MainActivity extends AppCompatActivity
             };
         }
 
-        class RecipeViewHolder extends RecyclerView.ViewHolder {
+        class RecipeViewHolder extends RecyclerView.ViewHolder
+                implements View.OnClickListener, View.OnLongClickListener {
 
             ViewDataBinding binding;
 
             RecipeViewHolder(View itemView) {
                 super(itemView);
+
+                itemView.setOnClickListener(this);
+                itemView.setOnLongClickListener(this);
             }
 
             public void bind(RecipeViewModel item) {
                 binding.setVariable(BR.recipe, item);
                 binding.executePendingBindings();
+            }
+
+            @Override
+            public void onClick(View view) {
+                //TODO implement transition to view activity
+                //TODO add flag to call stating photo/no photo to choose layout to inflate
+                //TODO make simpler viewrecipe layout without collapsingtoolbarlayout
+                ViewRecipe(view, getAdapterPosition());
+            }
+
+            @Override
+            public boolean onLongClick(View view) {
+                //TODO implement drag/drop initiation
+                return true;
             }
         }
 
@@ -474,99 +447,13 @@ public class MainActivity extends AppCompatActivity
                 binding = itemBinding;
             }
         }
-
-
-//        /**
-//         * Parent class with values all cards possess
-//         */
-//        class BasicViewHolder extends RecyclerView.ViewHolder
-//                implements View.OnClickListener, View.OnLongClickListener {
-//
-//            @BindView(R.id.txt_crd_title)
-//            TextView title;
-//            @BindView(R.id.txt_crd_ingredient_no)
-//            TextView ingredientsNo;
-//            @BindView(R.id.txt_crd_steps_no)
-//            TextView stepsNo;
-//
-//            BasicViewHolder(View itemView) {
-//                super(itemView);
-//
-//                ButterKnife.bind(this, itemView);
-//
-//                //Optionally setup click listeners
-//                itemView.setOnClickListener(this);
-//                itemView.setOnLongClickListener(this);
-//            }
-//
-//            @Override
-//            public void onClick(View view) {
-//                //TODO implement transition to view activity
-//                //TODO add flag to call stating photo/no photo to choose layout to inflate
-//                //TODO make simpler viewrecipe layout without collapsingtoolbarlayout
-//                ViewRecipe(view, title.getText().toString());
-//            }
-//
-//            @Override
-//            public boolean onLongClick(View view) {
-//                //TODO implement drag/drop initiation
-//                return true;
-//            }
-//        }
-//
-//        /**
-//         * Adds calorie and/or time to make information
-//         */
-//        class ComplexViewHolder extends BasicViewHolder {
-//
-//            @BindView(R.id.txt_crd_cal)
-//            TextView calories;
-//            @BindView(R.id.txt_crd_duration)
-//            TextView timeInMins;
-//
-//            ComplexViewHolder(View itemView) {
-//                super(itemView);
-//
-//                ButterKnife.bind(this, itemView);
-//            }
-//        }
-//
-//        /**
-//         * Adds an image preview of the completed dish
-//         */
-//        class BasicPhotoViewHolder extends BasicViewHolder {
-//
-//            @BindView(R.id.ivw_crd_preview)
-//            ImageView preview;
-//
-//            BasicPhotoViewHolder(View itemView) {
-//                super(itemView);
-//
-//                ButterKnife.bind(this, itemView);
-//            }
-//        }
-//
-//        /**
-//         * Adds an image preview of the completed dish
-//         */
-//        class ComplexPhotoViewHolder extends ComplexViewHolder {
-//
-//            @BindView(R.id.ivw_crd_preview)
-//            ImageView preview;
-//
-//            ComplexPhotoViewHolder(View itemView) {
-//                super(itemView);
-//
-//                ButterKnife.bind(this, itemView);
-//            }
-//        }
     }
 
-    private void ViewRecipe(View cardView, String recipeTitle) {
+    private void ViewRecipe(View cardView, int recipeId) {
 
         Intent viewRecipe = new Intent(getApplicationContext(), ViewRecipeActivity.class);
         ActivityOptions options = null;
-        viewRecipe.putExtra("Title", recipeTitle);
+        viewRecipe.putExtra("Title", recipesList.get(recipeId).getTitle());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //TODO get shared transitions working

@@ -1,7 +1,5 @@
 package com.danthecodinggui.recipes.model;
 
-import android.graphics.Bitmap;
-
 import android.net.Uri;
 
 /**
