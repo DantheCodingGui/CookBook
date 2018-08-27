@@ -5,6 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -15,6 +18,11 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipeBinding;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipePhotoBinding;
@@ -23,6 +31,8 @@ import com.danthecodinggui.recipes.model.RecipeViewModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
 
@@ -31,7 +41,21 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
 
-    boolean hasPhoto = false;
+    private boolean hasPhoto = true;
+
+    private String[] foodPhotos = {
+            "https://images.pexels.com/photos/46239/salmon-dish-food-meal-46239.jpeg?cs=srgb&dl=food-salad-healthy-46239.jpg&fm=jpg",
+            "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?cs=srgb&dl=food-dinner-lunch-70497.jpg&fm=jpg",
+            "https://images.pexels.com/photos/247685/pexels-photo-247685.png?cs=srgb&dl=food-plate-healthy-247685.jpg&fm=jpg",
+            "https://images.pexels.com/photos/8313/food-eating-potatoes-beer-8313.jpg?auto=compress&cs=tinysrgb&h=350",
+            "https://drop.ndtv.com/albums/COOKS/corngallery/creolespicedcornthumb_640x480.jpg",
+            "https://cdn.cnn.com/cnnnext/dam/assets/171027052520-processed-foods-exlarge-tease.jpg",
+            "https://drop.ndtv.com/albums/COOKS/pasta-vegetarian/pastaveg_640x480.jpg",
+            "http://www.parkdeanholidays.co.uk/resources/images/foodanddrink/foodMainImg.jpg",
+            "https://media.istockphoto.com/photos/health-food-for-fitness-picture-id855098134?k=6&m=855098134&s=612x612&w=0&h=eIWWpYWKTz_z2ryYAo0Dd97igUZVExzl4AKRIhUrFj4="
+    };
+
+    private String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +71,28 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
 
             bindingPhoto.setRecipe(new RecipeViewModel("Fish and Chips"));
 
-            bindingPhoto.ablViewRecipe.addOnOffsetChangedListener(this);
+            bindingPhoto.ivwToolbarPreview.setImageBitmap(BitmapFactory.decodeResource(getResources(),
+                    R.drawable.sample_image));
 
-            SetScrimColour(bindingPhoto.ablViewRecipe);
+            url = foodPhotos[new Random().nextInt(foodPhotos.length)];
+
+            Glide.with(this)
+                    .load(url)
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            SetScrimColour(bindingPhoto.ablViewRecipe, resource);
+                            return false;
+                        }
+                    })
+                    .into(bindingPhoto.ivwToolbarPreview);
+
+            bindingPhoto.ablViewRecipe.addOnOffsetChangedListener(this);
 
             //Set status bar colour
             Window window = getWindow();
@@ -84,9 +127,10 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
     /**
      * Generates one colour from the recipe preview photo to use as toolbar colour
      */
-    private void SetScrimColour(final AppBarLayout appBar) {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
-                R.drawable.sample_image);
+    private void SetScrimColour(final AppBarLayout appBar, Drawable res) {
+        BitmapDrawable drawable = (BitmapDrawable) res;
+        Bitmap bitmap = drawable.getBitmap();
+
         Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
             @Override
             public void onGenerated(Palette palette) {

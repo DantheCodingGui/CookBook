@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
 import android.os.Build;
@@ -122,7 +121,7 @@ public class MainActivity extends AppCompatActivity
         recipesList.add(new RecipeViewModel("Sushi Sliders",
                 10, 1));
         recipesList.add(new RecipeViewModel("English Pancakes", 10, 300));
-        recipesList.add(new RecipeViewModel("Spag Bol", 4, 700));
+        recipesList.add(new RecipeViewModel("Spag Bol", 4, 550));
         recipesAdapter.notifyDataSetChanged();
     }
 
@@ -321,10 +320,9 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onBindViewHolder(RecipeViewHolder holder, int pos) {
 
-            holder.bind(filteredRecipesList.get(pos));
+            RecipeViewModel recipe = filteredRecipesList.get(pos);
 
-            //ViewCompat.setTransitionName(holder.itemView,
-            //       getString(R.string.main_card_transition_name) + "_" + Integer.toString(pos));
+            holder.bind(recipe);
         }
 
         @Override
@@ -435,16 +433,40 @@ public class MainActivity extends AppCompatActivity
         }
         class BasicPhotoViewHolder extends RecipeViewHolder {
 
+            RecipeCardPhotoBasicBinding photoBinding;
+
             BasicPhotoViewHolder(RecipeCardPhotoBasicBinding itemBinding) {
                 super(itemBinding.getRoot());
-                binding = itemBinding;
+                binding = photoBinding = itemBinding;
+            }
+
+            @Override
+            public void bind(RecipeViewModel item) {
+                super.bind(item);
+
+                //Set unique transition name for this specific
+                ViewCompat.setTransitionName(photoBinding.ivwCrdPreview,
+                        getString(R.string.main_card_transition_name) + "_" +
+                                item.getTitle() + "_" + Integer.toString(getAdapterPosition()));
             }
         }
         class ComplexPhotoViewHolder extends RecipeViewHolder {
 
+            RecipeCardPhotoComplexBinding photoBinding;
+
             ComplexPhotoViewHolder(RecipeCardPhotoComplexBinding itemBinding) {
                 super(itemBinding.getRoot());
-                binding = itemBinding;
+                binding = photoBinding = itemBinding;
+            }
+
+            @Override
+            public void bind(RecipeViewModel item) {
+                super.bind(item);
+
+                //Set unique transition name for this specific
+                ViewCompat.setTransitionName(photoBinding.ivwCrdPreview,
+                        getString(R.string.main_card_transition_name) + "_" +
+                                item.getTitle() + "_" + Integer.toString(getAdapterPosition()));
             }
         }
     }

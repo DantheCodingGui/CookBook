@@ -41,7 +41,6 @@
 
                 <ImageView
                     android:id="@+id/ivw_toolbar_preview"
-                    android:src="@drawable/sample_image"
                     android:layout_width="match_parent"
                     android:layout_height="362dp"
                     android:scaleType="centerCrop"
