@@ -27,21 +27,21 @@ import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipeBinding;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipePhotoBinding;
 import com.danthecodinggui.recipes.model.RecipeViewModel;
+import com.danthecodinggui.recipes.msc.AnimUtils;
+import com.danthecodinggui.recipes.msc.IntentConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
 
 import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
+import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DB_ID;
 
 public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
 
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
-
-    private boolean hasPhoto = true;
 
     private String[] foodPhotos = {
             "https://images.pexels.com/photos/46239/salmon-dish-food-meal-46239.jpeg?cs=srgb&dl=food-salad-healthy-46239.jpg&fm=jpg",
@@ -55,27 +55,41 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
             "https://media.istockphoto.com/photos/health-food-for-fitness-picture-id855098134?k=6&m=855098134&s=612x612&w=0&h=eIWWpYWKTz_z2ryYAo0Dd97igUZVExzl4AKRIhUrFj4="
     };
 
-    private String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Bundle extras = getIntent().getExtras();
+        int recipeId = extras.getInt(RECIPE_DB_ID);
+        boolean hasPhoto = extras.getBoolean("hasPhoto");
+
+        RecipeViewModel recipe = new RecipeViewModel("Fish and Chips");
+
+        //Todo change later to recipe.hasPhoto()
         if (hasPhoto) {
 
             bindingPhoto = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe_photo);
-            //supportPostponeEnterTransition();
+            supportPostponeEnterTransition();
 
             //TODO change later to set based on database query
-            //bindingPhoto.ctlVwRecipe.setTitle(getIntent().getStringExtra("Title"));
 
-            bindingPhoto.setRecipe(new RecipeViewModel("Fish and Chips"));
+            bindingPhoto.setRecipe(recipe);
+
+            if (AnimUtils.canUseSharedTransitions()) {
+                //Set the shared elements transition name
+                String imageTransitionName = extras.getString(CARD_TRANSITION_NAME);
+                bindingPhoto.ivwToolbarPreview.setTransitionName(imageTransitionName);
+
+                supportStartPostponedEnterTransition();
+            }
 
             bindingPhoto.ivwToolbarPreview.setImageBitmap(BitmapFactory.decodeResource(getResources(),
                     R.drawable.sample_image));
 
-            url = foodPhotos[new Random().nextInt(foodPhotos.length)];
+            String url = foodPhotos[new Random().nextInt(foodPhotos.length)];
 
+            //TODO remove all url references when actually loading images (also remove internet privelige)
             Glide.with(this)
                     .load(url)
                     .listener(new RequestListener<Drawable>() {
@@ -172,6 +186,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
 
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_ingredients);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_method);
+
     }
 
     @Override
@@ -183,11 +198,12 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
     @Override
     public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
         //Will set the alpha of the image based on collapsing toolbar scroll
+        //ie. the image is fully visible when scrolled down, but fades away into the toolbar colour
+        // when scrolled up
         int toolBarHeight = bindingPhoto.tbarVwRecipe.getMeasuredHeight();
         int appBarHeight = appBarLayout.getMeasuredHeight();
         float transitionSpace = (float)appBarHeight - toolBarHeight;// - tabLayout.getMeasuredHeight() - 80;
         Float f = ((transitionSpace + verticalOffset) / transitionSpace) * 255;
-        Log.d("graphics", "f: " + f.toString());
         bindingPhoto.ivwToolbarPreview.setImageAlpha(Math.round(f));
     }
 }

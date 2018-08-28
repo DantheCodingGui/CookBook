@@ -8,8 +8,10 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -32,6 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.danthecodinggui.recipes.BR;
@@ -47,9 +50,12 @@ import com.danthecodinggui.recipes.msc.IntentConstants;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
+import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DB_ID;
 import static com.danthecodinggui.recipes.msc.LogTags.PERMISSIONS;
 
 /**
@@ -116,12 +122,18 @@ public class MainActivity extends AppCompatActivity
         getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
 
 
+
+        String path = Environment.getExternalStorageDirectory().getPath();
+        String photoPath = path + "/Download/food-dinner-lunch-70497.jpg";
+
+        Uri photouri = Uri.fromFile(new File(photoPath));
+
         //Example cards TODO remove later
         recipesList.add(new RecipeViewModel("American Pancakes"));
         recipesList.add(new RecipeViewModel("Sushi Sliders",
                 10, 1));
-        recipesList.add(new RecipeViewModel("English Pancakes", 10, 300));
-        recipesList.add(new RecipeViewModel("Spag Bol", 4, 550));
+        recipesList.add(new RecipeViewModel("English Pancakes", 10, 300, photouri));
+        recipesList.add(new RecipeViewModel("Spag Bol", 4, 550, photouri));
         recipesAdapter.notifyDataSetChanged();
     }
 
@@ -407,7 +419,7 @@ public class MainActivity extends AppCompatActivity
                 //TODO implement transition to view activity
                 //TODO add flag to call stating photo/no photo to choose layout to inflate
                 //TODO make simpler viewrecipe layout without collapsingtoolbarlayout
-                ViewRecipe(view, getAdapterPosition());
+                ViewRecipe(view, getAdapterPosition(), null);
             }
 
             @Override
@@ -449,6 +461,11 @@ public class MainActivity extends AppCompatActivity
                         getString(R.string.main_card_transition_name) + "_" +
                                 item.getTitle() + "_" + Integer.toString(getAdapterPosition()));
             }
+
+            @Override
+            public void onClick(View view) {
+                ViewRecipe(view, getAdapterPosition(), photoBinding.ivwCrdPreview);
+            }
         }
         class ComplexPhotoViewHolder extends RecipeViewHolder {
 
@@ -468,35 +485,36 @@ public class MainActivity extends AppCompatActivity
                         getString(R.string.main_card_transition_name) + "_" +
                                 item.getTitle() + "_" + Integer.toString(getAdapterPosition()));
             }
+
+            @Override
+            public void onClick(View view) {
+                ViewRecipe(view, getAdapterPosition(), photoBinding.ivwCrdPreview);
+            }
         }
     }
 
-    private void ViewRecipe(View cardView, int recipeId) {
+    private void ViewRecipe(View cardView, int recipeId, ImageView sharedImageView) {
 
-        Intent viewRecipe = new Intent(getApplicationContext(), ViewRecipeActivity.class);
-        ActivityOptions options = null;
-        viewRecipe.putExtra("Title", recipesList.get(recipeId).getTitle());
+        Intent viewRecipe = new Intent(this, ViewRecipeActivity.class);
+        ActivityOptions options;
+        viewRecipe.putExtra(RECIPE_DB_ID, recipeId);
+        //Todo remove line later when records loaded from db
+        viewRecipe.putExtra("hasPhoto", sharedImageView != null);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            //TODO get shared transitions working
+        if (AnimUtils.canUseSharedTransitions()) {
 
-            String transitionName = ViewCompat.getTransitionName(cardView);
-            //viewRecipe.putExtra(CARD_TRANSITION_NAME, transitionName);
-            options = ActivityOptions.makeSceneTransitionAnimation(this, cardView, transitionName);
-            ActivityCompat.startActivity(this, viewRecipe, options.toBundle());
-            return;
+            if (sharedImageView != null) {
 
-            /*
-            View imagePreview;
+                viewRecipe.putExtra(CARD_TRANSITION_NAME, ViewCompat.getTransitionName(sharedImageView));
 
-            //Recipe has an image associated with it
-            if ((imagePreview = cardView.findViewById(R.id.ivw_crd_preview)) != null) {
                 options = ActivityOptions.makeSceneTransitionAnimation(
-                        this, imagePreview, getString(R.string.transition_image_preview));
-                ActivityCompat.startActivity(this, viewRecipe, options.toBundle());
+                        this,
+                        sharedImageView,
+                        ViewCompat.getTransitionName(sharedImageView));
+                startActivity(viewRecipe, options.toBundle());
                 return;
+
             }
-            */
         }
         //Should just start activity normally
         startActivity(viewRecipe);

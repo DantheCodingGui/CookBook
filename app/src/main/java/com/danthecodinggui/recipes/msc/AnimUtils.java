@@ -19,6 +19,10 @@ import com.danthecodinggui.recipes.R;
 
 public class AnimUtils {
 
+    public static boolean canUseSharedTransitions() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    }
+
     public static void animateSearchToolbar(final Activity activity, final Toolbar toolbar, int numberOfMenuIcon, boolean containsOverflow, boolean shouldShow) {
 
         toolbar.setBackgroundColor(ContextCompat.getColor(activity, android.R.color.white));
@@ -26,7 +30,7 @@ public class AnimUtils {
         Resources res = activity.getResources();
 
         if (shouldShow) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (AnimUtils.canUseSharedTransitions()) {
                 int width = toolbar.getWidth() -
                         (containsOverflow ? res.getDimensionPixelSize(R.dimen.abc_action_button_min_width_overflow_material) : 0) -
                         ((res.getDimensionPixelSize(R.dimen.abc_action_button_min_width_material) * numberOfMenuIcon) / 2);
@@ -43,7 +47,7 @@ public class AnimUtils {
             }
         }
         else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (AnimUtils.canUseSharedTransitions()) {
                 int width = toolbar.getWidth() -
                         (containsOverflow ? res.getDimensionPixelSize(R.dimen.abc_action_button_min_width_overflow_material) : 0) -
                         ((res.getDimensionPixelSize(R.dimen.abc_action_button_min_width_material) * numberOfMenuIcon) / 2);
