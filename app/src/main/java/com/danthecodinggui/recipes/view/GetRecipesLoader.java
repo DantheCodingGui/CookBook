@@ -203,19 +203,19 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
             }
         } else {
 
-            Uri tempUri = Uri.fromFile(new File(cursor.getString(cursor.getColumnIndexOrThrow(
-                    ProviderContract.RecipeEntry.IMAGE_PATH))));
+            String photoPath = cursor.getString(cursor.getColumnIndexOrThrow(
+                    ProviderContract.RecipeEntry.IMAGE_PATH));
 
             if (noKcal) {
                 if (noTime)
-                    return new RecipeViewModel(recipeTitle, tempUri);
+                    return new RecipeViewModel(recipeTitle, photoPath);
                 else
-                    return new RecipeViewModel(recipeTitle, timeInMins, tempUri);
+                    return new RecipeViewModel(recipeTitle, timeInMins, photoPath);
             } else {
                 if (noTime)
-                    return new RecipeViewModel(recipeTitle, calories, tempUri);
+                    return new RecipeViewModel(recipeTitle, calories, photoPath);
                 else
-                    return new RecipeViewModel(recipeTitle, calories, timeInMins, tempUri);
+                    return new RecipeViewModel(recipeTitle, calories, timeInMins, photoPath);
             }
         }
     }

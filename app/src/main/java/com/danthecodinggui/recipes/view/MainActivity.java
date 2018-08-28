@@ -126,14 +126,11 @@ public class MainActivity extends AppCompatActivity
         String path = Environment.getExternalStorageDirectory().getPath();
         String photoPath = path + "/Download/food-dinner-lunch-70497.jpg";
 
-        Uri photouri = Uri.fromFile(new File(photoPath));
-
         //Example cards TODO remove later
         recipesList.add(new RecipeViewModel("American Pancakes"));
-        recipesList.add(new RecipeViewModel("Sushi Sliders",
-                10, 1));
-        recipesList.add(new RecipeViewModel("English Pancakes", 10, 300, photouri));
-        recipesList.add(new RecipeViewModel("Spag Bol", 4, 550, photouri));
+        recipesList.add(new RecipeViewModel("Sushi Sliders", photoPath));
+        recipesList.add(new RecipeViewModel("English Pancakes", 10, 300));
+        recipesList.add(new RecipeViewModel("Spag Bol", 4, 550, photoPath));
         recipesAdapter.notifyDataSetChanged();
     }
 

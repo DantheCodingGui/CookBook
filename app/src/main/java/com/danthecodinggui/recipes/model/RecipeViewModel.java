@@ -11,41 +11,30 @@ public class RecipeViewModel {
     private int ingredientsNo = -1;
     private int stepsNo = -1;
 
-    //private Bitmap preview;
-
-    public Uri getImagePreviewUri() {
-        return imagePreviewUri;
-    }
-
-    public void setImagePreviewUri(Uri imagePreviewUri) {
-        this.imagePreviewUri = imagePreviewUri;
-    }
-
-    private Uri imagePreviewUri;
-    //change to URI for glide to load w/ data binding
+    private String imageFilePath;
 
     private int calories;
     private int timeInMins;
 
-    public RecipeViewModel(String title, Integer calories, int timeInMins, Uri imagePreviewUri) {
+    public RecipeViewModel(String title, Integer calories, int timeInMins, String imagefilePath) {
         this.title = title;
         this.calories = calories;
         this.timeInMins = timeInMins;
-        this.imagePreviewUri = imagePreviewUri;
+        this.imageFilePath = imagefilePath;
     }
     public RecipeViewModel(String title, Integer calories, int timeInMins) {
         this(title,  calories, timeInMins, null);
     }
 
     //With Image
-    public RecipeViewModel(String title, Integer calories, Uri imagePreviewUri) {
-        this(title,  calories, -1, imagePreviewUri);
+    public RecipeViewModel(String title, Integer calories, String imagefilePath) {
+        this(title,  calories, -1, imagefilePath);
     }
-    public RecipeViewModel(String title, int timeInMins, Uri imagePreviewUri) {
-        this(title, -1, timeInMins, imagePreviewUri);
+    public RecipeViewModel(String title, int timeInMins, String imagefilePath) {
+        this(title, -1, timeInMins, imagefilePath);
     }
-    public RecipeViewModel(String title, Uri imagePreviewUri) {
-        this(title, -1, -1, imagePreviewUri);
+    public RecipeViewModel(String title, String imagefilePath) {
+        this(title, -1, -1, imagefilePath);
     }
 
     //Without Image
@@ -72,7 +61,7 @@ public class RecipeViewModel {
      * @return
      */
     public boolean hasPhoto() {
-        return imagePreviewUri != null;
+        return imageFilePath != null;
     }
 
     public String getTitle() {
@@ -96,14 +85,12 @@ public class RecipeViewModel {
         this.stepsNo = stepsNo;
     }
 
-    /*
-    public Bitmap getPreview() {
-        return preview;
+    public String getImageFilePath() {
+        return imageFilePath;
     }
-    public void setPreview(Bitmap preview) {
-        this.preview = preview;
+    public void setImageFilePath(String imageFilePath) {
+        this.imageFilePath = imageFilePath;
     }
-    */
 
     public int getCalories() {
         return calories;

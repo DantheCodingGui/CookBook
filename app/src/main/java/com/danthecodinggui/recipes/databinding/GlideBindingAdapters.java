@@ -1,6 +1,5 @@
-package com.danthecodinggui.recipes.data_binding;
+package com.danthecodinggui.recipes.databinding;
 
-import android.app.Activity;
 import android.content.Context;
 import android.databinding.BindingAdapter;
 import android.graphics.drawable.Drawable;
@@ -13,7 +12,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.danthecodinggui.recipes.R;
+
+import java.io.File;
 
 /**
  * Set of methods to be called when specific data binding attributes are set in layout files,
@@ -21,15 +24,23 @@ import com.bumptech.glide.request.target.Target;
  */
 public class GlideBindingAdapters {
 
-    @BindingAdapter("imageUri")
-    public static void setImageResource(final ImageView view, Uri imageUri) {
+    @BindingAdapter("imageFilePath")
+    public static void setImageResource(final ImageView view, String imageFilePath) {
+
+        //Get Uri from filepath
+        Uri photoUri = Uri.fromFile(new File(imageFilePath));
 
         //Load an image (local storage) into an ImageView from a Uri
 
         final Context context = view.getContext();
 
+        RequestOptions options = new RequestOptions()
+                .placeholder(R.drawable.ic_launcher_background)
+                .error(R.drawable.ic_launcher_background);
+
         Glide.with(context)
-                .load(imageUri)
+                .setDefaultRequestOptions(options)
+                .load(photoUri)
                 .listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -40,7 +51,7 @@ public class GlideBindingAdapters {
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                         ((FragmentActivity)context).supportStartPostponedEnterTransition();
-                        return true;
+                        return false;
                     }
                 })
                 .into(view);

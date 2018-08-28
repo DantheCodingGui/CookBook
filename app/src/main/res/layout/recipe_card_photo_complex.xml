@@ -21,7 +21,7 @@
             <ImageView
                 android:id="@+id/ivw_crd_preview"
                 style="@style/CardImagePreview"
-                app:imageUri="@{recipe.getImagePreviewUri()}"
+                app:imageFilePath="@{recipe.getImageFilePath()}"
                 tools:src="@drawable/sample_image"/>
 
             <LinearLayout

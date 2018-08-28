@@ -14,7 +14,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
-import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -28,7 +27,6 @@ import com.danthecodinggui.recipes.databinding.ActivityViewRecipeBinding;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipePhotoBinding;
 import com.danthecodinggui.recipes.model.RecipeViewModel;
 import com.danthecodinggui.recipes.msc.AnimUtils;
-import com.danthecodinggui.recipes.msc.IntentConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,7 +85,8 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
             bindingPhoto.ivwToolbarPreview.setImageBitmap(BitmapFactory.decodeResource(getResources(),
                     R.drawable.sample_image));
 
-            String url = foodPhotos[new Random().nextInt(foodPhotos.length)];
+            //String url = foodPhotos[new Random().nextInt(foodPhotos.length)];
+            String url = foodPhotos[1];
 
             //TODO remove all url references when actually loading images (also remove internet privelige)
             Glide.with(this)
