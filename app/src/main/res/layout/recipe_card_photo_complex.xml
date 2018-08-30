@@ -18,9 +18,11 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <ImageView
+            <com.makeramen.roundedimageview.RoundedImageView
                 android:id="@+id/ivw_crd_preview"
                 style="@style/CardImagePreview"
+                app:riv_corner_radius_top_left="10dp"
+                app:riv_corner_radius_top_right="10dp"
                 app:imageFilePath="@{recipe.getImageFilePath()}"
                 tools:src="@drawable/sample_image"/>
 

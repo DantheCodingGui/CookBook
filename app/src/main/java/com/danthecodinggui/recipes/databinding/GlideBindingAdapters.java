@@ -6,6 +6,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.CircularProgressDrawable;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -17,6 +19,8 @@ import com.bumptech.glide.request.target.Target;
 import com.danthecodinggui.recipes.R;
 
 import java.io.File;
+
+import static com.danthecodinggui.recipes.msc.LogTags.GLIDE;
 
 /**
  * Set of methods to be called when specific data binding attributes are set in layout files,
@@ -34,9 +38,16 @@ public class GlideBindingAdapters {
 
         final Context context = view.getContext();
 
+        //Make placeholder spinner
+        CircularProgressDrawable placeholder = new CircularProgressDrawable(context);
+        placeholder.setStrokeWidth(5f);
+        placeholder.setCenterRadius(50f);
+        placeholder.start();
+
+        //Todo update placeholder and error with final custom ones
         RequestOptions options = new RequestOptions()
-                .placeholder(R.drawable.ic_launcher_background)
-                .error(R.drawable.ic_launcher_background);
+                .placeholder(placeholder)
+                .error(R.drawable.ic_imageload_error);
 
         Glide.with(context)
                 .setDefaultRequestOptions(options)
@@ -45,6 +56,7 @@ public class GlideBindingAdapters {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                         ((FragmentActivity)context).supportStartPostponedEnterTransition();
+                        Log.e(GLIDE, "Data Binding image loading failed (from filepath)", e);
                         return false;
                     }
 

@@ -4,9 +4,6 @@
         <variable
             name="recipe"
             type="com.danthecodinggui.recipes.model.RecipeViewModel"/>
-        <variable
-            name="temp"
-            type="Integer"/>
     </data>
     <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -29,7 +26,7 @@
             <android.support.design.widget.CollapsingToolbarLayout
                 android:id="@+id/ctl_vw_recipe"
                 android:layout_width="match_parent"
-                android:layout_height="250dp"
+                android:layout_height="200dp"
                 app:title="@{recipe.getTitle()}"
                 app:expandedTitleMarginBottom="5dp"
                 app:collapsedTitleTextAppearance="@font/open_sans_light"
@@ -39,10 +36,11 @@
                 app:contentScrim="@android:color/transparent"
                 app:statusBarScrim="@android:color/transparent">
 
+
                 <ImageView
                     android:id="@+id/ivw_toolbar_preview"
                     android:layout_width="match_parent"
-                    android:layout_height="362dp"
+                    android:layout_height="312dp"
                     android:scaleType="centerCrop"
                     android:fitsSystemWindows="true"
                     android:paddingBottom="?attr/actionBarSize"
@@ -93,6 +91,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
 
     </android.support.design.widget.CoordinatorLayout>
 </layout>

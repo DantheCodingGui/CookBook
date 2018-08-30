@@ -1,5 +1,6 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
+import android.app.Activity;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +15,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -27,6 +29,7 @@ import com.danthecodinggui.recipes.databinding.ActivityViewRecipeBinding;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipePhotoBinding;
 import com.danthecodinggui.recipes.model.RecipeViewModel;
 import com.danthecodinggui.recipes.msc.AnimUtils;
+import com.danthecodinggui.recipes.msc.MaterialColours;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -185,13 +188,17 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
 
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_ingredients);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_method);
-
     }
 
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        supportFinishAfterTransition();
     }
 
     @Override

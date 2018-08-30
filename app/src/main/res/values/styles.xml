@@ -47,7 +47,6 @@
         <item name="cardElevation">2dp</item>
         <item name="cardPreventCornerOverlap">true</item>
         <item name="cardUseCompatPadding">true</item>
-        <item name="android:transitionName">test</item>
     </style>
 
     <style name="CardRecipeTitle">

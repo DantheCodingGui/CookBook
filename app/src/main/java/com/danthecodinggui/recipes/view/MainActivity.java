@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity
 
         //Example cards TODO remove later
         recipesList.add(new RecipeViewModel("American Pancakes"));
-        recipesList.add(new RecipeViewModel("Sushi Sliders", photoPath));
+        recipesList.add(new RecipeViewModel("Lasagna", photoPath));
         recipesList.add(new RecipeViewModel("English Pancakes", 10, 300));
         recipesList.add(new RecipeViewModel("Spag Bol", 4, 550, photoPath));
         recipesAdapter.notifyDataSetChanged();
@@ -416,7 +416,7 @@ public class MainActivity extends AppCompatActivity
                 //TODO implement transition to view activity
                 //TODO add flag to call stating photo/no photo to choose layout to inflate
                 //TODO make simpler viewrecipe layout without collapsingtoolbarlayout
-                ViewRecipe(view, getAdapterPosition(), null);
+                ViewRecipe(getAdapterPosition(), null);
             }
 
             @Override
@@ -461,7 +461,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
-                ViewRecipe(view, getAdapterPosition(), photoBinding.ivwCrdPreview);
+                ViewRecipe(getAdapterPosition(), photoBinding.ivwCrdPreview);
             }
         }
         class ComplexPhotoViewHolder extends RecipeViewHolder {
@@ -485,12 +485,12 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
-                ViewRecipe(view, getAdapterPosition(), photoBinding.ivwCrdPreview);
+                ViewRecipe(getAdapterPosition(), photoBinding.ivwCrdPreview);
             }
         }
     }
 
-    private void ViewRecipe(View cardView, int recipeId, ImageView sharedImageView) {
+    private void ViewRecipe(int recipeId, ImageView sharedImageView) {
 
         Intent viewRecipe = new Intent(this, ViewRecipeActivity.class);
         ActivityOptions options;

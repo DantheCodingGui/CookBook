@@ -14,9 +14,8 @@
             android:id="@+id/tbar_add"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/backToolbar"
-            android:theme="@style/ThemeOverlay.AppCompat.Light"
-            android:elevation="5dp"/>
+            android:background="@android:color/white"
+            android:theme="@style/ThemeOverlay.AppCompat.Light"/>
 
         <android.support.design.widget.CoordinatorLayout
             android:layout_width="match_parent"
