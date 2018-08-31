@@ -1,6 +1,5 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
-import android.app.Activity;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,7 +14,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
-import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -28,13 +26,12 @@ import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipeBinding;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipePhotoBinding;
 import com.danthecodinggui.recipes.model.RecipeViewModel;
-import com.danthecodinggui.recipes.msc.AnimUtils;
 import com.danthecodinggui.recipes.msc.MaterialColours;
+import com.danthecodinggui.recipes.msc.Utility;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DB_ID;
@@ -77,7 +74,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
 
             bindingPhoto.setRecipe(recipe);
 
-            if (AnimUtils.canUseSharedTransitions()) {
+            if (Utility.atLeastLollipop()) {
                 //Set the shared elements transition name
                 String imageTransitionName = extras.getString(CARD_TRANSITION_NAME);
                 bindingPhoto.ivwToolbarPreview.setTransitionName(imageTransitionName);
@@ -123,7 +120,6 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         }
         else {
             binding = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe);
-            //supportPostponeEnterTransition();
 
             binding.setRecipe(new RecipeViewModel("Fish and Chips"));
 
@@ -132,12 +128,28 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
             SetupTabLayout(binding.tlyViewRecipe, binding.vprViewRecipe);
+
+            //Set random colour of layout
+            SetLayoutColour();
         }
 
         //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         //    String imageTransitionName = getIntent().getStringExtra(CARD_TRANSITION_NAME);
         //    binding.viewRecipeRoot.setTransitionName(imageTransitionName);
         //}
+    }
+
+    private void SetLayoutColour() {
+        int randMaterialCol = MaterialColours.nextColour();
+
+        binding.tbarVwRecipe.setBackgroundColor(randMaterialCol);
+        binding.tlyViewRecipe.setBackgroundColor(randMaterialCol);
+
+        if (Utility.atLeastLollipop()) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(randMaterialCol);
+        }
     }
 
     /**

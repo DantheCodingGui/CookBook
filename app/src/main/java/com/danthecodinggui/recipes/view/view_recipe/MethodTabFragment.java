@@ -3,6 +3,7 @@ package com.danthecodinggui.recipes.view.view_recipe;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -79,12 +80,16 @@ public class MethodTabFragment extends Fragment {
 
         class StepViewHolder extends RecyclerView.ViewHolder {
 
+            @BindView(R.id.crd_method_item)
+            CardView background;
+
             @BindView(R.id.txt_method_item)
             TextView step;
 
             StepViewHolder(View itemView) {
                 super(itemView);
                 ButterKnife.bind(this, itemView);
+                background.setCardBackgroundColor(getResources().getColor(R.color.colorMethodStep));
             }
         }
     }

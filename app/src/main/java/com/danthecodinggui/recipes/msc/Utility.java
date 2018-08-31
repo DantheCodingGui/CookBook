@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.view.View;
 
 /**
@@ -22,5 +23,9 @@ public class Utility {
         int result = a.getColor(0, 0);
         a.recycle();
         return result;
+    }
+
+    public static boolean atLeastLollipop() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
 }

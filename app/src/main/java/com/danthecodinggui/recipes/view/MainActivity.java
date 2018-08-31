@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -48,9 +47,9 @@ import com.danthecodinggui.recipes.model.RecipeViewModel;
 import com.danthecodinggui.recipes.msc.AnimUtils;
 import com.danthecodinggui.recipes.msc.IntentConstants;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
+import com.danthecodinggui.recipes.msc.Utility;
 import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -498,7 +497,7 @@ public class MainActivity extends AppCompatActivity
         //Todo remove line later when records loaded from db
         viewRecipe.putExtra("hasPhoto", sharedImageView != null);
 
-        if (AnimUtils.canUseSharedTransitions()) {
+        if (Utility.atLeastLollipop()) {
 
             if (sharedImageView != null) {
 
