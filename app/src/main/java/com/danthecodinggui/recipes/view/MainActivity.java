@@ -25,6 +25,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -94,7 +95,7 @@ public class MainActivity extends AppCompatActivity
         //Conditionally set RecyclerView layout manager depending on screen orientation
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE)
-            binding.rvwRecipes.setLayoutManager(new GridLayoutManager(getApplicationContext(), 2));
+            binding.rvwRecipes.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         else
             binding.rvwRecipes.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
