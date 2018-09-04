@@ -4,11 +4,12 @@ import android.provider.BaseColumns;
 
 final class DBSchema {
 
-    static final String INGREDIENTS_JOIN = "SELECT " +
-            RecipeIngredientEntry._ID + ", " + RecipeIngredientEntry.RECIPE_ID + ", " +
-            IngredientEntry.NAME + " FROM " +
+    static final String INGREDIENTS_JOIN = "(SELECT " +
+            RecipeIngredientEntry.TABLE_NAME + "." + RecipeIngredientEntry._ID + ", " +
+            RecipeIngredientEntry.RECIPE_ID + ", " + IngredientEntry.NAME + " FROM " +
             RecipeIngredientEntry.TABLE_NAME + " INNER JOIN " + IngredientEntry.TABLE_NAME +
-                    " ON " + RecipeIngredientEntry.INGREDIENT_ID  + " = " + IngredientEntry._ID;
+            " ON " + RecipeIngredientEntry.INGREDIENT_ID  + " = " + IngredientEntry.TABLE_NAME +
+            "." + IngredientEntry._ID + ")";
 
     /**
      * Core recipe data

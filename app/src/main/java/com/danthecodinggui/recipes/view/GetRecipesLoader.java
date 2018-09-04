@@ -22,12 +22,6 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
     private List<RecipeViewModel> records;
 
-    private static final int PERM_CODE_WAITING = 0;
-    private static final int PERM_CODE_GRANTED = 1;
-    private static final int PERM_CODE_DENIED = 2;
-
-    private int permResponseCode = PERM_CODE_WAITING;
-
     private ImagePermissionsListener permissionsCallback;
 
     //Content provider query data
@@ -77,6 +71,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         );
         //Cursor for the ingredients/method queries afterwards
         Cursor countCursor;
+
         //Temporary holder variable
         RecipeViewModel temp;
 
@@ -87,23 +82,23 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
             temp = BuildBaseModel(baseCursor);
 
                     //Add ingredients data to record
-            String[] countSelArgs = {Long.toString(
+            String[] countSelArgs = { Long.toString(
                     baseCursor.getLong(baseCursor.getColumnIndexOrThrow(
-                    ProviderContract.RecipeEntry._ID)))};
+                    ProviderContract.RecipeEntry._ID))) };
 
             //syntax error (code 1): , while compiling: SELECT count(_id) AS count FROM SELECT _id, RecipeId, IngredientName FROM RecipeIngredients INNER JOIN Ingredients ON IngredientId = _id WHERE (RecipeId = ?)
 
-//            countCursor = contentResolver.query(
-//                    ProviderContract.RECIPE_INGREDIENTS_URI,
-//                    ProviderContract.COUNT_INGREDIENTS_PROJECTION,
-//                    ingreSel,
-//                    countSelArgs,
-//                    null
-//            );
-//            if (countCursor == null)
-//                Log.e(LogTags.CONTENT_PROVIDER, "Previews Loader: ingredients cursor is null");
-//            else
-//                temp = AddIngredientCount(countCursor, temp);
+            countCursor = contentResolver.query(
+                    ProviderContract.RECIPE_INGREDIENTS_URI,
+                    ProviderContract.COUNT_INGREDIENTS_PROJECTION,
+                    ingreSel,
+                    countSelArgs,
+                    null
+            );
+            if (countCursor == null)
+                Log.e(LogTags.CONTENT_PROVIDER, "Previews Loader: ingredients cursor is null");
+            else
+                temp = AddIngredientCount(countCursor, temp);
 
             //Add method data to record
             countCursor = contentResolver.query(
@@ -120,7 +115,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
 
             //Need to ask for permission if a recipe includes a photo
-            if (temp.hasPhoto())
+            if (temp.hasPhoto() && permissionsCallback != null)
                 AskForReadPermission();
 
             records.add(temp);
@@ -146,6 +141,8 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
             @Override
             public void run() {
                 permissionsCallback.onImagePermRequested();
+                //Nullify reference to avoid memory leak
+                permissionsCallback = null;
             }
         });
     }
@@ -229,17 +226,6 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
                 cursor.getColumnIndexOrThrow(BaseColumns._COUNT))
         );
         return currentModel;
-    }
-
-    /**
-     * Unblocks Loader's background thread, the status of the permission requested is available
-     * @param permissionGranted Whether the requested permission has been granted
-     */
-    void onPermissionResponse(boolean permissionGranted) {
-        if (permissionGranted)
-            permResponseCode = PERM_CODE_GRANTED;
-        else
-            permResponseCode = PERM_CODE_DENIED;
     }
 
     interface ImagePermissionsListener {
