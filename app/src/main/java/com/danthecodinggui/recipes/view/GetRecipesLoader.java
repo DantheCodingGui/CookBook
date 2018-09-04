@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
+import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.danthecodinggui.recipes.model.FileUtils;
@@ -15,6 +16,8 @@ import com.danthecodinggui.recipes.msc.LogTags;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 
 public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
@@ -47,17 +50,21 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
                      ImagePermissionsListener permissionCallback, int loaderId) {
         super(context, uiThread, updateCallback, loaderId);
         contentResolver = context.getContentResolver();
-        records = new ArrayList<>();
         this.permissionsCallback = permissionCallback;
     }
 
     @Override
     protected void onStartLoading() {
         //Cache records so can handle orientation changes and such
-        if (records != null)
+        if (records != null) {
+            Log.v(DATA_LOADING, "Recipe loading started: Using cached values");
             deliverResult(records);
-        else
+        }
+        else {
+            Log.v(DATA_LOADING, "Recipe loading started: Load new values");
+            records = new ArrayList<>();
             forceLoad();
+        }
     }
 
     @Override
@@ -82,31 +89,34 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
             //Get base recipe data
             temp = BuildBaseModel(baseCursor);
 
-            //Add ingredients data to record
-            String[] countSelArgs = {Long.toString(baseCursor.getColumnIndexOrThrow(
-                    ProviderContract.RecipeEntry._ID
-            ))};
+                    //Add ingredients data to record
+            String[] countSelArgs = {Long.toString(
+                    baseCursor.getLong(baseCursor.getColumnIndexOrThrow(
+                    ProviderContract.RecipeEntry._ID)))};
 
-            countCursor = contentResolver.query(
-                    ProviderContract.RECIPE_INGREDIENTS_URI,
-                    ProviderContract.COUNT_PROJECTION,
-                    ingreSel,
-                    countSelArgs,
-                    null
-            );
-            if (countCursor == null)
-                Log.e(LogTags.CONTENT_PROVIDER, "Previews Loader: ingredients cursor is null");
-            else
-                temp = AddIngredientCount(countCursor, temp);
+            //syntax error (code 1): , while compiling: SELECT count(_id) AS count FROM SELECT _id, RecipeId, IngredientName FROM RecipeIngredients INNER JOIN Ingredients ON IngredientId = _id WHERE (RecipeId = ?)
+
+//            countCursor = contentResolver.query(
+//                    ProviderContract.RECIPE_INGREDIENTS_URI,
+//                    ProviderContract.COUNT_PROJECTION,
+//                    ingreSel,
+//                    countSelArgs,
+//                    null
+//            );
+//            if (countCursor == null)
+//                Log.e(LogTags.CONTENT_PROVIDER, "Previews Loader: ingredients cursor is null");
+//            else
+//                temp = AddIngredientCount(countCursor, temp);
 
             //Add method data to record
             countCursor = contentResolver.query(
-                    ProviderContract.RECIPE_INGREDIENTS_URI,
+                    ProviderContract.METHOD_URI,
                     ProviderContract.COUNT_PROJECTION,
                     methodSel,
                     countSelArgs,
                     null
             );
+
             if (countCursor == null)
                 Log.e(LogTags.CONTENT_PROVIDER, "Previews Loader: method cursor is null");
             else
@@ -147,7 +157,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         baseCursor.close();
 
         //Return remaining records in list
-        return records.subList(recordsGathered - (recordsGathered % 10) - 1, recordsGathered - 1);
+        return records.subList(recordsGathered - (recordsGathered % 10), recordsGathered);
     }
 
     /**
@@ -238,7 +248,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
     private RecipeViewModel AddStepsCount(Cursor cursor, RecipeViewModel currentModel) {
         cursor.moveToFirst();
         currentModel.setStepsNo(
-                cursor.getColumnIndexOrThrow(ProviderContract.RecipeIngredientEntry._COUNT)
+                cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns._COUNT))
         );
         return currentModel;
     }

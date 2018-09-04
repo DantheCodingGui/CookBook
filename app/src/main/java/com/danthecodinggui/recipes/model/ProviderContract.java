@@ -8,7 +8,7 @@ import android.provider.BaseColumns;
  */
 public final class ProviderContract {
 
-    static final String CONTENT_AUTHORITY = "com.danthecodinggui.recipes.provider";
+    static final String CONTENT_AUTHORITY = "com.danthecodinggui.recipes.model.RecipeProvider";
 
     //Section of URI identifying table name
     static final String PATH_RECIPES = "Recipes";
@@ -26,7 +26,7 @@ public final class ProviderContract {
     public static final Uri RECIPE_INGREDIENTS_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPE_INGREDIENTS).build();
 
     //Count records projection string
-    public static final String[] COUNT_PROJECTION = { "count(" + BaseColumns._ID + ") AS count" };
+    public static final String[] COUNT_PROJECTION = { "count(" + MethodStepEntry.RECIPE_ID + ") AS " + BaseColumns._COUNT};
 
     //Empty constructor in case anyone instantiates class
     ProviderContract() {}

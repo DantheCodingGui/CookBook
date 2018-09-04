@@ -3,6 +3,7 @@ package com.danthecodinggui.recipes.model;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Basic Database helper to create and handle core database changes
@@ -15,7 +16,7 @@ class DBHelper extends SQLiteOpenHelper {
     private static final String CREATE_RECIPE = "CREATE TABLE " +
             DBSchema.RecipeEntry.TABLE_NAME + "(" +
             DBSchema.RecipeEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            DBSchema.RecipeEntry.VIEW_ORDER + "INTEGER NOT NULL, " +
+            DBSchema.RecipeEntry.VIEW_ORDER + " INTEGER NOT NULL, " +
             DBSchema.RecipeEntry.TITLE + " TEXT NOT NULL, " +
             DBSchema.RecipeEntry.CALORIES_PER_PERSON + " INTEGER, " +
             DBSchema.RecipeEntry.DURATION + " INTEGER, " +

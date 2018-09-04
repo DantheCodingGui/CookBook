@@ -116,7 +116,7 @@ public class RecipeProvider extends ContentProvider {
                 );
 
         //Ingredient is not already in table, must add it
-        if (ingredients == null) {
+        if (ingredients.getCount() <= 0) {
             ContentValues newIngredient = new ContentValues();
             newIngredient.put(DBSchema.IngredientEntry.NAME, ingredientName);
 

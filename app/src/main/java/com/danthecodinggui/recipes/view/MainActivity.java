@@ -2,12 +2,16 @@ package com.danthecodinggui.recipes.view;
 
 import android.Manifest;
 import android.app.ActivityOptions;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -21,7 +25,6 @@ import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -44,6 +47,7 @@ import com.danthecodinggui.recipes.databinding.RecipeCardBasicBinding;
 import com.danthecodinggui.recipes.databinding.RecipeCardComplexBinding;
 import com.danthecodinggui.recipes.databinding.RecipeCardPhotoBasicBinding;
 import com.danthecodinggui.recipes.databinding.RecipeCardPhotoComplexBinding;
+import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.RecipeViewModel;
 import com.danthecodinggui.recipes.msc.AnimUtils;
 import com.danthecodinggui.recipes.msc.IntentConstants;
@@ -77,7 +81,7 @@ public class MainActivity extends AppCompatActivity
     private GetRecipesLoader recipesLoader;
 
     //Loader IDs
-    private static final int PREVIEWS_TOKEN = 101;
+    private static final int RECIPE_PREVIEWS_LOADER = 101;
 
     //Permission request codes
     private static final int REQUEST_READ_EXTERNAL = 201;
@@ -119,12 +123,13 @@ public class MainActivity extends AppCompatActivity
 
         setSupportActionBar(binding.tbarHome);
 
-        getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
-
+        getSupportLoaderManager().initLoader(RECIPE_PREVIEWS_LOADER, null, this);
 
 
         String path = Environment.getExternalStorageDirectory().getPath();
         String photoPath = path + "/Download/food-dinner-lunch-70497.jpg";
+
+        //InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
 
         //Example cards TODO remove later
         recipesList.add(new RecipeViewModel("American Pancakes"));
@@ -132,6 +137,95 @@ public class MainActivity extends AppCompatActivity
         recipesList.add(new RecipeViewModel("English Pancakes", 10, 300));
         recipesList.add(new RecipeViewModel("Spag Bol", 4, 550, photoPath));
         recipesAdapter.notifyDataSetChanged();
+    }
+
+    private void InsertValue(String imagePath) {
+
+        ContentResolver resolver = getContentResolver();
+
+        ContentValues values = new ContentValues();
+
+        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, 20);
+        values.put(ProviderContract.RecipeEntry.TITLE, "Pasta Aglio E Olio");
+        values.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, 340);
+        values.put(ProviderContract.RecipeEntry.DURATION, 20);
+        values.put(ProviderContract.RecipeEntry.IMAGE_PATH, imagePath);
+
+        Uri result = resolver.insert(
+                ProviderContract.RECIPES_URI,
+                values);
+
+        long recipeId = ContentUris.parseId(result);
+
+        //Ingredients
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Spaghetti");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Garlic");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Parsley");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Olive Oil");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Red Pepper Flake");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Chicken (Optional)");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        //Method
+
+        values = new ContentValues();
+        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.MethodStepEntry.STEP_NO, 1);
+        values.put(ProviderContract.MethodStepEntry.TEXT, "Gradually heat up oil in pan and saute garlic until golden");
+        resolver.insert(
+                ProviderContract.METHOD_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.MethodStepEntry.STEP_NO, 2);
+        values.put(ProviderContract.MethodStepEntry.TEXT, "Add Red Pepper Flake and chopped Parsley");
+        resolver.insert(
+                ProviderContract.METHOD_URI,
+                values);
+
+
+        values = new ContentValues();
+        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.MethodStepEntry.STEP_NO, 3);
+        values.put(ProviderContract.MethodStepEntry.TEXT, "Toss with cooked spaghetti and add cooked chicken if desired");
+        resolver.insert(
+                ProviderContract.METHOD_URI,
+                values);
     }
 
     @Override
@@ -214,7 +308,7 @@ public class MainActivity extends AppCompatActivity
                     break;
         }
 
-        getSupportLoaderManager().initLoader(PREVIEWS_TOKEN, null, this);
+        getSupportLoaderManager().initLoader(RECIPE_PREVIEWS_LOADER, null, this);
     }
 
     @Override
@@ -248,13 +342,13 @@ public class MainActivity extends AppCompatActivity
     public android.support.v4.content.Loader<List<RecipeViewModel>> onCreateLoader(int id, Bundle args) {
         Handler uiThread = new Handler(getMainLooper());
         return recipesLoader = new GetRecipesLoader(this, uiThread, this,
-                this, PREVIEWS_TOKEN);
+                this, RECIPE_PREVIEWS_LOADER);
     }
 
     @Override
     public <T> void onProgressUpdate(int loaderId, T updateValue) {
         switch(loaderId) {
-            case PREVIEWS_TOKEN:
+            case RECIPE_PREVIEWS_LOADER:
                 UpdateRecipesList((List)updateValue);
                 break;
         }
@@ -264,6 +358,9 @@ public class MainActivity extends AppCompatActivity
     public void onLoadFinished(android.support.v4.content.Loader<List<RecipeViewModel>> loader, List<RecipeViewModel> remainingRecords) {
         //Add the remaining records (not passed through onProgressUpdate) to recipeList
         recipesList.addAll(remainingRecords);
+        recipesAdapter.notifyDataSetChanged();
+
+        getLoaderManager().destroyLoader(RECIPE_PREVIEWS_LOADER);
     }
 
     private void UpdateRecipesList(List<RecipeViewModel> newRecords) {
