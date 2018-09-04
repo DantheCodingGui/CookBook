@@ -26,7 +26,10 @@ public final class ProviderContract {
     public static final Uri RECIPE_INGREDIENTS_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPE_INGREDIENTS).build();
 
     //Count records projection string
-    public static final String[] COUNT_PROJECTION = { "count(" + MethodStepEntry.RECIPE_ID + ") AS " + BaseColumns._COUNT};
+    public static final String[] COUNT_INGREDIENTS_PROJECTION = { "count(" + RecipeIngredientEntry.RECIPE_ID +
+            ") AS " + BaseColumns._COUNT};
+    public static final String[] COUNT_STEPS_PROJECTION = { "count(" + MethodStepEntry.RECIPE_ID +
+            ") AS " + BaseColumns._COUNT};
 
     //Empty constructor in case anyone instantiates class
     ProviderContract() {}
@@ -35,8 +38,6 @@ public final class ProviderContract {
      * Core recipe data
      */
     public final class RecipeEntry implements BaseColumns {
-
-        public static final String TABLE_NAME = "Recipes";
 
         public static final String VIEW_ORDER = "ViewOrder";
         public static final String TITLE = "Title";
@@ -50,8 +51,6 @@ public final class ProviderContract {
      */
     public final class RecipeIngredientEntry implements BaseColumns {
 
-        public static final String TABLE_NAME = "RecipeIngredients";
-
         public static final String RECIPE_ID = "RecipeId";
         public static final String INGREDIENT_NAME = "IngredientName";
     }
@@ -60,8 +59,6 @@ public final class ProviderContract {
      * Step in recipe method with associated recipe
      */
     public final class MethodStepEntry implements BaseColumns {
-
-        public static final String TABLE_NAME = "Steps";
 
         public static final String RECIPE_ID = "Recipe";
         public static final String STEP_NO = "StepNo";

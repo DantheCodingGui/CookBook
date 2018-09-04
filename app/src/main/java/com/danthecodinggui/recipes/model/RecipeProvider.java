@@ -56,8 +56,6 @@ public class RecipeProvider extends ContentProvider {
         SQLiteDatabase db;
         String tableName;
 
-        ContentValues editedValues = values;
-
         switch (uriMatcher.match(uri)) {
             case RECIPES_TABLE:
                 tableName = DBSchema.RecipeEntry.TABLE_NAME;
@@ -73,9 +71,9 @@ public class RecipeProvider extends ContentProvider {
 
                 long ingredientId = GetIngredientId(ingredient);
 
-                editedValues = new ContentValues();
-                values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-                values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, ingredientId);
+                values = new ContentValues();
+                values.put(DBSchema.RecipeIngredientEntry.RECIPE_ID, recipeId);
+                values.put(DBSchema.RecipeIngredientEntry.INGREDIENT_ID, ingredientId);
 
                 tableName = DBSchema.RecipeIngredientEntry.TABLE_NAME;
                 break;
@@ -84,7 +82,7 @@ public class RecipeProvider extends ContentProvider {
         }
 
         db = dbHelper.getWritableDatabase();
-        long id = db.insert(tableName, null, editedValues);
+        long id = db.insert(tableName, null, values);
         return ContentUris.withAppendedId(uri, id);
     }
 

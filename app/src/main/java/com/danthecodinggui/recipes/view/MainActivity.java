@@ -123,13 +123,13 @@ public class MainActivity extends AppCompatActivity
 
         setSupportActionBar(binding.tbarHome);
 
-        getSupportLoaderManager().initLoader(RECIPE_PREVIEWS_LOADER, null, this);
+        //getSupportLoaderManager().initLoader(RECIPE_PREVIEWS_LOADER, null, this);
 
 
         String path = Environment.getExternalStorageDirectory().getPath();
         String photoPath = path + "/Download/food-dinner-lunch-70497.jpg";
 
-        //InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
+        InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
 
         //Example cards TODO remove later
         recipesList.add(new RecipeViewModel("American Pancakes"));
@@ -273,10 +273,8 @@ public class MainActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch(requestCode) {
             case REQUEST_READ_EXTERNAL:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Permission now granted!", Toast.LENGTH_SHORT).show();
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     recipesLoader.onPermissionResponse(true);
-                }
                 else {
                     //Alert the user why this permission is needed
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
