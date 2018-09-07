@@ -59,7 +59,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
-import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DB_ID;
+import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_BUNDLE;
+import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_OBJECT;
 import static com.danthecodinggui.recipes.msc.LogTags.PERMISSIONS;
 
 /**
@@ -126,17 +127,8 @@ public class MainActivity extends AppCompatActivity
         getSupportLoaderManager().initLoader(RECIPE_PREVIEWS_LOADER, null, this);
 
 
-        String path = Environment.getExternalStorageDirectory().getPath();
-        String photoPath = path + "/Download/food-dinner-lunch-70497.jpg";
-
+        //String path = Environment.getExternalStorageDirectory().getPath();
         //InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
-
-        //Example cards TODO remove later
-        recipesList.add(new RecipeViewModel("American Pancakes"));
-        recipesList.add(new RecipeViewModel("Lasagna", photoPath));
-        recipesList.add(new RecipeViewModel("English Pancakes", 10, 300));
-        recipesList.add(new RecipeViewModel("Spag Bol", 4, 550, photoPath));
-        recipesAdapter.notifyDataSetChanged();
     }
 
     private void InsertValue(String imagePath) {
@@ -306,8 +298,6 @@ public class MainActivity extends AppCompatActivity
                 }
                     break;
         }
-
-        getSupportLoaderManager().initLoader(RECIPE_PREVIEWS_LOADER, null, this);
     }
 
     @Override
@@ -359,7 +349,16 @@ public class MainActivity extends AppCompatActivity
         recipesList.addAll(remainingRecords);
         recipesAdapter.notifyDataSetChanged();
 
-        getLoaderManager().destroyLoader(RECIPE_PREVIEWS_LOADER);
+        getLoaderManager().destroyLoader(loader.getId());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        //Loader will always reload data in onStart, so reset here
+        recipesList.clear();
+        recipesAdapter.notifyDataSetChanged();
     }
 
     private void UpdateRecipesList(List<RecipeViewModel> newRecords) {
@@ -509,10 +508,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
-                //TODO implement transition to view activity
-                //TODO add flag to call stating photo/no photo to choose layout to inflate
-                //TODO make simpler viewrecipe layout without collapsingtoolbarlayout
-                ViewRecipe(getAdapterPosition(), null);
+                ViewRecipe(recipesList.get(getAdapterPosition()), null);
             }
 
             @Override
@@ -557,7 +553,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
-                ViewRecipe(getAdapterPosition(), photoBinding.ivwCrdPreview);
+                ViewRecipe(recipesList.get(getAdapterPosition()), photoBinding.ivwCrdPreview);
             }
         }
         class ComplexPhotoViewHolder extends RecipeViewHolder {
@@ -581,18 +577,20 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
-                ViewRecipe(getAdapterPosition(), photoBinding.ivwCrdPreview);
+                ViewRecipe(recipesList.get(getAdapterPosition()), photoBinding.ivwCrdPreview);
             }
         }
     }
 
-    private void ViewRecipe(int recipeId, ImageView sharedImageView) {
+    private void ViewRecipe(RecipeViewModel recipe, ImageView sharedImageView) {
 
         Intent viewRecipe = new Intent(this, ViewRecipeActivity.class);
         ActivityOptions options;
-        viewRecipe.putExtra(RECIPE_DB_ID, recipeId);
-        //Todo remove line later when records loaded from db
-        viewRecipe.putExtra("hasPhoto", sharedImageView != null);
+
+        Bundle recipeBundle = new Bundle();
+        recipeBundle.putParcelable(RECIPE_DETAIL_OBJECT, recipe);
+
+        viewRecipe.putExtra(RECIPE_DETAIL_BUNDLE, recipeBundle);
 
         if (Utility.atLeastLollipop()) {
 

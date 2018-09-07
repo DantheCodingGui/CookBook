@@ -1,11 +1,15 @@
 package com.danthecodinggui.recipes.model;
 
-import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * MainActivity RecyclerView model
  */
-public class RecipeViewModel {
+public class RecipeViewModel implements Parcelable {
+
+    //Primary key in db
+    private long recipePk;
 
     private String title;
     private int ingredientsNo = -1;
@@ -16,36 +20,37 @@ public class RecipeViewModel {
     private int calories;
     private int timeInMins;
 
-    public RecipeViewModel(String title, Integer calories, int timeInMins, String imagefilePath) {
+    public RecipeViewModel(long recipePk, String title, Integer calories, int timeInMins, String imagefilePath) {
+        this.recipePk = recipePk;
         this.title = title;
         this.calories = calories;
         this.timeInMins = timeInMins;
         this.imageFilePath = imagefilePath;
     }
-    public RecipeViewModel(String title, Integer calories, int timeInMins) {
-        this(title,  calories, timeInMins, null);
+    public RecipeViewModel(long recipePk, String title, Integer calories, int timeInMins) {
+        this(recipePk, title,  calories, timeInMins, null);
     }
 
     //With Image
-    public RecipeViewModel(String title, Integer calories, String imagefilePath) {
-        this(title,  calories, -1, imagefilePath);
+    public RecipeViewModel(long recipePk, String title, Integer calories, String imagefilePath) {
+        this(recipePk, title,  calories, -1, imagefilePath);
     }
-    public RecipeViewModel(String title, int timeInMins, String imagefilePath) {
-        this(title, -1, timeInMins, imagefilePath);
+    public  RecipeViewModel(long recipePk, String title, int timeInMins, String imagefilePath) {
+        this(recipePk, title, -1, timeInMins, imagefilePath);
     }
-    public RecipeViewModel(String title, String imagefilePath) {
-        this(title, -1, -1, imagefilePath);
+    public RecipeViewModel(long recipePk, String title, String imagefilePath) {
+        this(recipePk, title, -1, -1, imagefilePath);
     }
 
     //Without Image
-    public RecipeViewModel(String title, Integer calories) {
-        this(title,  calories, -1, null);
+    public RecipeViewModel(long recipePk, String title, Integer calories) {
+        this(recipePk, title,  calories, -1, null);
     }
-    public RecipeViewModel(String title, int timeInMins) {
-        this(title, -1, timeInMins, null);
+    public RecipeViewModel(long recipePk, String title, int timeInMins) {
+        this(recipePk, title, -1, timeInMins, null);
     }
-    public RecipeViewModel(String title) {
-        this(title, -1, -1, null);
+    public RecipeViewModel(long recipePk, String title) {
+        this(recipePk, title, -1, -1, null);
     }
 
     /**
@@ -62,6 +67,10 @@ public class RecipeViewModel {
      */
     public boolean hasPhoto() {
         return imageFilePath != null;
+    }
+
+    public long getRecipeId() {
+        return recipePk;
     }
 
     public String getTitle() {
@@ -105,4 +114,45 @@ public class RecipeViewModel {
     public void setTimeInMins(int timeInMins) {
         this.timeInMins = timeInMins;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeLong(recipePk);
+        parcel.writeString(title);
+        parcel.writeInt(ingredientsNo);
+        parcel.writeInt(stepsNo);
+        parcel.writeString(imageFilePath);
+        parcel.writeInt(calories);
+        parcel.writeInt(timeInMins);
+    }
+
+    public RecipeViewModel(Parcel parcel) {
+        this.recipePk = parcel.readLong();
+        this.title = parcel.readString();
+        this.ingredientsNo = parcel.readInt();
+        this.stepsNo = parcel.readInt();
+        this.imageFilePath = parcel.readString();
+        this.calories = parcel.readInt();
+        this.timeInMins = parcel.readInt();
+    }
+
+    //Generates instances of Parcelable class from a Parcel
+    public static final Parcelable.Creator<RecipeViewModel> CREATOR = new Parcelable.Creator<RecipeViewModel>() {
+
+        @Override
+        public RecipeViewModel createFromParcel(Parcel parcel) {
+            return new RecipeViewModel(parcel);
+        }
+
+        @Override
+        public RecipeViewModel[] newArray(int size) {
+            //Used when parcelable gets a list of ParcelableObjects
+            return new RecipeViewModel[size];
+        }
+    };
 }

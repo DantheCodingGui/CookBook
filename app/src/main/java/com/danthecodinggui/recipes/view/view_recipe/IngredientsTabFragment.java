@@ -2,7 +2,13 @@ package com.danthecodinggui.recipes.view.view_recipe;
 
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +18,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.model.RecipeViewModel;
+import com.danthecodinggui.recipes.view.UpdatingAsyncTaskLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,15 +27,23 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
+
 /**
  * A simple {@link Fragment} subclass.
  */
-public class IngredientsTabFragment extends Fragment {
+public class IngredientsTabFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<List<String>>,
+        UpdatingAsyncTaskLoader.ProgressUpdateListener {
+
+    private static final int INGREDIENTS_LOADER = 101;
 
     @BindView(R.id.rvw_ingredients)
     RecyclerView ingredientsView;
     private IngredientsViewAdapter ingredientsAdapter;
-    private List<String> ingredients;
+    private List<String> ingredientsList;
+
+    private long recipeId;
 
     public IngredientsTabFragment() {}
 
@@ -37,6 +53,11 @@ public class IngredientsTabFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_ingredients, container, false);
 
         ButterKnife.bind(this, view);
+
+        recipeId = getArguments().getLong(RECIPE_DETAIL_ID);
+
+        getActivity().getSupportLoaderManager().initLoader(INGREDIENTS_LOADER, null, this);
+
         return view;
     }
 
@@ -45,18 +66,42 @@ public class IngredientsTabFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         ingredientsAdapter = new IngredientsViewAdapter();
-        ingredients = new ArrayList<>();
+        ingredientsList = new ArrayList<>();
         ingredientsView.setAdapter(ingredientsAdapter);
         ingredientsView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        ingredients.add("15 cherry tomatoes");
-        ingredients.add("1 tspn salt");
-        ingredients.add("1 tspn pepper");
-        ingredients.add("10 lettuce leaves");
-        ingredients.add("1 carrot");
+//        ingredientsList.add("15 cherry tomatoes");
+//        ingredientsList.add("1 tspn salt");
+//        ingredientsList.add("1 tspn pepper");
+//        ingredientsList.add("10 lettuce leaves");
+//        ingredientsList.add("1 carrot");
+//
+//        ingredientsAdapter.notifyDataSetChanged();
+    }
 
+    @Override
+    public <T> void onProgressUpdate(int loaderId, T updateValue) {
+        ingredientsList.addAll((List)updateValue);
         ingredientsAdapter.notifyDataSetChanged();
     }
+
+    @NonNull
+    @Override
+    public Loader<List<String>> onCreateLoader(int id, @Nullable Bundle args) {
+        Handler uiThread = new Handler(Looper.getMainLooper());
+        return new GetIngredientsLoader(getActivity(), uiThread, this, id, recipeId);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<List<String>> loader, List<String> remainingIngredients) {
+        ingredientsList.addAll(remainingIngredients);
+        ingredientsAdapter.notifyDataSetChanged();
+
+        getLoaderManager().destroyLoader(loader.getId());
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<List<String>> loader) { }
 
     class IngredientsViewAdapter extends RecyclerView.Adapter<IngredientsViewAdapter.IngredientViewHolder> {
 
@@ -68,12 +113,12 @@ public class IngredientsTabFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(IngredientViewHolder holder, int position) {
-            holder.ingredient.setText(ingredients.get(position));
+            holder.ingredient.setText(ingredientsList.get(position));
         }
 
         @Override
         public int getItemCount() {
-            return ingredients.size();
+            return ingredientsList.size();
         }
 
         class IngredientViewHolder extends RecyclerView.ViewHolder {

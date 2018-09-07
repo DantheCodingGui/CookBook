@@ -12,7 +12,6 @@ public final class ProviderContract {
 
     //Section of URI identifying table name
     static final String PATH_RECIPES = "Recipes";
-    static final String PATH_INGREDIENTS = "Ingredients";
     static final String PATH_METHOD = "Method";
     static final String PATH_RECIPE_INGREDIENTS = "RecipeIngredients";
 
@@ -21,9 +20,20 @@ public final class ProviderContract {
 
     //Public URIs to access tables
     public static final Uri RECIPES_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPES).build();
-    public static final Uri INGREDIENTS_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_INGREDIENTS).build();
     public static final Uri METHOD_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_METHOD).build();
     public static final Uri RECIPE_INGREDIENTS_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPE_INGREDIENTS).build();
+
+    //Projection to access whole Recipe record
+    public static final String[] RECIPE_PROJECTION_FULL = {
+            RecipeEntry._ID,
+            RecipeEntry.VIEW_ORDER,
+            RecipeEntry.TITLE,
+            RecipeEntry.CALORIES_PER_PERSON,
+            RecipeEntry.DURATION,
+            RecipeEntry.IMAGE_PATH
+    };
+    public static final String INGREDIENTS_SELECTION = RecipeIngredientEntry.RECIPE_ID + " = ?";
+    public static final String METHOD_SELECTION = MethodStepEntry.RECIPE_ID + " = ?";
 
     //Count records projection string
     public static final String[] COUNT_INGREDIENTS_PROJECTION = { "count(" + RecipeIngredientEntry.RECIPE_ID +

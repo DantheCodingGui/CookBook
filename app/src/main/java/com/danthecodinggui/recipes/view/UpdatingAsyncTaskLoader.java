@@ -4,14 +4,14 @@ import android.content.Context;
 import android.os.Handler;
 import android.support.v4.content.AsyncTaskLoader;
 
-abstract class UpdatingAsyncTaskLoader extends AsyncTaskLoader {
+public abstract class UpdatingAsyncTaskLoader extends AsyncTaskLoader {
 
     private int loaderId;
 
     Handler uiThread;
     private ProgressUpdateListener progressCallback;
 
-    UpdatingAsyncTaskLoader(Context context, Handler uiThread,
+    public UpdatingAsyncTaskLoader(Context context, Handler uiThread,
                                    ProgressUpdateListener progressCallback, int loaderId) {
         super(context);
         this.uiThread = uiThread;
@@ -19,7 +19,7 @@ abstract class UpdatingAsyncTaskLoader extends AsyncTaskLoader {
         this.loaderId = loaderId;
     }
 
-    <T> void UpdateProgress(final T updateValue) {
+    public <T> void UpdateProgress(final T updateValue) {
         uiThread.post(new Runnable() {
             @Override
             public void run() {
@@ -28,7 +28,7 @@ abstract class UpdatingAsyncTaskLoader extends AsyncTaskLoader {
         });
     }
 
-    interface ProgressUpdateListener {
+    public interface ProgressUpdateListener {
         <T> void onProgressUpdate(int loaderId, T updateValue);
     }
 }

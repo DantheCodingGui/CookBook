@@ -19,6 +19,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
+
 /**
  * Holds list of steps for a given recipe
  */
@@ -29,9 +31,9 @@ public class MethodTabFragment extends Fragment {
     private MethodViewAdapter methodStepsAdapter;
     private List<String> methodSteps;
 
-    public MethodTabFragment() {
-        // Required empty public constructor
-    }
+    private long recipeId;
+
+    public MethodTabFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -39,6 +41,9 @@ public class MethodTabFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_method, container, false);
 
         ButterKnife.bind(this, view);
+
+        recipeId = getArguments().getLong(RECIPE_DETAIL_ID);
+
         return view;
     }
 

@@ -2,7 +2,6 @@ package com.danthecodinggui.recipes.view.view_recipe;
 
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -34,12 +33,20 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
-import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DB_ID;
+import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_BUNDLE;
+import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_OBJECT;
 
-public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
+public class ViewRecipeActivity extends AppCompatActivity
+        implements AppBarLayout.OnOffsetChangedListener {
+
+    //TODO duplicate static value, find way to push into 1 class
+    //Permission request codes
+    private static final int REQUEST_READ_EXTERNAL = 201;
 
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
+
+    private RecipeViewModel recipe;
 
     private String[] foodPhotos = {
             "https://images.pexels.com/photos/46239/salmon-dish-food-meal-46239.jpeg?cs=srgb&dl=food-salad-healthy-46239.jpg&fm=jpg",
@@ -53,44 +60,45 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
             "https://media.istockphoto.com/photos/health-food-for-fitness-picture-id855098134?k=6&m=855098134&s=612x612&w=0&h=eIWWpYWKTz_z2ryYAo0Dd97igUZVExzl4AKRIhUrFj4="
     };
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Bundle extras = getIntent().getExtras();
-        int recipeId = extras.getInt(RECIPE_DB_ID);
-        boolean hasPhoto = extras.getBoolean("hasPhoto");
+        recipe = extras.getBundle(RECIPE_DETAIL_BUNDLE).getParcelable(RECIPE_DETAIL_OBJECT);
 
-        RecipeViewModel recipe = new RecipeViewModel("Fish and Chips");
+        //TODO when you load the actual recipe, check permission again and make sure to not load
+        //image if no permission (as you don't have noImage var here)
 
         //Todo change later to recipe.hasPhoto()
-        if (hasPhoto) {
+        if (recipe.hasPhoto()) {
+
+            //PermissionsHandler.AskForPermission(this,
+            //        Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, false);
 
             bindingPhoto = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe_photo);
-            supportPostponeEnterTransition();
-
-            //TODO change later to set based on database query
-
             bindingPhoto.setRecipe(recipe);
+
+
 
             if (Utility.atLeastLollipop()) {
                 //Set the shared elements transition name
+                postponeEnterTransition();
                 String imageTransitionName = extras.getString(CARD_TRANSITION_NAME);
                 bindingPhoto.ivwToolbarPreview.setTransitionName(imageTransitionName);
 
-                supportStartPostponedEnterTransition();
+                //Set status bar colour
+                Window window = getWindow();
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                window.setStatusBarColor(Color.TRANSPARENT);
             }
 
-            bindingPhoto.ivwToolbarPreview.setImageBitmap(BitmapFactory.decodeResource(getResources(),
-                    R.drawable.sample_image));
-
             //String url = foodPhotos[new Random().nextInt(foodPhotos.length)];
-            String url = foodPhotos[1];
+            //String url = foodPhotos[1];
 
             //TODO remove all url references when actually loading images (also remove internet privelige)
             Glide.with(this)
-                    .load(url)
+                    .load(recipe.getImageFilePath())
                     .listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -100,17 +108,13 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             SetScrimColour(bindingPhoto.ablViewRecipe, resource);
+                            startPostponedEnterTransition();
                             return false;
                         }
                     })
                     .into(bindingPhoto.ivwToolbarPreview);
 
             bindingPhoto.ablViewRecipe.addOnOffsetChangedListener(this);
-
-            //Set status bar colour
-            Window window = getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.TRANSPARENT);
 
             setSupportActionBar(bindingPhoto.tbarVwRecipe);
             if (getSupportActionBar() != null)
@@ -121,7 +125,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
         else {
             binding = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe);
 
-            binding.setRecipe(new RecipeViewModel("Fish and Chips"));
+            binding.setRecipe(recipe);
 
             setSupportActionBar(binding.tbarVwRecipe);
             if (getSupportActionBar() != null)
@@ -132,13 +136,12 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
             //Set random colour of layout
             SetLayoutColour();
         }
-
-        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        //    String imageTransitionName = getIntent().getStringExtra(CARD_TRANSITION_NAME);
-        //    binding.viewRecipeRoot.setTransitionName(imageTransitionName);
-        //}
     }
 
+    /**
+     * In the event of no stored photo for the recipe, generate a random material design colour and
+     * apply it to the toolbar
+     */
     private void SetLayoutColour() {
         int randMaterialCol = MaterialColours.nextColour();
 
@@ -184,7 +187,7 @@ public class ViewRecipeActivity extends AppCompatActivity implements AppBarLayou
 
         tabLayout.setupWithViewPager(viewPager);
 
-        final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount(), tabTitles);
+        final RecipePagerAdapter adapter = new RecipePagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount(), tabTitles, recipe.getRecipeId());
         viewPager.setAdapter(adapter);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override

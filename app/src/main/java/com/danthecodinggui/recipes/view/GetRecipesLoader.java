@@ -24,18 +24,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
     private ImagePermissionsListener permissionsCallback;
 
-    //Content provider query data
-    private final String[] recipesProjection = {
-            ProviderContract.RecipeEntry._ID,
-            ProviderContract.RecipeEntry.VIEW_ORDER,
-            ProviderContract.RecipeEntry.TITLE,
-            ProviderContract.RecipeEntry.CALORIES_PER_PERSON,
-            ProviderContract.RecipeEntry.DURATION,
-            ProviderContract.RecipeEntry.IMAGE_PATH
-    };
     private final String recipesSortOrder = ProviderContract.RecipeEntry.VIEW_ORDER + " ASC";
-    private final String ingreSel = ProviderContract.RecipeIngredientEntry.RECIPE_ID + " = ?";
-    private final String methodSel = ProviderContract.MethodStepEntry.RECIPE_ID + " = ?";
 
     GetRecipesLoader(Context context, Handler uiThread, ProgressUpdateListener updateCallback,
                      ImagePermissionsListener permissionCallback, int loaderId) {
@@ -64,7 +53,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         //Query recipes table for all records
         Cursor baseCursor = contentResolver.query(
                 ProviderContract.RECIPES_URI,
-                recipesProjection,
+                ProviderContract.RECIPE_PROJECTION_FULL,
                 null,
                 null,
                 recipesSortOrder
@@ -86,12 +75,10 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
                     baseCursor.getLong(baseCursor.getColumnIndexOrThrow(
                     ProviderContract.RecipeEntry._ID))) };
 
-            //syntax error (code 1): , while compiling: SELECT count(_id) AS count FROM SELECT _id, RecipeId, IngredientName FROM RecipeIngredients INNER JOIN Ingredients ON IngredientId = _id WHERE (RecipeId = ?)
-
             countCursor = contentResolver.query(
                     ProviderContract.RECIPE_INGREDIENTS_URI,
                     ProviderContract.COUNT_INGREDIENTS_PROJECTION,
-                    ingreSel,
+                    ProviderContract.INGREDIENTS_SELECTION,
                     countSelArgs,
                     null
             );
@@ -104,7 +91,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
             countCursor = contentResolver.query(
                     ProviderContract.METHOD_URI,
                     ProviderContract.COUNT_STEPS_PROJECTION,
-                    methodSel,
+                    ProviderContract.METHOD_SELECTION,
                     countSelArgs,
                     null
             );
@@ -154,6 +141,8 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
      */
     private RecipeViewModel BuildBaseModel(Cursor cursor) {
 
+        long pk = cursor.getLong(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry._ID));
+
         String recipeTitle = cursor.getString(cursor.getColumnIndexOrThrow(
                 ProviderContract.RecipeEntry.TITLE));
         int calories = -1;
@@ -176,14 +165,14 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         if (noImage) {
             if (noKcal) {
                 if (noTime)
-                    return new RecipeViewModel(recipeTitle);
+                    return new RecipeViewModel(pk, recipeTitle);
                 else
-                    return new RecipeViewModel(recipeTitle, timeInMins);
+                    return new RecipeViewModel(pk, recipeTitle, timeInMins);
             } else {
                 if (noTime)
-                    return new RecipeViewModel(recipeTitle, calories);
+                    return new RecipeViewModel(pk, recipeTitle, calories);
                 else
-                    return new RecipeViewModel(recipeTitle, calories, timeInMins);
+                    return new RecipeViewModel(pk, recipeTitle, calories, timeInMins);
             }
         } else {
 
@@ -192,14 +181,14 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
             if (noKcal) {
                 if (noTime)
-                    return new RecipeViewModel(recipeTitle, photoPath);
+                    return new RecipeViewModel(pk, recipeTitle, photoPath);
                 else
-                    return new RecipeViewModel(recipeTitle, timeInMins, photoPath);
+                    return new RecipeViewModel(pk, recipeTitle, timeInMins, photoPath);
             } else {
                 if (noTime)
-                    return new RecipeViewModel(recipeTitle, calories, photoPath);
+                    return new RecipeViewModel(pk, recipeTitle, calories, photoPath);
                 else
-                    return new RecipeViewModel(recipeTitle, calories, timeInMins, photoPath);
+                    return new RecipeViewModel(pk, recipeTitle, calories, timeInMins, photoPath);
             }
         }
     }
