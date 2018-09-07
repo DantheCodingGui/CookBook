@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view;
+package com.danthecodinggui.recipes.view.Loaders;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -26,7 +26,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
     private final String recipesSortOrder = ProviderContract.RecipeEntry.VIEW_ORDER + " ASC";
 
-    GetRecipesLoader(Context context, Handler uiThread, ProgressUpdateListener updateCallback,
+    public GetRecipesLoader(Context context, Handler uiThread, ProgressUpdateListener updateCallback,
                      ImagePermissionsListener permissionCallback, int loaderId) {
         super(context, uiThread, updateCallback, loaderId);
         contentResolver = context.getContentResolver();
@@ -217,7 +217,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         return currentModel;
     }
 
-    interface ImagePermissionsListener {
+    public interface ImagePermissionsListener {
         /**
          * Loader has requested a permission from calling activity
          */

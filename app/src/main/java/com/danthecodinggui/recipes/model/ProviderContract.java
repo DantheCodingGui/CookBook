@@ -41,6 +41,9 @@ public final class ProviderContract {
     public static final String[] COUNT_STEPS_PROJECTION = { "count(" + MethodStepEntry.RECIPE_ID +
             ") AS " + BaseColumns._COUNT};
 
+    //Sort orders
+    public static final String METHOD_SORT_ORDER = MethodStepEntry.STEP_NO + " ASC";
+
     //Empty constructor in case anyone instantiates class
     ProviderContract() {}
 

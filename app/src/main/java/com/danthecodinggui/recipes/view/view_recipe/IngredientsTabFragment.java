@@ -18,8 +18,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
-import com.danthecodinggui.recipes.model.RecipeViewModel;
-import com.danthecodinggui.recipes.view.UpdatingAsyncTaskLoader;
+import com.danthecodinggui.recipes.view.Loaders.GetIngredientsLoader;
+import com.danthecodinggui.recipes.view.Loaders.UpdatingAsyncTaskLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,17 +79,17 @@ public class IngredientsTabFragment extends Fragment
 //        ingredientsAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public <T> void onProgressUpdate(int loaderId, T updateValue) {
-        ingredientsList.addAll((List)updateValue);
-        ingredientsAdapter.notifyDataSetChanged();
-    }
-
     @NonNull
     @Override
     public Loader<List<String>> onCreateLoader(int id, @Nullable Bundle args) {
         Handler uiThread = new Handler(Looper.getMainLooper());
         return new GetIngredientsLoader(getActivity(), uiThread, this, id, recipeId);
+    }
+
+    @Override
+    public <T> void onProgressUpdate(int loaderId, T updateValue) {
+        ingredientsList.addAll((List)updateValue);
+        ingredientsAdapter.notifyDataSetChanged();
     }
 
     @Override

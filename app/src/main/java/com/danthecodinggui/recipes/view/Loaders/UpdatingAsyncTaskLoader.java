@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view;
+package com.danthecodinggui.recipes.view.Loaders;
 
 import android.content.Context;
 import android.os.Handler;

@@ -2,7 +2,13 @@ package com.danthecodinggui.recipes.view.view_recipe;
 
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +18,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.view.Loaders.GetMethodStepsLoader;
+import com.danthecodinggui.recipes.view.Loaders.UpdatingAsyncTaskLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +32,16 @@ import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
 /**
  * Holds list of steps for a given recipe
  */
-public class MethodTabFragment extends Fragment {
+public class MethodTabFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<List<String>>,
+        UpdatingAsyncTaskLoader.ProgressUpdateListener {
+
+    private static final int METHOD_LOADER = 201;
 
     @BindView(R.id.rvw_method)
     RecyclerView methodStepsView;
     private MethodViewAdapter methodStepsAdapter;
-    private List<String> methodSteps;
+    private List<String> methodList;
 
     private long recipeId;
 
@@ -44,6 +56,8 @@ public class MethodTabFragment extends Fragment {
 
         recipeId = getArguments().getLong(RECIPE_DETAIL_ID);
 
+        getActivity().getSupportLoaderManager().initLoader(METHOD_LOADER, null, this);
+
         return view;
     }
 
@@ -52,18 +66,34 @@ public class MethodTabFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         methodStepsAdapter = new MethodViewAdapter();
-        methodSteps = new ArrayList<>();
+        methodList = new ArrayList<>();
         methodStepsView.setAdapter(methodStepsAdapter);
         methodStepsView.setLayoutManager(new LinearLayoutManager(getContext()));
+    }
 
-        methodSteps.add("Do first thing");
-        methodSteps.add("Do second thing");
-        methodSteps.add("Do third thing");
-        methodSteps.add("Do fourth thing");
-        methodSteps.add("Do fifth thing");
+    @NonNull
+    @Override
+    public Loader<List<String>> onCreateLoader(int id, @Nullable Bundle args) {
+        Handler uiThread = new Handler(Looper.getMainLooper());
+        return new GetMethodStepsLoader(getActivity(), uiThread, this, id, recipeId);
+    }
 
+    @Override
+    public <T> void onProgressUpdate(int loaderId, T updateValue) {
+        methodList.addAll((List)updateValue);
         methodStepsAdapter.notifyDataSetChanged();
     }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<List<String>> loader, List<String> remainingSteps) {
+        methodList.addAll(remainingSteps);
+        methodStepsAdapter.notifyDataSetChanged();
+
+        getLoaderManager().destroyLoader(loader.getId());
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<List<String>> loader) {}
 
     class MethodViewAdapter extends RecyclerView.Adapter<MethodViewAdapter.StepViewHolder> {
 
@@ -75,12 +105,12 @@ public class MethodTabFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(StepViewHolder holder, int position) {
-            holder.step.setText(methodSteps.get(position));
+            holder.step.setText(methodList.get(position));
         }
 
         @Override
         public int getItemCount() {
-            return methodSteps.size();
+            return methodList.size();
         }
 
         class StepViewHolder extends RecyclerView.ViewHolder {

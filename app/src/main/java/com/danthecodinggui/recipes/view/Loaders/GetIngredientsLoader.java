@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view.view_recipe;
+package com.danthecodinggui.recipes.view.Loaders;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.danthecodinggui.recipes.model.ProviderContract;
-import com.danthecodinggui.recipes.view.UpdatingAsyncTaskLoader;
 
 import java.util.ArrayList;
 import java.util.List;
