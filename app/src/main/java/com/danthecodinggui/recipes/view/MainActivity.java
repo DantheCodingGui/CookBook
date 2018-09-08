@@ -132,94 +132,94 @@ public class MainActivity extends AppCompatActivity
         //InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
     }
 
-    private void InsertValue(String imagePath) {
-
-        ContentResolver resolver = getContentResolver();
-
-        ContentValues values = new ContentValues();
-
-        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, 20);
-        values.put(ProviderContract.RecipeEntry.TITLE, "Pasta Aglio E Olio");
-        values.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, 340);
-        values.put(ProviderContract.RecipeEntry.DURATION, 20);
-        values.put(ProviderContract.RecipeEntry.IMAGE_PATH, imagePath);
-
-        Uri result = resolver.insert(
-                ProviderContract.RECIPES_URI,
-                values);
-
-        long recipeId = ContentUris.parseId(result);
-
-        //Ingredients
-        values = new ContentValues();
-        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Spaghetti");
-        resolver.insert(
-                ProviderContract.RECIPE_INGREDIENTS_URI,
-                values);
-
-        values = new ContentValues();
-        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Garlic");
-        resolver.insert(
-                ProviderContract.RECIPE_INGREDIENTS_URI,
-                values);
-
-        values = new ContentValues();
-        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Parsley");
-        resolver.insert(
-                ProviderContract.RECIPE_INGREDIENTS_URI,
-                values);
-
-        values = new ContentValues();
-        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Olive Oil");
-        resolver.insert(
-                ProviderContract.RECIPE_INGREDIENTS_URI,
-                values);
-
-        values = new ContentValues();
-        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Red Pepper Flake");
-        resolver.insert(
-                ProviderContract.RECIPE_INGREDIENTS_URI,
-                values);
-
-        values = new ContentValues();
-        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Chicken (Optional)");
-        resolver.insert(
-                ProviderContract.RECIPE_INGREDIENTS_URI,
-                values);
-
-        //Method
-
-        values = new ContentValues();
-        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
-        values.put(ProviderContract.MethodStepEntry.STEP_NO, 1);
-        values.put(ProviderContract.MethodStepEntry.TEXT, "Gradually heat up oil in pan and saute garlic until golden");
-        resolver.insert(
-                ProviderContract.METHOD_URI,
-                values);
-
-        values = new ContentValues();
-        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
-        values.put(ProviderContract.MethodStepEntry.STEP_NO, 2);
-        values.put(ProviderContract.MethodStepEntry.TEXT, "Add Red Pepper Flake and chopped Parsley");
-        resolver.insert(
-                ProviderContract.METHOD_URI,
-                values);
-
-
-        values = new ContentValues();
-        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
-        values.put(ProviderContract.MethodStepEntry.STEP_NO, 3);
-        values.put(ProviderContract.MethodStepEntry.TEXT, "Toss with cooked spaghetti and add cooked chicken if desired");
-        resolver.insert(
-                ProviderContract.METHOD_URI,
-                values);
-    }
+//    private void InsertValue(String imagePath) {
+//
+//        ContentResolver resolver = getContentResolver();
+//
+//        ContentValues values = new ContentValues();
+//
+//        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, 20);
+//        values.put(ProviderContract.RecipeEntry.TITLE, "Pasta Aglio E Olio");
+//        values.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, 340);
+//        values.put(ProviderContract.RecipeEntry.DURATION, 20);
+//        values.put(ProviderContract.RecipeEntry.IMAGE_PATH, imagePath);
+//
+//        Uri result = resolver.insert(
+//                ProviderContract.RECIPES_URI,
+//                values);
+//
+//        long recipeId = ContentUris.parseId(result);
+//
+//        //Ingredients
+//        values = new ContentValues();
+//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Spaghetti");
+//        resolver.insert(
+//                ProviderContract.RECIPE_INGREDIENTS_URI,
+//                values);
+//
+//        values = new ContentValues();
+//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Garlic");
+//        resolver.insert(
+//                ProviderContract.RECIPE_INGREDIENTS_URI,
+//                values);
+//
+//        values = new ContentValues();
+//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Parsley");
+//        resolver.insert(
+//                ProviderContract.RECIPE_INGREDIENTS_URI,
+//                values);
+//
+//        values = new ContentValues();
+//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Olive Oil");
+//        resolver.insert(
+//                ProviderContract.RECIPE_INGREDIENTS_URI,
+//                values);
+//
+//        values = new ContentValues();
+//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Red Pepper Flake");
+//        resolver.insert(
+//                ProviderContract.RECIPE_INGREDIENTS_URI,
+//                values);
+//
+//        values = new ContentValues();
+//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Chicken (Optional)");
+//        resolver.insert(
+//                ProviderContract.RECIPE_INGREDIENTS_URI,
+//                values);
+//
+//        //Method
+//
+//        values = new ContentValues();
+//        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
+//        values.put(ProviderContract.MethodStepEntry.STEP_NO, 1);
+//        values.put(ProviderContract.MethodStepEntry.TEXT, "Gradually heat up oil in pan and saute garlic until golden");
+//        resolver.insert(
+//                ProviderContract.METHOD_URI,
+//                values);
+//
+//        values = new ContentValues();
+//        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
+//        values.put(ProviderContract.MethodStepEntry.STEP_NO, 2);
+//        values.put(ProviderContract.MethodStepEntry.TEXT, "Add Red Pepper Flake and chopped Parsley");
+//        resolver.insert(
+//                ProviderContract.METHOD_URI,
+//                values);
+//
+//
+//        values = new ContentValues();
+//        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
+//        values.put(ProviderContract.MethodStepEntry.STEP_NO, 3);
+//        values.put(ProviderContract.MethodStepEntry.TEXT, "Toss with cooked spaghetti and add cooked chicken if desired");
+//        resolver.insert(
+//                ProviderContract.METHOD_URI,
+//                values);
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

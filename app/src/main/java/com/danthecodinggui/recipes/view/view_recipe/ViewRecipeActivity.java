@@ -1,15 +1,21 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
+import android.Manifest;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
@@ -26,7 +32,9 @@ import com.danthecodinggui.recipes.databinding.ActivityViewRecipeBinding;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipePhotoBinding;
 import com.danthecodinggui.recipes.model.RecipeViewModel;
 import com.danthecodinggui.recipes.msc.MaterialColours;
+import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.view.MainActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +50,8 @@ public class ViewRecipeActivity extends AppCompatActivity
     //TODO duplicate static value, find way to push into 1 class
     //Permission request codes
     private static final int REQUEST_READ_EXTERNAL = 201;
+
+    private String imageTransitionName;
 
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
@@ -67,75 +77,122 @@ public class ViewRecipeActivity extends AppCompatActivity
         Bundle extras = getIntent().getExtras();
         recipe = extras.getBundle(RECIPE_DETAIL_BUNDLE).getParcelable(RECIPE_DETAIL_OBJECT);
 
-        //TODO when you load the actual recipe, check permission again and make sure to not load
-        //image if no permission (as you don't have noImage var here)
-
-        //Todo change later to recipe.hasPhoto()
         if (recipe.hasPhoto()) {
+            imageTransitionName = extras.getString(CARD_TRANSITION_NAME);
 
-            //PermissionsHandler.AskForPermission(this,
-            //        Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, false);
+            int response = PermissionsHandler.AskForPermission(this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, false);
 
-            bindingPhoto = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe_photo);
-            bindingPhoto.setRecipe(recipe);
-
-
-
-            if (Utility.atLeastLollipop()) {
-                //Set the shared elements transition name
-                postponeEnterTransition();
-                String imageTransitionName = extras.getString(CARD_TRANSITION_NAME);
-                bindingPhoto.ivwToolbarPreview.setTransitionName(imageTransitionName);
-
-                //Set status bar colour
-                Window window = getWindow();
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                window.setStatusBarColor(Color.TRANSPARENT);
+            switch (response) {
+                case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
+                    SetupPhotoLayout();
+                    break;
+                case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
+                    SetupNoPhotoLayout();
+                    break;
             }
-
-            //String url = foodPhotos[new Random().nextInt(foodPhotos.length)];
-            //String url = foodPhotos[1];
-
-            //TODO remove all url references when actually loading images (also remove internet privelige)
-            Glide.with(this)
-                    .load(recipe.getImageFilePath())
-                    .listener(new RequestListener<Drawable>() {
-                        @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            SetScrimColour(bindingPhoto.ablViewRecipe, resource);
-                            startPostponedEnterTransition();
-                            return false;
-                        }
-                    })
-                    .into(bindingPhoto.ivwToolbarPreview);
-
-            bindingPhoto.ablViewRecipe.addOnOffsetChangedListener(this);
-
-            setSupportActionBar(bindingPhoto.tbarVwRecipe);
-            if (getSupportActionBar() != null)
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-            SetupTabLayout(bindingPhoto.tlyViewRecipe, bindingPhoto.vprViewRecipe);
         }
-        else {
-            binding = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe);
+        else
+            SetupNoPhotoLayout();
+    }
 
-            binding.setRecipe(recipe);
-
-            setSupportActionBar(binding.tbarVwRecipe);
-            if (getSupportActionBar() != null)
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-            SetupTabLayout(binding.tlyViewRecipe, binding.vprViewRecipe);
-
-            //Set random colour of layout
-            SetLayoutColour();
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch(requestCode) {
+            case REQUEST_READ_EXTERNAL:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    SetupPhotoLayout();
+                else {
+//                    //Alert the user why this permission is needed
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(ViewRecipeActivity.this);
+//                    builder.setMessage(R.string.perm_dialog_read_external)
+//                            .setNegativeButton(R.string.perm_dialog_butt_deny, new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialogInterface, int i) {
+//                                    //recipesLoader.onPermissionResponse(false);
+//                                    noImage = true;
+//
+//                                    //Alert the user how they can re-enable the feature
+//                                    Snackbar.make(binding.clyMainRoot,
+//                                            R.string.perm_snackbar_msg,
+//                                            Snackbar.LENGTH_LONG
+//                                    )
+//                                            .show();
+//                                }
+//                            })
+//                            .setPositiveButton(R.string.perm_dialog_butt_permit, new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialogInterface, int i) {
+//                                    PermissionsHandler.AskForPermission(MainActivity.this,
+//                                            Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, true);
+//                                }
+//                            })
+//                            .create()
+//                            .show();
+                    SetupNoPhotoLayout();
+                }
+                break;
         }
+    }
+
+    private void SetupPhotoLayout() {
+        bindingPhoto = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe_photo);
+        bindingPhoto.setRecipe(recipe);
+
+        if (Utility.atLeastLollipop()) {
+            //Set the shared elements transition name
+            postponeEnterTransition();
+            bindingPhoto.ivwToolbarPreview.setTransitionName(imageTransitionName);
+
+            //Set status bar colour
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.TRANSPARENT);
+        }
+
+        //String url = foodPhotos[new Random().nextInt(foodPhotos.length)];
+        //String url = foodPhotos[1];
+
+        //TODO remove all url references when actually loading images (also remove internet privelige)
+        Glide.with(this)
+                .load(recipe.getImageFilePath())
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        SetScrimColour(bindingPhoto.ablViewRecipe, resource);
+                        startPostponedEnterTransition();
+                        return false;
+                    }
+                })
+                .into(bindingPhoto.ivwToolbarPreview);
+
+        bindingPhoto.ablViewRecipe.addOnOffsetChangedListener(this);
+
+        setSupportActionBar(bindingPhoto.tbarVwRecipe);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        SetupTabLayout(bindingPhoto.tlyViewRecipe, bindingPhoto.vprViewRecipe);
+    }
+
+    private void SetupNoPhotoLayout() {
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe);
+
+        binding.setRecipe(recipe);
+
+        setSupportActionBar(binding.tbarVwRecipe);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        SetupTabLayout(binding.tlyViewRecipe, binding.vprViewRecipe);
+
+        //Set random colour of layout
+        SetLayoutColour();
     }
 
     /**
