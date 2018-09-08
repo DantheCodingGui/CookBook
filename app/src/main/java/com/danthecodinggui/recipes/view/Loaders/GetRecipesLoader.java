@@ -8,7 +8,7 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.danthecodinggui.recipes.model.ProviderContract;
-import com.danthecodinggui.recipes.model.RecipeViewModel;
+import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.LogTags;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
     private ContentResolver contentResolver;
 
-    private List<RecipeViewModel> records;
+    private List<Recipe> records;
 
     private ImagePermissionsListener permissionsCallback;
 
@@ -48,7 +48,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
     }
 
     @Override
-    public List<RecipeViewModel> loadInBackground() {
+    public List<Recipe> loadInBackground() {
 
         //Query recipes table for all records
         Cursor baseCursor = contentResolver.query(
@@ -62,7 +62,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         Cursor countCursor;
 
         //Temporary holder variable
-        RecipeViewModel temp;
+        Recipe temp;
 
         int recordsGathered = 0;
 
@@ -135,11 +135,11 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
     }
 
     /**
-     * Decides what type of RecipeViewModel to build based on what data is saved in the table
+     * Decides what type of Recipe to build based on what data is saved in the table
      * record
-     * @return The base RecipeViewModel constructed with the data found in the record
+     * @return The base Recipe constructed with the data found in the record
      */
-    private RecipeViewModel BuildBaseModel(Cursor cursor) {
+    private Recipe BuildBaseModel(Cursor cursor) {
 
         long pk = cursor.getLong(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry._ID));
 
@@ -165,14 +165,14 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         if (noImage) {
             if (noKcal) {
                 if (noTime)
-                    return new RecipeViewModel(pk, recipeTitle);
+                    return new Recipe(pk, recipeTitle);
                 else
-                    return new RecipeViewModel(pk, recipeTitle, timeInMins);
+                    return new Recipe(pk, recipeTitle, timeInMins);
             } else {
                 if (noTime)
-                    return new RecipeViewModel(pk, recipeTitle, calories);
+                    return new Recipe(pk, recipeTitle, calories);
                 else
-                    return new RecipeViewModel(pk, recipeTitle, calories, timeInMins);
+                    return new Recipe(pk, recipeTitle, calories, timeInMins);
             }
         } else {
 
@@ -181,14 +181,14 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
             if (noKcal) {
                 if (noTime)
-                    return new RecipeViewModel(pk, recipeTitle, photoPath);
+                    return new Recipe(pk, recipeTitle, photoPath);
                 else
-                    return new RecipeViewModel(pk, recipeTitle, timeInMins, photoPath);
+                    return new Recipe(pk, recipeTitle, timeInMins, photoPath);
             } else {
                 if (noTime)
-                    return new RecipeViewModel(pk, recipeTitle, calories, photoPath);
+                    return new Recipe(pk, recipeTitle, calories, photoPath);
                 else
-                    return new RecipeViewModel(pk, recipeTitle, calories, timeInMins, photoPath);
+                    return new Recipe(pk, recipeTitle, calories, timeInMins, photoPath);
             }
         }
     }
@@ -197,7 +197,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
      * Add the number of ingredients to the current record being loaded
      * @return The updated record
      */
-    private RecipeViewModel AddIngredientCount(Cursor cursor, RecipeViewModel currentModel) {
+    private Recipe AddIngredientCount(Cursor cursor, Recipe currentModel) {
         cursor.moveToFirst();
         currentModel.setIngredientsNo(
                 cursor.getInt(cursor.getColumnIndexOrThrow(
@@ -209,7 +209,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
      * Add the number of steps in the method to the current record being loaded
      * @return The updated record
      */
-    private RecipeViewModel AddStepsCount(Cursor cursor, RecipeViewModel currentModel) {
+    private Recipe AddStepsCount(Cursor cursor, Recipe currentModel) {
         cursor.moveToFirst();
         currentModel.setStepsNo(cursor.getInt(
                 cursor.getColumnIndexOrThrow(BaseColumns._COUNT))

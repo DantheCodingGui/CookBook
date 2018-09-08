@@ -1,7 +1,6 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
@@ -12,10 +11,8 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
@@ -27,14 +24,14 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.danthecodinggui.recipes.BR;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipeBinding;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipePhotoBinding;
-import com.danthecodinggui.recipes.model.RecipeViewModel;
+import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.MaterialColours;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.msc.Utility;
-import com.danthecodinggui.recipes.view.MainActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,19 +53,19 @@ public class ViewRecipeActivity extends AppCompatActivity
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
 
-    private RecipeViewModel recipe;
+    private Recipe recipe;
 
-    private String[] foodPhotos = {
-            "https://images.pexels.com/photos/46239/salmon-dish-food-meal-46239.jpeg?cs=srgb&dl=food-salad-healthy-46239.jpg&fm=jpg",
-            "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?cs=srgb&dl=food-dinner-lunch-70497.jpg&fm=jpg",
-            "https://images.pexels.com/photos/247685/pexels-photo-247685.png?cs=srgb&dl=food-plate-healthy-247685.jpg&fm=jpg",
-            "https://images.pexels.com/photos/8313/food-eating-potatoes-beer-8313.jpg?auto=compress&cs=tinysrgb&h=350",
-            "https://drop.ndtv.com/albums/COOKS/corngallery/creolespicedcornthumb_640x480.jpg",
-            "https://cdn.cnn.com/cnnnext/dam/assets/171027052520-processed-foods-exlarge-tease.jpg",
-            "https://drop.ndtv.com/albums/COOKS/pasta-vegetarian/pastaveg_640x480.jpg",
-            "http://www.parkdeanholidays.co.uk/resources/images/foodanddrink/foodMainImg.jpg",
-            "https://media.istockphoto.com/photos/health-food-for-fitness-picture-id855098134?k=6&m=855098134&s=612x612&w=0&h=eIWWpYWKTz_z2ryYAo0Dd97igUZVExzl4AKRIhUrFj4="
-    };
+//    private String[] foodPhotos = {
+//            "https://images.pexels.com/photos/46239/salmon-dish-food-meal-46239.jpeg?cs=srgb&dl=food-salad-healthy-46239.jpg&fm=jpg",
+//            "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?cs=srgb&dl=food-dinner-lunch-70497.jpg&fm=jpg",
+//            "https://images.pexels.com/photos/247685/pexels-photo-247685.png?cs=srgb&dl=food-plate-healthy-247685.jpg&fm=jpg",
+//            "https://images.pexels.com/photos/8313/food-eating-potatoes-beer-8313.jpg?auto=compress&cs=tinysrgb&h=350",
+//            "https://drop.ndtv.com/albums/COOKS/corngallery/creolespicedcornthumb_640x480.jpg",
+//            "https://cdn.cnn.com/cnnnext/dam/assets/171027052520-processed-foods-exlarge-tease.jpg",
+//            "https://drop.ndtv.com/albums/COOKS/pasta-vegetarian/pastaveg_640x480.jpg",
+//            "http://www.parkdeanholidays.co.uk/resources/images/foodanddrink/foodMainImg.jpg",
+//            "https://media.istockphoto.com/photos/health-food-for-fitness-picture-id855098134?k=6&m=855098134&s=612x612&w=0&h=eIWWpYWKTz_z2ryYAo0Dd97igUZVExzl4AKRIhUrFj4="
+//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,48 +93,22 @@ public class ViewRecipeActivity extends AppCompatActivity
             SetupNoPhotoLayout();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch(requestCode) {
-            case REQUEST_READ_EXTERNAL:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    SetupPhotoLayout();
-                else {
-//                    //Alert the user why this permission is needed
-//                    AlertDialog.Builder builder = new AlertDialog.Builder(ViewRecipeActivity.this);
-//                    builder.setMessage(R.string.perm_dialog_read_external)
-//                            .setNegativeButton(R.string.perm_dialog_butt_deny, new DialogInterface.OnClickListener() {
-//                                @Override
-//                                public void onClick(DialogInterface dialogInterface, int i) {
-//                                    //recipesLoader.onPermissionResponse(false);
-//                                    noImage = true;
-//
-//                                    //Alert the user how they can re-enable the feature
-//                                    Snackbar.make(binding.clyMainRoot,
-//                                            R.string.perm_snackbar_msg,
-//                                            Snackbar.LENGTH_LONG
-//                                    )
-//                                            .show();
-//                                }
-//                            })
-//                            .setPositiveButton(R.string.perm_dialog_butt_permit, new DialogInterface.OnClickListener() {
-//                                @Override
-//                                public void onClick(DialogInterface dialogInterface, int i) {
-//                                    PermissionsHandler.AskForPermission(MainActivity.this,
-//                                            Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, true);
-//                                }
-//                            })
-//                            .create()
-//                            .show();
-                    SetupNoPhotoLayout();
-                }
-                break;
-        }
-    }
-
     private void SetupPhotoLayout() {
         bindingPhoto = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe_photo);
         bindingPhoto.setRecipe(recipe);
+        bindingPhoto.setVariable(BR.imageLoadedCallback, new RequestListener<Drawable>() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                SetScrimColour(bindingPhoto.ablViewRecipe, resource);
+                startPostponedEnterTransition();
+                return false;
+            }
+        });
 
         if (Utility.atLeastLollipop()) {
             //Set the shared elements transition name
@@ -153,23 +124,7 @@ public class ViewRecipeActivity extends AppCompatActivity
         //String url = foodPhotos[new Random().nextInt(foodPhotos.length)];
         //String url = foodPhotos[1];
 
-        //TODO remove all url references when actually loading images (also remove internet privelige)
-        Glide.with(this)
-                .load(recipe.getImageFilePath())
-                .listener(new RequestListener<Drawable>() {
-                    @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        return false;
-                    }
 
-                    @Override
-                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                        SetScrimColour(bindingPhoto.ablViewRecipe, resource);
-                        startPostponedEnterTransition();
-                        return false;
-                    }
-                })
-                .into(bindingPhoto.ivwToolbarPreview);
 
         bindingPhoto.ablViewRecipe.addOnOffsetChangedListener(this);
 

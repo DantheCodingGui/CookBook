@@ -3,7 +3,7 @@
     <data>
         <variable
             name="recipe"
-            type="com.danthecodinggui.recipes.model.RecipeViewModel"/>
+            type="com.danthecodinggui.recipes.model.object_models.Recipe"/>
     </data>
     <android.support.v7.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"

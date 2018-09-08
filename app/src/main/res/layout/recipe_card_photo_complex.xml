@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
     <data>
+        <import type="com.danthecodinggui.recipes.msc.StringUtils"/>
+        <import type="android.graphics.drawable.Drawable"/>
         <variable
             name="recipe"
-            type="com.danthecodinggui.recipes.model.RecipeViewModel"/>
-        <import type="com.danthecodinggui.recipes.msc.StringUtils"/>
+            type="com.danthecodinggui.recipes.model.object_models.Recipe"/>
+        <variable
+            name="imageLoadedCallback"
+            type="com.bumptech.glide.request.RequestListener&lt;Drawable&gt;"/>
     </data>
     <android.support.v7.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -24,6 +28,7 @@
                 app:riv_corner_radius_top_left="10dp"
                 app:riv_corner_radius_top_right="10dp"
                 app:imageFilePath="@{recipe.getImageFilePath()}"
+                app:onLoadedListener="@{imageLoadedCallback}"
                 tools:src="@drawable/sample_image"/>
 
             <android.support.constraint.ConstraintLayout

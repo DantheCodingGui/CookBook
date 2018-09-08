@@ -1,6 +1,7 @@
 package com.danthecodinggui.recipes.view;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -11,11 +12,14 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -37,8 +41,11 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
-import android.widget.Toast;
 
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.danthecodinggui.recipes.BR;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityMainBinding;
@@ -47,7 +54,7 @@ import com.danthecodinggui.recipes.databinding.RecipeCardComplexBinding;
 import com.danthecodinggui.recipes.databinding.RecipeCardPhotoBasicBinding;
 import com.danthecodinggui.recipes.databinding.RecipeCardPhotoComplexBinding;
 import com.danthecodinggui.recipes.model.ProviderContract;
-import com.danthecodinggui.recipes.model.RecipeViewModel;
+import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.AnimUtils;
 import com.danthecodinggui.recipes.msc.IntentConstants;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
@@ -62,20 +69,22 @@ import java.util.List;
 import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_BUNDLE;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_OBJECT;
+import static com.danthecodinggui.recipes.msc.LogTags.GLIDE;
 import static com.danthecodinggui.recipes.msc.LogTags.PERMISSIONS;
 
 /**
  * Display all stored recipes
  */
 public class MainActivity extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<List<RecipeViewModel>>,
+        implements LoaderManager.LoaderCallbacks<List<Recipe>>,
         UpdatingAsyncTaskLoader.ProgressUpdateListener,
-        GetRecipesLoader.ImagePermissionsListener {
+        GetRecipesLoader.ImagePermissionsListener,
+        Utility.PermissionDialogListener {
 
     ActivityMainBinding binding;
 
     RecipesViewAdapter recipesAdapter;
-    private List<RecipeViewModel> recipesList;
+    private List<Recipe> recipesList;
 
     //If read external files permission denied, must avoid loading images from recipes
     private boolean noImage = false;
@@ -132,94 +141,94 @@ public class MainActivity extends AppCompatActivity
         //InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
     }
 
-//    private void InsertValue(String imagePath) {
-//
-//        ContentResolver resolver = getContentResolver();
-//
-//        ContentValues values = new ContentValues();
-//
-//        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, 20);
-//        values.put(ProviderContract.RecipeEntry.TITLE, "Pasta Aglio E Olio");
-//        values.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, 340);
-//        values.put(ProviderContract.RecipeEntry.DURATION, 20);
-//        values.put(ProviderContract.RecipeEntry.IMAGE_PATH, imagePath);
-//
-//        Uri result = resolver.insert(
-//                ProviderContract.RECIPES_URI,
-//                values);
-//
-//        long recipeId = ContentUris.parseId(result);
-//
-//        //Ingredients
-//        values = new ContentValues();
-//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Spaghetti");
-//        resolver.insert(
-//                ProviderContract.RECIPE_INGREDIENTS_URI,
-//                values);
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Garlic");
-//        resolver.insert(
-//                ProviderContract.RECIPE_INGREDIENTS_URI,
-//                values);
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Parsley");
-//        resolver.insert(
-//                ProviderContract.RECIPE_INGREDIENTS_URI,
-//                values);
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Olive Oil");
-//        resolver.insert(
-//                ProviderContract.RECIPE_INGREDIENTS_URI,
-//                values);
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Red Pepper Flake");
-//        resolver.insert(
-//                ProviderContract.RECIPE_INGREDIENTS_URI,
-//                values);
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Chicken (Optional)");
-//        resolver.insert(
-//                ProviderContract.RECIPE_INGREDIENTS_URI,
-//                values);
-//
-//        //Method
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.MethodStepEntry.STEP_NO, 1);
-//        values.put(ProviderContract.MethodStepEntry.TEXT, "Gradually heat up oil in pan and saute garlic until golden");
-//        resolver.insert(
-//                ProviderContract.METHOD_URI,
-//                values);
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.MethodStepEntry.STEP_NO, 2);
-//        values.put(ProviderContract.MethodStepEntry.TEXT, "Add Red Pepper Flake and chopped Parsley");
-//        resolver.insert(
-//                ProviderContract.METHOD_URI,
-//                values);
-//
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.MethodStepEntry.STEP_NO, 3);
-//        values.put(ProviderContract.MethodStepEntry.TEXT, "Toss with cooked spaghetti and add cooked chicken if desired");
-//        resolver.insert(
-//                ProviderContract.METHOD_URI,
-//                values);
-//    }
+    private void InsertValue(String imagePath) {
+
+        ContentResolver resolver = getContentResolver();
+
+        ContentValues values = new ContentValues();
+
+        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, 20);
+        values.put(ProviderContract.RecipeEntry.TITLE, "Pasta Aglio E Olio");
+        values.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, 340);
+        values.put(ProviderContract.RecipeEntry.DURATION, 20);
+        values.put(ProviderContract.RecipeEntry.IMAGE_PATH, imagePath);
+
+        Uri result = resolver.insert(
+                ProviderContract.RECIPES_URI,
+                values);
+
+        long recipeId = ContentUris.parseId(result);
+
+        //Ingredients
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Spaghetti");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Garlic");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Parsley");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Olive Oil");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Red Pepper Flake");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Chicken (Optional)");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        //Method
+
+        values = new ContentValues();
+        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.MethodStepEntry.STEP_NO, 1);
+        values.put(ProviderContract.MethodStepEntry.TEXT, "Gradually heat up oil in pan and saute garlic until golden");
+        resolver.insert(
+                ProviderContract.METHOD_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.MethodStepEntry.STEP_NO, 2);
+        values.put(ProviderContract.MethodStepEntry.TEXT, "Add Red Pepper Flake and chopped Parsley");
+        resolver.insert(
+                ProviderContract.METHOD_URI,
+                values);
+
+
+        values = new ContentValues();
+        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.MethodStepEntry.STEP_NO, 3);
+        values.put(ProviderContract.MethodStepEntry.TEXT, "Toss with cooked spaghetti and add cooked chicken if desired");
+        resolver.insert(
+                ProviderContract.METHOD_URI,
+                values);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -263,42 +272,37 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onImagePermRequested() {
+        int response = PermissionsHandler.AskForPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, false);
+
+        switch(response) {
+            case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
+                Log.v(PERMISSIONS, "Storage permission already granted");
+                break;
+            case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
+                Log.v(PERMISSIONS, "Storage permission denied, app won't load images");
+                noImage = true;
+                break;
+        }
+    }
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch(requestCode) {
             case REQUEST_READ_EXTERNAL:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    //recipesLoader.onPermissionResponse(true);
-                    ;
-                else {
-                    //Alert the user why this permission is needed
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setMessage(R.string.perm_dialog_read_external)
-                            .setNegativeButton(R.string.perm_dialog_butt_deny, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    //recipesLoader.onPermissionResponse(false);
-                                    noImage = true;
-
-                                    //Alert the user how they can re-enable the feature
-                                    Snackbar.make(binding.clyMainRoot,
-                                                    R.string.perm_snackbar_msg,
-                                                    Snackbar.LENGTH_LONG
-                                            )
-                                            .show();
-                                }
-                            })
-                            .setPositiveButton(R.string.perm_dialog_butt_permit, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    PermissionsHandler.AskForPermission(MainActivity.this,
-                                            Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, true);
-                                }
-                            })
-                            .create()
-                            .show();
-                }
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED)
+                    Utility.showPermissionDeniedDialog(this,
+                    R.string.perm_dialog_read_external,
+                    binding.clyMainRoot,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    REQUEST_READ_EXTERNAL,
+                    this);
                     break;
         }
+    }
+    @Override
+    public void onFeatureDisabled() {
+        noImage = true;
     }
 
     @Override
@@ -329,7 +333,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public android.support.v4.content.Loader<List<RecipeViewModel>> onCreateLoader(int id, Bundle args) {
+    public android.support.v4.content.Loader<List<Recipe>> onCreateLoader(int id, Bundle args) {
         Handler uiThread = new Handler(getMainLooper());
         return recipesLoader = new GetRecipesLoader(this, uiThread, this,
                 this, RECIPE_PREVIEWS_LOADER);
@@ -345,7 +349,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onLoadFinished(android.support.v4.content.Loader<List<RecipeViewModel>> loader, List<RecipeViewModel> remainingRecords) {
+    public void onLoadFinished(android.support.v4.content.Loader<List<Recipe>> loader, List<Recipe> remainingRecords) {
         //Add the remaining records (not passed through onProgressUpdate) to recipeList
         recipesList.addAll(remainingRecords);
         recipesAdapter.notifyDataSetChanged();
@@ -362,35 +366,13 @@ public class MainActivity extends AppCompatActivity
         recipesAdapter.notifyDataSetChanged();
     }
 
-    private void UpdateRecipesList(List<RecipeViewModel> newRecords) {
+    private void UpdateRecipesList(List<Recipe> newRecords) {
         recipesList.addAll(newRecords);
         recipesAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onImagePermRequested() {
-        int response = PermissionsHandler.AskForPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, false);
-
-        //If permission status already decided, alert loader immediately
-        switch(response) {
-            case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
-                Toast.makeText(this, "Permission already granted!", Toast.LENGTH_SHORT).show();
-
-                //recipesLoader.onPermissionResponse(true);
-                break;
-            case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
-                Log.v(PERMISSIONS, "Storage permission denied, app won't load images");
-                Toast.makeText(this, "Permission previously denied!", Toast.LENGTH_SHORT).show();
-
-                //recipesLoader.onPermissionResponse(false);
-                noImage = true;
-                break;
-        }
-    }
-
-    @Override
-    public void onLoaderReset(android.support.v4.content.Loader<List<RecipeViewModel>> loader) {}
+    public void onLoaderReset(android.support.v4.content.Loader<List<Recipe>> loader) {}
 
     /**
      * Allows integration between the list of recipe objects and the recyclerview
@@ -398,11 +380,11 @@ public class MainActivity extends AppCompatActivity
     class RecipesViewAdapter
             extends RecyclerView.Adapter<RecipesViewAdapter.RecipeViewHolder> implements Filterable {
 
-        List<RecipeViewModel> filteredRecipesList;
+        List<Recipe> filteredRecipesList;
 
         private final int BASIC = 0, COMPLEX = 1, PHOTO_BASIC = 2, PHOTO_COMPLEX = 3;
 
-        RecipesViewAdapter(List<RecipeViewModel> list) {
+        RecipesViewAdapter(List<Recipe> list) {
             filteredRecipesList = list;
         }
 
@@ -425,7 +407,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onBindViewHolder(RecipeViewHolder holder, int pos) {
 
-            RecipeViewModel recipe = filteredRecipesList.get(pos);
+            Recipe recipe = filteredRecipesList.get(pos);
 
             holder.bind(recipe);
         }
@@ -460,8 +442,8 @@ public class MainActivity extends AppCompatActivity
                         filteredRecipesList = recipesList;
                     }
                     else {
-                        List<RecipeViewModel> filteredList = new ArrayList<>();
-                        for (RecipeViewModel row : recipesList) {
+                        List<Recipe> filteredList = new ArrayList<>();
+                        for (Recipe row : recipesList) {
 
                             if (row.getTitle().toLowerCase().contains(charString.toLowerCase())) {
                                 filteredList.add(row);
@@ -478,7 +460,7 @@ public class MainActivity extends AppCompatActivity
 
                 @Override
                 protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                     filteredRecipesList = (ArrayList<RecipeViewModel>) filterResults.values;
+                     filteredRecipesList = (ArrayList<Recipe>) filterResults.values;
 
                     if (filteredRecipesList.size() == 0)
                         binding.txtSearchNoItems.setVisibility(View.VISIBLE);
@@ -502,7 +484,7 @@ public class MainActivity extends AppCompatActivity
                 itemView.setOnLongClickListener(this);
             }
 
-            public void bind(RecipeViewModel item) {
+            public void bind(Recipe item) {
                 binding.setVariable(BR.recipe, item);
                 binding.executePendingBindings();
             }
@@ -543,13 +525,29 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            public void bind(RecipeViewModel item) {
+            public void bind(Recipe item) {
                 super.bind(item);
 
                 //Set unique transition name for this specific
                 ViewCompat.setTransitionName(photoBinding.ivwCrdPreview,
                         getString(R.string.main_card_transition_name) + "_" +
                                 item.getTitle() + "_" + Integer.toString(getAdapterPosition()));
+
+                photoBinding.setVariable(BR.imageLoadedCallback, new RequestListener<Drawable>() {
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        startPostponedEnterTransition();
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
+                        startPostponedEnterTransition();
+                        Log.e(GLIDE, "Data Binding image loading failed (from filepath)", e);
+                        return false;
+                    }
+                });
             }
 
             @Override
@@ -567,13 +565,29 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            public void bind(RecipeViewModel item) {
+            public void bind(Recipe item) {
                 super.bind(item);
 
                 //Set unique transition name for this specific
                 ViewCompat.setTransitionName(photoBinding.ivwCrdPreview,
                         getString(R.string.main_card_transition_name) + "_" +
                                 item.getTitle() + "_" + Integer.toString(getAdapterPosition()));
+
+                photoBinding.setImageLoadedCallback(new RequestListener() {
+
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
+                        startPostponedEnterTransition();
+                        Log.e(GLIDE, "Data Binding image loading failed (from filepath)", e);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Object resource, Object model, Target target, DataSource dataSource, boolean isFirstResource) {
+                        startPostponedEnterTransition();
+                        return false;
+                    }
+                });
             }
 
             @Override
@@ -583,7 +597,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void ViewRecipe(RecipeViewModel recipe, ImageView sharedImageView) {
+    private void ViewRecipe(Recipe recipe, ImageView sharedImageView) {
 
         Intent viewRecipe = new Intent(this, ViewRecipeActivity.class);
         ActivityOptions options;
