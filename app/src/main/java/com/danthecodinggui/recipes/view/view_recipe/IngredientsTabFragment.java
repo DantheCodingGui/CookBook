@@ -1,6 +1,7 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
 
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -9,24 +10,21 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.databinding.FragmentIngredientsBinding;
+import com.danthecodinggui.recipes.databinding.IngredientItemBinding;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.view.Loaders.GetIngredientsLoader;
 import com.danthecodinggui.recipes.view.Loaders.UpdatingAsyncTaskLoader;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
 
@@ -37,10 +35,10 @@ public class IngredientsTabFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<List<Ingredient>>,
         UpdatingAsyncTaskLoader.ProgressUpdateListener {
 
+    FragmentIngredientsBinding binding;
+
     private static final int INGREDIENTS_LOADER = 111;
 
-    @BindView(R.id.rvw_ingredients)
-    RecyclerView ingredientsView;
     private IngredientsViewAdapter ingredientsAdapter;
     private List<Ingredient> ingredientsList;
 
@@ -51,9 +49,8 @@ public class IngredientsTabFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_ingredients, container, false);
-
-        ButterKnife.bind(this, view);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_ingredients, container, false);
+        View view = binding.getRoot();
 
         recipeId = getArguments().getLong(RECIPE_DETAIL_ID);
 
@@ -68,16 +65,8 @@ public class IngredientsTabFragment extends Fragment
 
         ingredientsAdapter = new IngredientsViewAdapter();
         ingredientsList = new ArrayList<>();
-        ingredientsView.setAdapter(ingredientsAdapter);
-        ingredientsView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-//        ingredientsList.add("15 cherry tomatoes");
-//        ingredientsList.add("1 tspn salt");
-//        ingredientsList.add("1 tspn pepper");
-//        ingredientsList.add("10 lettuce leaves");
-//        ingredientsList.add("1 carrot");
-//
-//        ingredientsAdapter.notifyDataSetChanged();
+        binding.rvwIngredients.setAdapter(ingredientsAdapter);
+        binding.rvwIngredients.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
     @NonNull
@@ -108,13 +97,14 @@ public class IngredientsTabFragment extends Fragment
 
         @Override
         public IngredientViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new IngredientViewHolder(LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.ingredient_item, parent, false));
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            return new IngredientViewHolder(IngredientItemBinding.inflate(inflater, parent, false));
         }
 
         @Override
         public void onBindViewHolder(IngredientViewHolder holder, int position) {
-            holder.ingredient.setText(ingredientsList.get(position).getIngredientText());
+            Ingredient ingredient = ingredientsList.get(position);
+            holder.bind(ingredient);
         }
 
         @Override
@@ -124,16 +114,17 @@ public class IngredientsTabFragment extends Fragment
 
         class IngredientViewHolder extends RecyclerView.ViewHolder {
 
-            @BindView(R.id.crd_ingredient_item)
-            CardView background;
+            IngredientItemBinding binding;
 
-            @BindView(R.id.txt_ingredient_item)
-            TextView ingredient;
+            IngredientViewHolder(IngredientItemBinding binding) {
+                super(binding.getRoot());
+                this.binding = binding;
+                binding.crdIngredientItem.setCardBackgroundColor(getResources().getColor(R.color.colorIngredients));
+            }
 
-            IngredientViewHolder(View itemView) {
-                super(itemView);
-                ButterKnife.bind(this, itemView);
-                background.setCardBackgroundColor(getResources().getColor(R.color.colorIngredients));
+            public void bind(Ingredient item) {
+                binding.setIngredient(item);
+                binding.executePendingBindings();
             }
         }
     }

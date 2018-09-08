@@ -1,6 +1,7 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
 
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -9,15 +10,15 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.databinding.FragmentMethodBinding;
+import com.danthecodinggui.recipes.databinding.MethodItemBinding;
 import com.danthecodinggui.recipes.model.object_models.MethodStep;
 import com.danthecodinggui.recipes.view.Loaders.GetMethodStepsLoader;
 import com.danthecodinggui.recipes.view.Loaders.UpdatingAsyncTaskLoader;
@@ -25,8 +26,6 @@ import com.danthecodinggui.recipes.view.Loaders.UpdatingAsyncTaskLoader;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
 
@@ -37,10 +36,10 @@ public class MethodTabFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<List<MethodStep>>,
         UpdatingAsyncTaskLoader.ProgressUpdateListener {
 
+    FragmentMethodBinding binding;
+
     private static final int METHOD_LOADER = 121;
 
-    @BindView(R.id.rvw_method)
-    RecyclerView methodStepsView;
     private MethodViewAdapter methodStepsAdapter;
     private List<MethodStep> methodList;
 
@@ -51,9 +50,9 @@ public class MethodTabFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_method, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_method, container, false);
+        View view = binding.getRoot();
 
-        ButterKnife.bind(this, view);
 
         recipeId = getArguments().getLong(RECIPE_DETAIL_ID);
 
@@ -68,8 +67,8 @@ public class MethodTabFragment extends Fragment
 
         methodStepsAdapter = new MethodViewAdapter();
         methodList = new ArrayList<>();
-        methodStepsView.setAdapter(methodStepsAdapter);
-        methodStepsView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.rvwMethod.setAdapter(methodStepsAdapter);
+        binding.rvwMethod.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
     @NonNull
@@ -100,13 +99,14 @@ public class MethodTabFragment extends Fragment
 
         @Override
         public StepViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new StepViewHolder(LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.method_item, parent, false));
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            return new StepViewHolder(MethodItemBinding.inflate(inflater, parent, false));
         }
 
         @Override
         public void onBindViewHolder(StepViewHolder holder, int position) {
-            holder.step.setText(methodList.get(position).getStepText());
+            MethodStep step = methodList.get(position);
+            holder.bind(step);
         }
 
         @Override
@@ -116,16 +116,17 @@ public class MethodTabFragment extends Fragment
 
         class StepViewHolder extends RecyclerView.ViewHolder {
 
-            @BindView(R.id.crd_method_item)
-            CardView background;
+            MethodItemBinding binding;
 
-            @BindView(R.id.txt_method_item)
-            TextView step;
+            StepViewHolder(MethodItemBinding binding) {
+                super(binding.getRoot());
+                this.binding = binding;
+                binding.crdMethodItem.setCardBackgroundColor(getResources().getColor(R.color.colorMethodStep));
+            }
 
-            StepViewHolder(View itemView) {
-                super(itemView);
-                ButterKnife.bind(this, itemView);
-                background.setCardBackgroundColor(getResources().getColor(R.color.colorMethodStep));
+            public void bind(MethodStep item) {
+                binding.setMethodStep(item);
+                binding.executePendingBindings();
             }
         }
     }
