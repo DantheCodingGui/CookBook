@@ -93,6 +93,10 @@ public class ViewRecipeActivity extends AppCompatActivity
             SetupNoPhotoLayout();
     }
 
+    /**
+     * Setup layout with CollapsingToolbarLayout and all it's components, including the relevant
+     * data bindings
+     */
     private void SetupPhotoLayout() {
         bindingPhoto = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe_photo);
         bindingPhoto.setRecipe(recipe);
@@ -124,8 +128,6 @@ public class ViewRecipeActivity extends AppCompatActivity
         //String url = foodPhotos[new Random().nextInt(foodPhotos.length)];
         //String url = foodPhotos[1];
 
-
-
         bindingPhoto.ablViewRecipe.addOnOffsetChangedListener(this);
 
         setSupportActionBar(bindingPhoto.tbarVwRecipe);
@@ -135,6 +137,9 @@ public class ViewRecipeActivity extends AppCompatActivity
         SetupTabLayout(bindingPhoto.tlyViewRecipe, bindingPhoto.vprViewRecipe);
     }
 
+    /**
+     * Setup layout with standard toolbar and tablayout, including the relevant data bindings
+     */
     private void SetupNoPhotoLayout() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe);
 
