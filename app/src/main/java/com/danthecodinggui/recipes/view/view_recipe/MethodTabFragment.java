@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.model.object_models.MethodStep;
 import com.danthecodinggui.recipes.view.Loaders.GetMethodStepsLoader;
 import com.danthecodinggui.recipes.view.Loaders.UpdatingAsyncTaskLoader;
 
@@ -33,15 +34,15 @@ import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
  * Holds list of steps for a given recipe
  */
 public class MethodTabFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<List<String>>,
+        implements LoaderManager.LoaderCallbacks<List<MethodStep>>,
         UpdatingAsyncTaskLoader.ProgressUpdateListener {
 
-    private static final int METHOD_LOADER = 201;
+    private static final int METHOD_LOADER = 121;
 
     @BindView(R.id.rvw_method)
     RecyclerView methodStepsView;
     private MethodViewAdapter methodStepsAdapter;
-    private List<String> methodList;
+    private List<MethodStep> methodList;
 
     private long recipeId;
 
@@ -73,7 +74,7 @@ public class MethodTabFragment extends Fragment
 
     @NonNull
     @Override
-    public Loader<List<String>> onCreateLoader(int id, @Nullable Bundle args) {
+    public Loader<List<MethodStep>> onCreateLoader(int id, @Nullable Bundle args) {
         Handler uiThread = new Handler(Looper.getMainLooper());
         return new GetMethodStepsLoader(getActivity(), uiThread, this, id, recipeId);
     }
@@ -85,7 +86,7 @@ public class MethodTabFragment extends Fragment
     }
 
     @Override
-    public void onLoadFinished(@NonNull Loader<List<String>> loader, List<String> remainingSteps) {
+    public void onLoadFinished(@NonNull Loader<List<MethodStep>> loader, List<MethodStep> remainingSteps) {
         methodList.addAll(remainingSteps);
         methodStepsAdapter.notifyDataSetChanged();
 
@@ -93,7 +94,7 @@ public class MethodTabFragment extends Fragment
     }
 
     @Override
-    public void onLoaderReset(@NonNull Loader<List<String>> loader) {}
+    public void onLoaderReset(@NonNull Loader<List<MethodStep>> loader) {}
 
     class MethodViewAdapter extends RecyclerView.Adapter<MethodViewAdapter.StepViewHolder> {
 
@@ -105,7 +106,7 @@ public class MethodTabFragment extends Fragment
 
         @Override
         public void onBindViewHolder(StepViewHolder holder, int position) {
-            holder.step.setText(methodList.get(position));
+            holder.step.setText(methodList.get(position).getStepText());
         }
 
         @Override

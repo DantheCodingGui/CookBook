@@ -1,12 +1,10 @@
 package com.danthecodinggui.recipes.view;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -16,17 +14,14 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -92,10 +87,10 @@ public class MainActivity extends AppCompatActivity
     private GetRecipesLoader recipesLoader;
 
     //Loader IDs
-    private static final int RECIPE_PREVIEWS_LOADER = 101;
+    private static final int LOADER_RECIPE_PREVIEWS = 101;
 
     //Permission request codes
-    private static final int REQUEST_READ_EXTERNAL = 201;
+    private static final int REQ_CODE_READ_EXTERNAL = 201;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +129,7 @@ public class MainActivity extends AppCompatActivity
 
         setSupportActionBar(binding.tbarHome);
 
-        getSupportLoaderManager().initLoader(RECIPE_PREVIEWS_LOADER, null, this);
+        getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, this);
 
 
         //String path = Environment.getExternalStorageDirectory().getPath();
@@ -274,7 +269,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onImagePermRequested() {
         int response = PermissionsHandler.AskForPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, false);
+                Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL, false);
 
         switch(response) {
             case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
@@ -289,13 +284,13 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch(requestCode) {
-            case REQUEST_READ_EXTERNAL:
+            case REQ_CODE_READ_EXTERNAL:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED)
                     Utility.showPermissionDeniedDialog(this,
                     R.string.perm_dialog_read_external,
                     binding.clyMainRoot,
                     Manifest.permission.READ_EXTERNAL_STORAGE,
-                    REQUEST_READ_EXTERNAL,
+                            REQ_CODE_READ_EXTERNAL,
                     this);
                     break;
         }
@@ -336,13 +331,13 @@ public class MainActivity extends AppCompatActivity
     public android.support.v4.content.Loader<List<Recipe>> onCreateLoader(int id, Bundle args) {
         Handler uiThread = new Handler(getMainLooper());
         return recipesLoader = new GetRecipesLoader(this, uiThread, this,
-                this, RECIPE_PREVIEWS_LOADER);
+                this, LOADER_RECIPE_PREVIEWS);
     }
 
     @Override
     public <T> void onProgressUpdate(int loaderId, T updateValue) {
         switch(loaderId) {
-            case RECIPE_PREVIEWS_LOADER:
+            case LOADER_RECIPE_PREVIEWS:
                 UpdateRecipesList((List)updateValue);
                 break;
         }

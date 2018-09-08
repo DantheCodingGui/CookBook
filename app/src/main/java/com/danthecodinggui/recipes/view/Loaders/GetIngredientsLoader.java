@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.danthecodinggui.recipes.model.ProviderContract;
+import com.danthecodinggui.recipes.model.object_models.Ingredient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public class GetIngredientsLoader extends UpdatingAsyncTaskLoader {
 
     ContentResolver contentResolver;
 
-    private List<String> ingredients;
+    private List<Ingredient> ingredients;
 
     private long recipePk;
 
@@ -65,10 +66,13 @@ public class GetIngredientsLoader extends UpdatingAsyncTaskLoader {
 
         int recordsGathered = 0;
 
-        while (cursor.moveToNext()) {
-            ingredients.add(cursor.getString(
-                    cursor.getColumnIndexOrThrow(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME)));
+        Ingredient temp;
 
+        while (cursor.moveToNext()) {
+
+            temp = new Ingredient(cursor.getString(
+                    cursor.getColumnIndexOrThrow(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME)));
+            ingredients.add(temp);
 
             recordsGathered = ingredients.size();
             if (recordsGathered % 10 == 0)

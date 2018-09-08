@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.danthecodinggui.recipes.model.ProviderContract;
+import com.danthecodinggui.recipes.model.object_models.MethodStep;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ public class GetMethodStepsLoader extends UpdatingAsyncTaskLoader {
 
     ContentResolver contentResolver;
 
-    private List<String> methodSteps;
+    private List<MethodStep> methodSteps;
 
     private long recipePk;
 
@@ -47,7 +48,8 @@ public class GetMethodStepsLoader extends UpdatingAsyncTaskLoader {
     @Override
     public Object loadInBackground() {
         String[] projection = {
-                ProviderContract.MethodStepEntry.TEXT
+                ProviderContract.MethodStepEntry.TEXT,
+                ProviderContract.MethodStepEntry.STEP_NO
         };
 
         String[] arguments = { Long.toString(recipePk) };
@@ -62,9 +64,17 @@ public class GetMethodStepsLoader extends UpdatingAsyncTaskLoader {
 
         int recordsGathered = 0;
 
+        MethodStep temp;
+
         while (cursor.moveToNext()) {
-            methodSteps.add(cursor.getString(
-                    cursor.getColumnIndexOrThrow(ProviderContract.MethodStepEntry.TEXT)));
+
+            temp = new MethodStep(
+                    cursor.getString(cursor.getColumnIndexOrThrow(
+                        ProviderContract.MethodStepEntry.TEXT)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(
+                        ProviderContract.MethodStepEntry.STEP_NO)));
+
+            methodSteps.add(temp);
 
 
             recordsGathered = methodSteps.size();

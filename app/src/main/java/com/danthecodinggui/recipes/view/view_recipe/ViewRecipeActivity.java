@@ -1,14 +1,12 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
 import android.Manifest;
-import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
@@ -19,7 +17,6 @@ import android.support.v7.graphics.Palette;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -41,12 +38,15 @@ import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NA
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_BUNDLE;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_OBJECT;
 
+/**
+ * Display details of a specific recipe
+ */
 public class ViewRecipeActivity extends AppCompatActivity
         implements AppBarLayout.OnOffsetChangedListener {
 
     //TODO duplicate static value, find way to push into 1 class
     //Permission request codes
-    private static final int REQUEST_READ_EXTERNAL = 201;
+    private static final int REQ_CODE_READ_EXTERNAL = 211;
 
     private String imageTransitionName;
 
@@ -78,7 +78,7 @@ public class ViewRecipeActivity extends AppCompatActivity
             imageTransitionName = extras.getString(CARD_TRANSITION_NAME);
 
             int response = PermissionsHandler.AskForPermission(this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL, false);
+                    Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL, false);
 
             switch (response) {
                 case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
@@ -95,7 +95,7 @@ public class ViewRecipeActivity extends AppCompatActivity
 
     /**
      * Setup layout with CollapsingToolbarLayout and all it's components, including the relevant
-     * data bindings
+     *  data bindings
      */
     private void SetupPhotoLayout() {
         bindingPhoto = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe_photo);

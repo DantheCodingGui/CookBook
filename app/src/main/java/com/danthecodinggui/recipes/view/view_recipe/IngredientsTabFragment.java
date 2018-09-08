@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.view.Loaders.GetIngredientsLoader;
 import com.danthecodinggui.recipes.view.Loaders.UpdatingAsyncTaskLoader;
 
@@ -33,15 +34,15 @@ import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
  * A simple {@link Fragment} subclass.
  */
 public class IngredientsTabFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<List<String>>,
+        implements LoaderManager.LoaderCallbacks<List<Ingredient>>,
         UpdatingAsyncTaskLoader.ProgressUpdateListener {
 
-    private static final int INGREDIENTS_LOADER = 101;
+    private static final int INGREDIENTS_LOADER = 111;
 
     @BindView(R.id.rvw_ingredients)
     RecyclerView ingredientsView;
     private IngredientsViewAdapter ingredientsAdapter;
-    private List<String> ingredientsList;
+    private List<Ingredient> ingredientsList;
 
     private long recipeId;
 
@@ -81,7 +82,7 @@ public class IngredientsTabFragment extends Fragment
 
     @NonNull
     @Override
-    public Loader<List<String>> onCreateLoader(int id, @Nullable Bundle args) {
+    public Loader<List<Ingredient>> onCreateLoader(int id, @Nullable Bundle args) {
         Handler uiThread = new Handler(Looper.getMainLooper());
         return new GetIngredientsLoader(getActivity(), uiThread, this, id, recipeId);
     }
@@ -93,7 +94,7 @@ public class IngredientsTabFragment extends Fragment
     }
 
     @Override
-    public void onLoadFinished(@NonNull Loader<List<String>> loader, List<String> remainingIngredients) {
+    public void onLoadFinished(@NonNull Loader<List<Ingredient>> loader, List<Ingredient> remainingIngredients) {
         ingredientsList.addAll(remainingIngredients);
         ingredientsAdapter.notifyDataSetChanged();
 
@@ -101,7 +102,7 @@ public class IngredientsTabFragment extends Fragment
     }
 
     @Override
-    public void onLoaderReset(@NonNull Loader<List<String>> loader) { }
+    public void onLoaderReset(@NonNull Loader<List<Ingredient>> loader) { }
 
     class IngredientsViewAdapter extends RecyclerView.Adapter<IngredientsViewAdapter.IngredientViewHolder> {
 
@@ -113,7 +114,7 @@ public class IngredientsTabFragment extends Fragment
 
         @Override
         public void onBindViewHolder(IngredientViewHolder holder, int position) {
-            holder.ingredient.setText(ingredientsList.get(position));
+            holder.ingredient.setText(ingredientsList.get(position).getIngredientText());
         }
 
         @Override
