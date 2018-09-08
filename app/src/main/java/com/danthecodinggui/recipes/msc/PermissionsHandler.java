@@ -32,7 +32,6 @@ public class PermissionsHandler{
     public static final int PERMISSION_GRANTING = 0;
     public static final int PERMISSION_ALREADY_GRANTED = 1;
     public static final int PERMISSION_PREVIOUSLY_DENIED = 2;
-    public static final int PERMISSION_INVALID = 3;
 
     /**
      *
@@ -49,8 +48,6 @@ public class PermissionsHandler{
      *     The caller is allowed to run the code requiring this permission.</li>
      *     <li><code>PERMISSION_PREVIOUSLY_DENIED</code> - The user has previously denied the permission.
      *     If intent not obvious then present some kind of explanation dialogue (async) before asking again.</li>
-     *     <li><code>PERMISSION_INVALID</code> - The requested permission is not one that the application
-     *     should need, and therefore is disallowed.</li>
      * </ul>
      *
      */
@@ -67,10 +64,8 @@ public class PermissionsHandler{
             if (p.equals(permission))
                 isValidPermission = true;
         }
-        if (!isValidPermission) {
-            Log.e(PERMISSIONS, "Permission " + permission + " is invalid");
-            return PERMISSION_INVALID;
-        }
+        if (!isValidPermission)
+            throw new InvalidPermissionException("Requested permission is not in the manifest");
 
         //Precaution to avoid unnecessary checks if not needed
         if (!runtimePermissions)
@@ -94,6 +89,13 @@ public class PermissionsHandler{
         else {
             Log.i(PERMISSIONS, "Permission " + permission + " already granted");
             return PERMISSION_ALREADY_GRANTED;
+        }
+    }
+
+    private static class InvalidPermissionException extends RuntimeException {
+
+        private InvalidPermissionException(String message) {
+            super(message);
         }
     }
 }
