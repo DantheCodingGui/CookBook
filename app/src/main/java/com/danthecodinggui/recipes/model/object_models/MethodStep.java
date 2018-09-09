@@ -1,5 +1,8 @@
 package com.danthecodinggui.recipes.model.object_models;
 
+/**
+ * ViewRecipeActivity RecyclerView model for Method tab
+ */
 public class MethodStep {
 
     private String stepText;

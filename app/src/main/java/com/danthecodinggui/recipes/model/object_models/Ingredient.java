@@ -1,5 +1,8 @@
 package com.danthecodinggui.recipes.model.object_models;
 
+/**
+ * ViewRecipeActivity RecyclerView model for Ingredients tab
+ */
 public class Ingredient {
 
     private String ingredientText;

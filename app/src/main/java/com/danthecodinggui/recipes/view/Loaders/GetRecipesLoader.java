@@ -141,56 +141,31 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
      */
     private Recipe BuildBaseModel(Cursor cursor) {
 
+        //Constant values, always used in constructor
         long pk = cursor.getLong(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry._ID));
-
         String recipeTitle = cursor.getString(cursor.getColumnIndexOrThrow(
                 ProviderContract.RecipeEntry.TITLE));
-        int calories = -1;
-        int timeInMins = -1;
 
-        boolean noImage = cursor.isNull(cursor.getColumnIndexOrThrow(
-                ProviderContract.RecipeEntry.IMAGE_PATH));
-        boolean noKcal = cursor.isNull(cursor.getColumnIndexOrThrow(
-                ProviderContract.RecipeEntry.CALORIES_PER_PERSON));
-        boolean noTime = cursor.isNull(cursor.getColumnIndexOrThrow(
-                ProviderContract.RecipeEntry.DURATION));
+        int calories = 0;
+        int timeInMins = 0;
+        String photoPath = null;
 
-        if (!noKcal)
+        //If optional values exist assign to variables
+        if (!cursor.isNull(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.CALORIES_PER_PERSON)))
             calories = cursor.getInt(cursor.getColumnIndexOrThrow(
                     ProviderContract.RecipeEntry.CALORIES_PER_PERSON));
-        if (!noTime)
+        if (!cursor.isNull(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.DURATION)))
             timeInMins = cursor.getInt(cursor.getColumnIndexOrThrow(
                     ProviderContract.RecipeEntry.DURATION));
-
-        if (noImage) {
-            if (noKcal) {
-                if (noTime)
-                    return new Recipe(pk, recipeTitle);
-                else
-                    return new Recipe(pk, recipeTitle, timeInMins);
-            } else {
-                if (noTime)
-                    return new Recipe(pk, recipeTitle, calories);
-                else
-                    return new Recipe(pk, recipeTitle, calories, timeInMins);
-            }
-        } else {
-
-            String photoPath = cursor.getString(cursor.getColumnIndexOrThrow(
+        if (!cursor.isNull(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.IMAGE_PATH)))
+            photoPath = cursor.getString(cursor.getColumnIndexOrThrow(
                     ProviderContract.RecipeEntry.IMAGE_PATH));
 
-            if (noKcal) {
-                if (noTime)
-                    return new Recipe(pk, recipeTitle, photoPath);
-                else
-                    return new Recipe(pk, recipeTitle, timeInMins, photoPath);
-            } else {
-                if (noTime)
-                    return new Recipe(pk, recipeTitle, calories, photoPath);
-                else
-                    return new Recipe(pk, recipeTitle, calories, timeInMins, photoPath);
-            }
-        }
+        return new Recipe.RecipeBuilder(pk, recipeTitle)
+                .calories(calories)
+                .timeInMins(timeInMins)
+                .imageFilePath(photoPath)
+                .build();
     }
 
     /**

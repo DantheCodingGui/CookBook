@@ -12,45 +12,20 @@ public class Recipe implements Parcelable {
     private long recipePk;
 
     private String title;
-    private int ingredientsNo = -1;
-    private int stepsNo = -1;
+    private int ingredientsNo;
+    private int stepsNo;
 
     private String imageFilePath;
 
     private int calories;
     private int timeInMins;
 
-    public Recipe(long recipePk, String title, Integer calories, int timeInMins, String imagefilePath) {
+    private Recipe(long recipePk, String title, Integer calories, int timeInMins, String imagefilePath) {
         this.recipePk = recipePk;
         this.title = title;
         this.calories = calories;
         this.timeInMins = timeInMins;
         this.imageFilePath = imagefilePath;
-    }
-    public Recipe(long recipePk, String title, Integer calories, int timeInMins) {
-        this(recipePk, title,  calories, timeInMins, null);
-    }
-
-    //With Image
-    public Recipe(long recipePk, String title, Integer calories, String imagefilePath) {
-        this(recipePk, title,  calories, -1, imagefilePath);
-    }
-    public Recipe(long recipePk, String title, int timeInMins, String imagefilePath) {
-        this(recipePk, title, -1, timeInMins, imagefilePath);
-    }
-    public Recipe(long recipePk, String title, String imagefilePath) {
-        this(recipePk, title, -1, -1, imagefilePath);
-    }
-
-    //Without Image
-    public Recipe(long recipePk, String title, Integer calories) {
-        this(recipePk, title,  calories, -1, null);
-    }
-    public Recipe(long recipePk, String title, int timeInMins) {
-        this(recipePk, title, -1, timeInMins, null);
-    }
-    public Recipe(long recipePk, String title) {
-        this(recipePk, title, -1, -1, null);
     }
 
     /**
@@ -97,22 +72,13 @@ public class Recipe implements Parcelable {
     public String getImageFilePath() {
         return imageFilePath;
     }
-    public void setImageFilePath(String imageFilePath) {
-        this.imageFilePath = imageFilePath;
-    }
 
     public int getCalories() {
         return calories;
     }
-    public void setCalories(int calories) {
-        this.calories = calories;
-    }
 
     public int getTimeInMins() {
         return timeInMins;
-    }
-    public void setTimeInMins(int timeInMins) {
-        this.timeInMins = timeInMins;
     }
 
     @Override
@@ -130,7 +96,7 @@ public class Recipe implements Parcelable {
         parcel.writeInt(calories);
         parcel.writeInt(timeInMins);
     }
-
+    //Parcel-based constructor
     public Recipe(Parcel parcel) {
         this.recipePk = parcel.readLong();
         this.title = parcel.readString();
@@ -155,4 +121,47 @@ public class Recipe implements Parcelable {
             return new Recipe[size];
         }
     };
+
+    /**
+     * Builds recipe objects, required due to large amount of constructor params and the fact that
+     * some are optional
+     */
+    public static class RecipeBuilder {
+        private long nestedRecipePk;
+
+        private String nestedTitle;
+
+        private String nestedImageFilePath;
+
+        private int nestedCalories;
+        private int nestedTimeInMins;
+
+        public RecipeBuilder(long recipePk, String title) {
+            nestedRecipePk = recipePk;
+            nestedTitle = title;
+        }
+
+        public RecipeBuilder calories(int calories) {
+            nestedCalories = calories;
+            return this;
+        }
+        public RecipeBuilder timeInMins(int timeInMins) {
+            nestedTimeInMins = timeInMins;
+            return this;
+        }
+        public RecipeBuilder imageFilePath(String imageFilePath) {
+            nestedImageFilePath = imageFilePath;
+            return this;
+        }
+
+        public Recipe build() {
+            return new Recipe(
+                    nestedRecipePk,
+                    nestedTitle,
+                    nestedCalories,
+                    nestedTimeInMins,
+                    nestedImageFilePath
+            );
+        }
+    }
 }
