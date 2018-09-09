@@ -11,6 +11,8 @@ public class StringUtils {
      * @return Formatted string
      */
     public static String minsToHourMins(int mins) {
+        if (mins == 0)
+            return "";
         if (mins < 60) {
             if (mins > 1)
                 return mins + " mins";

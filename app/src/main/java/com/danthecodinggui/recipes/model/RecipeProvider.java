@@ -24,7 +24,6 @@ public class RecipeProvider extends ContentProvider {
     private static final int RECIPE_INGREDIENTS_ITEM = 105;
 
     private static final UriMatcher uriMatcher;
-
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(ProviderContract.CONTENT_AUTHORITY, ProviderContract.PATH_RECIPES, RECIPES_TABLE);
@@ -64,13 +63,14 @@ public class RecipeProvider extends ContentProvider {
                 tableName = DBSchema.MethodStepEntry.TABLE_NAME;
                 break;
             case RECIPE_INGREDIENTS_TABLE:
-                //Need to handle 1 provider table -> 2 db tables
+                //Handle 1 provider table -> 2 db tables
                 long recipeId = values.getAsLong(ProviderContract.RecipeIngredientEntry.RECIPE_ID);
                 String ingredient = values.getAsString(
                         ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME);
 
                 long ingredientId = GetIngredientId(ingredient);
 
+                //Break down old values, reconstruct and insert in RecipeIngredients table
                 values = new ContentValues();
                 values.put(DBSchema.RecipeIngredientEntry.RECIPE_ID, recipeId);
                 values.put(DBSchema.RecipeIngredientEntry.INGREDIENT_ID, ingredientId);
@@ -125,7 +125,7 @@ public class RecipeProvider extends ContentProvider {
             );
         }
 
-        //Ingredient is already in table, just return it's ID
+        //Ingredient is already/now in table, just return it's ID
         ingredients.moveToFirst();
         return ingredients.getLong(
                 ingredients.getColumnIndexOrThrow(DBSchema.IngredientEntry._ID));
@@ -310,12 +310,10 @@ public class RecipeProvider extends ContentProvider {
                 );
                 break;
             case RECIPE_INGREDIENTS_TABLE:
-                /* TODO as we're using a view for ingredients, will need to handle references to
-                 ingredients when something is deleted, ie. check to see if deleted ingredients
-                 are still referenced in recipe-ingredients table
-                 */
+                //TODO Maybe in future look for references to a specific ingredient in recipeIngredients,
+                //and delete in ingredients if no refs to it (not a big deal for now)
                 rowNumDeleted = db.delete(
-                        DBSchema.IngredientEntry.TABLE_NAME,
+                        DBSchema.RecipeIngredientEntry.TABLE_NAME,
                         selection,
                         selectionArgs
                 );

@@ -32,20 +32,24 @@ public final class ProviderContract {
             RecipeEntry.DURATION,
             RecipeEntry.IMAGE_PATH
     };
-    public static final String INGREDIENTS_SELECTION = RecipeIngredientEntry.RECIPE_ID + " = ?";
-    public static final String METHOD_SELECTION = MethodStepEntry.RECIPE_ID + " = ?";
 
-    //Count records projection string
+    //Count ingredient/methodStep records projection string
     public static final String[] COUNT_INGREDIENTS_PROJECTION = { "count(" + RecipeIngredientEntry.RECIPE_ID +
             ") AS " + BaseColumns._COUNT};
     public static final String[] COUNT_STEPS_PROJECTION = { "count(" + MethodStepEntry.RECIPE_ID +
             ") AS " + BaseColumns._COUNT};
+
+    //Selections linking to a specific recipe _id
+    public static final String INGREDIENTS_SELECTION = RecipeIngredientEntry.RECIPE_ID + " = ?";
+    public static final String METHOD_SELECTION = MethodStepEntry.RECIPE_ID + " = ?";
 
     //Sort orders
     public static final String METHOD_SORT_ORDER = MethodStepEntry.STEP_NO + " ASC";
 
     //Empty constructor in case anyone instantiates class
     ProviderContract() {}
+
+    //Schema of "Virtual" database publicly shown to content provider
 
     /**
      * Core recipe data

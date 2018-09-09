@@ -3,7 +3,6 @@ package com.danthecodinggui.recipes.model;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 /**
  * Basic Database helper to create and handle core database changes
@@ -13,6 +12,7 @@ class DBHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "recipes.db";
 
+    //SQL table creation strings
     private static final String CREATE_RECIPE = "CREATE TABLE " +
             DBSchema.RecipeEntry.TABLE_NAME + "(" +
             DBSchema.RecipeEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -60,7 +60,7 @@ class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersionNo, int newVersionNo) {
-        //TODO actually write this properly this time
+        //TODO update when you upgrade the db version
         db.execSQL("DROP TABLE IF EXISTS " + DBSchema.RecipeEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + DBSchema.IngredientEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + DBSchema.MethodStepEntry.TABLE_NAME);

@@ -2,8 +2,12 @@ package com.danthecodinggui.recipes.model;
 
 import android.provider.BaseColumns;
 
+/**
+ * Defines the structure of the application's database
+ */
 final class DBSchema {
 
+    //SQL join statement for combining ingredients tables into 1 for easier queries
     static final String INGREDIENTS_JOIN = "(SELECT " +
             RecipeIngredientEntry.TABLE_NAME + "." + RecipeIngredientEntry._ID + ", " +
             RecipeIngredientEntry.RECIPE_ID + ", " + IngredientEntry.NAME + " FROM " +

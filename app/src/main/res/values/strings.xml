@@ -28,4 +28,6 @@
     <string name="perm_snackbar_msg">You can re-enable this permission in your device\'s settings</string>
     <string name="txt_no_recipes">You haven\'t got any recipes yet,\n Lets Get Started!</string>
     <string name="transition_rounded_to_square">transition_round_edges_to_square</string>
+
+    <string name="empty" />
 </resources>
