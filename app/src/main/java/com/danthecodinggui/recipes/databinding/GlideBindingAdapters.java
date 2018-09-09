@@ -4,7 +4,6 @@ import android.content.Context;
 import android.databinding.BindingAdapter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.support.v4.widget.CircularProgressDrawable;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -20,6 +19,11 @@ import java.io.File;
  */
 public class GlideBindingAdapters {
 
+    /**
+     * Loads an image into an imageView from a local filepath
+     * @param imageFilePath The path to the image
+     * @param onLoadedListener A callback to be used for any actions once the image is loaded
+     */
     @BindingAdapter(value = {"imageFilePath", "onLoadedListener"}, requireAll = false)
     public static void setImageResource(final ImageView view, String imageFilePath, RequestListener<Drawable> onLoadedListener) {
 
@@ -30,15 +34,8 @@ public class GlideBindingAdapters {
 
         final Context context = view.getContext();
 
-        //Make placeholder spinner
-        CircularProgressDrawable placeholder = new CircularProgressDrawable(context);
-        placeholder.setStrokeWidth(5f);
-        placeholder.setCenterRadius(50f);
-        placeholder.start();
-
         //Todo update placeholder and error with final custom ones
         RequestOptions options = new RequestOptions()
-                .placeholder(placeholder)
                 .error(R.drawable.ic_imageload_error);
 
         Glide.with(context)
