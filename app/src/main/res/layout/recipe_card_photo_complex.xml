@@ -65,8 +65,7 @@
                 <TextView
                     android:id="@+id/txt_crd_cal"
                     style="@style/CardText"
-                    android:text="@{(recipe.getCalories == 0) ? @string/empty :
-                                    @plurals/txt_calories(recipe.getCalories(), recipe.getCalories())}"
+                    android:text="@{(recipe.getCalories == 0) ? @string/empty : @plurals/txt_calories(recipe.getCalories(), recipe.getCalories())}"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/txt_crd_duration"
                     app:layout_constraintHorizontal_bias="0.0"
