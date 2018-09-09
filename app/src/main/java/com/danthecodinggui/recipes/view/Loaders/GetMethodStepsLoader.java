@@ -60,7 +60,7 @@ public class GetMethodStepsLoader extends UpdatingAsyncTaskLoader {
                 projection,
                 ProviderContract.METHOD_SELECTION,
                 arguments,
-                ProviderContract.MethodStepEntry.STEP_NO + "ASC"
+                ProviderContract.MethodStepEntry.STEP_NO + " ASC"
         );
 
         int recordsGathered = 0;
