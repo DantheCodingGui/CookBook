@@ -43,9 +43,6 @@ public final class ProviderContract {
     public static final String INGREDIENTS_SELECTION = RecipeIngredientEntry.RECIPE_ID + " = ?";
     public static final String METHOD_SELECTION = MethodStepEntry.RECIPE_ID + " = ?";
 
-    //Sort orders
-    public static final String METHOD_SORT_ORDER = MethodStepEntry.STEP_NO + " ASC";
-
     //Empty constructor in case anyone instantiates class
     ProviderContract() {}
 

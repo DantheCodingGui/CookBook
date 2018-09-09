@@ -136,6 +136,10 @@ public class MainActivity extends AppCompatActivity
         //InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
     }
 
+    /**
+     * Test method to insert dummy recipe, used until AddRecipeActivity is functional
+     * @param imagePath
+     */
     private void InsertValue(String imagePath) {
 
         ContentResolver resolver = getContentResolver();

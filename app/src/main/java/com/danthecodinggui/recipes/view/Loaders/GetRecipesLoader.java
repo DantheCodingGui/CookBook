@@ -24,8 +24,6 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
     private ImagePermissionsListener permissionsCallback;
 
-    private final String recipesSortOrder = ProviderContract.RecipeEntry.VIEW_ORDER + " ASC";
-
     public GetRecipesLoader(Context context, Handler uiThread, ProgressUpdateListener updateCallback,
                      ImagePermissionsListener permissionCallback, int loaderId) {
         super(context, uiThread, updateCallback, loaderId);
@@ -56,7 +54,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
                 ProviderContract.RECIPE_PROJECTION_FULL,
                 null,
                 null,
-                recipesSortOrder
+                ProviderContract.RecipeEntry.VIEW_ORDER + " ASC"
         );
         //Cursor for the ingredients/method queries afterwards
         Cursor countCursor;

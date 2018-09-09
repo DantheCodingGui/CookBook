@@ -16,9 +16,12 @@ import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 
+/**
+ * Load list of ingredients of a particular recipe
+ */
 public class GetIngredientsLoader extends UpdatingAsyncTaskLoader {
 
-    ContentResolver contentResolver;
+    private ContentResolver contentResolver;
 
     private List<Ingredient> ingredients;
 
@@ -54,6 +57,7 @@ public class GetIngredientsLoader extends UpdatingAsyncTaskLoader {
                 ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME
         };
 
+        //Link to recipe _id
         String[] arguments = { Long.toString(recipePk) };
 
         Cursor cursor = contentResolver.query(

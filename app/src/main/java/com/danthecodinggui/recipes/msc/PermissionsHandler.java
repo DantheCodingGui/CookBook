@@ -12,7 +12,7 @@ import android.util.Log;
 import static com.danthecodinggui.recipes.msc.LogTags.PERMISSIONS;
 
 /**
- * Reduces some boilerplate code concerning runtime permissions <br/>
+ * Reduces some boilerplate code concerning runtime permissions
  */
 public class PermissionsHandler{
 

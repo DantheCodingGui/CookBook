@@ -6,7 +6,6 @@ import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -23,6 +22,7 @@ import android.widget.TextView;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityAddRecipeBinding;
 import com.danthecodinggui.recipes.msc.AnimUtils;
+import com.danthecodinggui.recipes.msc.NoScrollLinearLayout;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -52,6 +52,7 @@ public class GetMethodStepsLoader extends UpdatingAsyncTaskLoader {
                 ProviderContract.MethodStepEntry.STEP_NO
         };
 
+        //Link to recipe _id
         String[] arguments = { Long.toString(recipePk) };
 
         Cursor cursor = contentResolver.query(
@@ -59,7 +60,7 @@ public class GetMethodStepsLoader extends UpdatingAsyncTaskLoader {
                 projection,
                 ProviderContract.METHOD_SELECTION,
                 arguments,
-                ProviderContract.METHOD_SORT_ORDER
+                ProviderContract.MethodStepEntry.STEP_NO + "ASC"
         );
 
         int recordsGathered = 0;
@@ -75,7 +76,6 @@ public class GetMethodStepsLoader extends UpdatingAsyncTaskLoader {
                         ProviderContract.MethodStepEntry.STEP_NO)));
 
             methodSteps.add(temp);
-
 
             recordsGathered = methodSteps.size();
             if (recordsGathered % 10 == 0)
