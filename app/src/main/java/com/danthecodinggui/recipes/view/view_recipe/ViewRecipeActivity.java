@@ -233,6 +233,7 @@ public class ViewRecipeActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         if (bindingPhoto != null) {
+            //Animate the appbar layout to expand before exiting
             bindingPhoto.ablViewRecipe.setExpanded(true, true);
             closingAnimating = true;
         }
@@ -242,12 +243,12 @@ public class ViewRecipeActivity extends AppCompatActivity
 
     @Override
     public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-        //Will set the alpha of the image based on collapsing toolbar scroll
-        //ie. the image is fully visible when scrolled down, but fades away into the toolbar colour
-        // when scrolled up
+        //Fades the scrim colour into the photo as appbar scrolls up/down
+        //Fully extended = normal image, Fully retracted = image partially obscured by colour
         int toolBarHeight = bindingPhoto.tbarVwRecipe.getMeasuredHeight();
         int appBarHeight = appBarLayout.getMeasuredHeight();
         float transitionSpace = (float)appBarHeight - toolBarHeight;
+
         Float f = ((transitionSpace + verticalOffset) / transitionSpace) * 255;
         bindingPhoto.ivwToolbarPreview.setImageAlpha(Math.round(f));
 
