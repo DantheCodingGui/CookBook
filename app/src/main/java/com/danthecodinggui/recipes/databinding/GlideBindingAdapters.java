@@ -34,8 +34,8 @@ public class GlideBindingAdapters {
 
         final Context context = view.getContext();
 
-        //Todo update placeholder and error with final custom ones
         RequestOptions options = new RequestOptions()
+                .dontTransform()
                 .error(R.drawable.ic_imageload_error);
 
         Glide.with(context)
@@ -43,5 +43,6 @@ public class GlideBindingAdapters {
                 .load(photoUri)
                 .listener(onLoadedListener)
                 .into(view);
+
     }
 }
