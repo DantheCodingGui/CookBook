@@ -14,6 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -81,6 +82,8 @@ public class MainActivity extends AppCompatActivity
     RecipesViewAdapter recipesAdapter;
     private List<Recipe> recipesList;
 
+    private boolean askingPermission = false;
+
     //If read external files permission denied, must avoid loading images from recipes
     private boolean noImage = false;
 
@@ -131,9 +134,17 @@ public class MainActivity extends AppCompatActivity
 
         getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, this);
 
-
         //String path = Environment.getExternalStorageDirectory().getPath();
         //InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
+
+        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
+        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
+        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
+        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
+        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
+        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
+
+        recipesAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -275,18 +286,23 @@ public class MainActivity extends AppCompatActivity
         int response = PermissionsHandler.AskForPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL, false);
 
+        askingPermission = true;
+
         switch(response) {
             case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
                 Log.v(PERMISSIONS, "Storage permission already granted");
+                askingPermission = false;
                 break;
             case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
                 Log.v(PERMISSIONS, "Storage permission denied, app won't load images");
+                askingPermission = false;
                 noImage = true;
                 break;
         }
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        askingPermission = false;
         switch(requestCode) {
             case REQ_CODE_READ_EXTERNAL:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED)
@@ -348,10 +364,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onLoadFinished(android.support.v4.content.Loader<List<Recipe>> loader, List<Recipe> remainingRecords) {
+    public void onLoadFinished(final android.support.v4.content.Loader<List<Recipe>> loader, final List<Recipe> remainingRecords) {
+
         //Add the remaining records (not passed through onProgressUpdate) to recipeList
-        recipesList.addAll(remainingRecords);
-        recipesAdapter.notifyDataSetChanged();
+        UpdateRecipesList(remainingRecords);
 
         getLoaderManager().destroyLoader(loader.getId());
     }
@@ -366,8 +382,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void UpdateRecipesList(List<Recipe> newRecords) {
+
+        int oldSize = recipesList.size();
         recipesList.addAll(newRecords);
-        recipesAdapter.notifyDataSetChanged();
+        recipesAdapter.notifyItemRangeInserted(oldSize, oldSize + 10);
     }
 
     @Override
@@ -572,7 +590,7 @@ public class MainActivity extends AppCompatActivity
                         getString(R.string.main_card_transition_name) + "_" +
                                 item.getTitle() + "_" + Integer.toString(getAdapterPosition()));
 
-                photoBinding.setImageLoadedCallback(new RequestListener() {
+                photoBinding.setVariable(BR.imageLoadedCallback, new RequestListener() {
 
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
