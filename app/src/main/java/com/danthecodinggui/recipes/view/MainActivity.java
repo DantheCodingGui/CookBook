@@ -139,15 +139,6 @@ public class MainActivity extends AppCompatActivity
             String path = Environment.getExternalStorageDirectory().getPath();
             InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
         }
-
-        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
-        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
-        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
-        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
-        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
-        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
-
-        recipesAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -160,7 +151,7 @@ public class MainActivity extends AppCompatActivity
 
         ContentValues values = new ContentValues();
 
-        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, 20);
+        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, 1);
         values.put(ProviderContract.RecipeEntry.TITLE, "Pasta Aglio E Olio");
         values.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, 340);
         values.put(ProviderContract.RecipeEntry.DURATION, 20);
