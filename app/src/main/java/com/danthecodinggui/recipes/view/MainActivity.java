@@ -82,8 +82,6 @@ public class MainActivity extends AppCompatActivity
     RecipesViewAdapter recipesAdapter;
     private List<Recipe> recipesList;
 
-    private boolean askingPermission = false;
-
     //If read external files permission denied, must avoid loading images from recipes
     private boolean noImage = false;
 
@@ -94,6 +92,9 @@ public class MainActivity extends AppCompatActivity
 
     //Permission request codes
     private static final int REQ_CODE_READ_EXTERNAL = 201;
+
+    //TODO remove later
+    private boolean inserting = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,10 +133,12 @@ public class MainActivity extends AppCompatActivity
 
         setSupportActionBar(binding.tbarHome);
 
-        getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, this);
-
-        //String path = Environment.getExternalStorageDirectory().getPath();
-        //InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
+        if (!inserting)
+            getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, this);
+        else {
+            String path = Environment.getExternalStorageDirectory().getPath();
+            InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
+        }
 
         recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
         recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
@@ -286,38 +289,43 @@ public class MainActivity extends AppCompatActivity
         int response = PermissionsHandler.AskForPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL, false);
 
-        askingPermission = true;
-
         switch(response) {
             case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
                 Log.v(PERMISSIONS, "Storage permission already granted");
-                askingPermission = false;
+                UnblockLoader();
                 break;
             case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
                 Log.v(PERMISSIONS, "Storage permission denied, app won't load images");
-                askingPermission = false;
                 noImage = true;
+                UnblockLoader();
                 break;
         }
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        askingPermission = false;
         switch(requestCode) {
             case REQ_CODE_READ_EXTERNAL:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED)
+                if (grantResults.length > 0) {
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                        UnblockLoader();
+                    if (grantResults[0] == PackageManager.PERMISSION_DENIED)
                     Utility.showPermissionDeniedDialog(this,
-                    R.string.perm_dialog_read_external,
-                    binding.clyMainRoot,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                            R.string.perm_dialog_read_external,
+                            binding.clyMainRoot,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
                             REQ_CODE_READ_EXTERNAL,
-                    this);
-                    break;
+                            this);
+                }
+                break;
         }
     }
     @Override
     public void onFeatureDisabled() {
         noImage = true;
+        UnblockLoader();
+    }
+    private void UnblockLoader() {
+        recipesLoader.onPermissionResponse();
     }
 
     @Override

@@ -35,7 +35,7 @@
                 app:title="@{recipe.getTitle()}"
                 app:expandedTitleMarginBottom="5dp"
                 app:collapsedTitleTextAppearance="@font/open_sans_light"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed"
                 android:fitsSystemWindows="true"
                 app:contentScrim="@android:color/transparent"
                 app:statusBarScrim="@android:color/transparent">

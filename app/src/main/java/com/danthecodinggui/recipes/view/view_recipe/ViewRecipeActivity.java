@@ -55,6 +55,8 @@ public class ViewRecipeActivity extends AppCompatActivity
 
     private Recipe recipe;
 
+    private boolean closingAnimating = false;
+
 //    private String[] foodPhotos = {
 //            "https://images.pexels.com/photos/46239/salmon-dish-food-meal-46239.jpeg?cs=srgb&dl=food-salad-healthy-46239.jpg&fm=jpg",
 //            "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?cs=srgb&dl=food-dinner-lunch-70497.jpg&fm=jpg",
@@ -230,7 +232,12 @@ public class ViewRecipeActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        supportFinishAfterTransition();
+        if (bindingPhoto != null) {
+            bindingPhoto.ablViewRecipe.setExpanded(true, true);
+            closingAnimating = true;
+        }
+        else
+            supportFinishAfterTransition();
     }
 
     @Override
@@ -240,8 +247,12 @@ public class ViewRecipeActivity extends AppCompatActivity
         // when scrolled up
         int toolBarHeight = bindingPhoto.tbarVwRecipe.getMeasuredHeight();
         int appBarHeight = appBarLayout.getMeasuredHeight();
-        float transitionSpace = (float)appBarHeight - toolBarHeight;// - tabLayout.getMeasuredHeight() - 80;
+        float transitionSpace = (float)appBarHeight - toolBarHeight;
         Float f = ((transitionSpace + verticalOffset) / transitionSpace) * 255;
         bindingPhoto.ivwToolbarPreview.setImageAlpha(Math.round(f));
+
+        //When AppBarLayout expansion fully animated, THEN the activity can close
+        if (closingAnimating && verticalOffset == 0)
+            supportFinishAfterTransition();
     }
 }

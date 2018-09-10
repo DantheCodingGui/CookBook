@@ -24,6 +24,8 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
     private ImagePermissionsListener permissionsCallback;
 
+    private boolean waitingForPermissionResponse = false;
+
     public GetRecipesLoader(Context context, Handler uiThread, ProgressUpdateListener updateCallback,
                      ImagePermissionsListener permissionCallback, int loaderId) {
         super(context, uiThread, updateCallback, loaderId);
@@ -100,8 +102,12 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
 
             //Need to ask for permission if a recipe includes a photo
-            if (temp.hasPhoto() && permissionsCallback != null)
+            if (temp.hasPhoto() && permissionsCallback != null) {
                 AskForReadPermission();
+
+                while (waitingForPermissionResponse)
+                    ;
+            }
 
             records.add(temp);
 
@@ -130,6 +136,14 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
                 permissionsCallback = null;
             }
         });
+        waitingForPermissionResponse = true;
+    }
+
+    /**
+     * Called to cancel busy waiting of loader, can now continue loading data
+     */
+    public void onPermissionResponse() {
+        waitingForPermissionResponse = false;
     }
 
     /**
