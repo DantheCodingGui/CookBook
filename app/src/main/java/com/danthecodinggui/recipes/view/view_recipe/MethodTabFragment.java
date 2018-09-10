@@ -41,7 +41,7 @@ public class MethodTabFragment extends Fragment
     private static final int METHOD_LOADER = 121;
 
     private MethodViewAdapter methodStepsAdapter;
-    private List<MethodStep> methodList;
+    private List<MethodStep> methodStepsList;
 
     private long recipeId;
 
@@ -66,9 +66,18 @@ public class MethodTabFragment extends Fragment
         super.onActivityCreated(savedInstanceState);
 
         methodStepsAdapter = new MethodViewAdapter();
-        methodList = new ArrayList<>();
+        methodStepsList = new ArrayList<>();
         binding.rvwMethod.setAdapter(methodStepsAdapter);
         binding.rvwMethod.setLayoutManager(new LinearLayoutManager(getContext()));
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        //Loader will always reload data in onStart, so reset here
+        methodStepsList.clear();
+        methodStepsAdapter.notifyDataSetChanged();
     }
 
     @NonNull
@@ -80,13 +89,13 @@ public class MethodTabFragment extends Fragment
 
     @Override
     public <T> void onProgressUpdate(int loaderId, T updateValue) {
-        methodList.addAll((List)updateValue);
+        methodStepsList.addAll((List)updateValue);
         methodStepsAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onLoadFinished(@NonNull Loader<List<MethodStep>> loader, List<MethodStep> remainingSteps) {
-        methodList.addAll(remainingSteps);
+        methodStepsList.addAll(remainingSteps);
         methodStepsAdapter.notifyDataSetChanged();
 
         getLoaderManager().destroyLoader(loader.getId());
@@ -105,13 +114,13 @@ public class MethodTabFragment extends Fragment
 
         @Override
         public void onBindViewHolder(StepViewHolder holder, int position) {
-            MethodStep step = methodList.get(position);
+            MethodStep step = methodStepsList.get(position);
             holder.bind(step);
         }
 
         @Override
         public int getItemCount() {
-            return methodList.size();
+            return methodStepsList.size();
         }
 
         class StepViewHolder extends RecyclerView.ViewHolder {

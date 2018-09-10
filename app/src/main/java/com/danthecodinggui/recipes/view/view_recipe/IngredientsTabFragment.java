@@ -69,6 +69,15 @@ public class IngredientsTabFragment extends Fragment
         binding.rvwIngredients.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        //Loader will always reload data in onStart, so reset here
+        ingredientsList.clear();
+        ingredientsAdapter.notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public Loader<List<Ingredient>> onCreateLoader(int id, @Nullable Bundle args) {
