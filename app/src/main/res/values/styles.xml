@@ -26,6 +26,9 @@
         <item name="android:overScrollMode">never</item>
         <item name="android:windowIsTranslucent">true</item>
 
+        <item name="android:windowEnterTransition">@transition/view_activity_enter</item>
+        <item name="android:windowExitTransition">@transition/view_activity_exit</item>
+
         <item name="android:windowSharedElementEnterTransition">@transition/view_activity_shared_image</item>
         <item name="android:windowSharedElementReturnTransition">@transition/view_activity_shared_image</item>
     </style>

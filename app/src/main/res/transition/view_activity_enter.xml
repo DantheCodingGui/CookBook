@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<transitionSet
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:startDelay="100">
+    <slide
+        android:slideEdge="bottom">
+        <targets>
+            <target android:excludeId="@+id/ctl_vw_recipe"/>
+            <target android:excludeId="@+id/tly_view_recipe"/>
+            <target android:excludeId="@+id/abl_view_recipe"/>
+            <target android:excludeId="@+id/ivw_toolbar_preview"/>
+            <target android:excludeId="@+id/tbar_vw_recipe"/>
+            <target android:excludeId="@android:id/navigationBarBackground"/>
+        </targets>
+    </slide>
+    <fade
+        android:startDelay="200"
+        android:duration="100">
+        <targets>
+            <target android:targetId="@+id/tly_view_recipe"/>
+            <target android:targetId="@+id/ctl_vw_recipe"/>
+            <target android:targetId="@+id/abl_view_recipe"/>
+            <target android:targetId="@+id/ivw_toolbar_preview"/>
+            <target android:targetId="@+id/tbar_vw_recipe"/>
+        </targets>
+    </fade>
+</transitionSet>

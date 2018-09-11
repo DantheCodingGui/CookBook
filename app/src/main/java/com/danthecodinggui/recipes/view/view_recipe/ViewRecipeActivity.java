@@ -126,6 +126,8 @@ public class ViewRecipeActivity extends AppCompatActivity
             Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
+
+            window.getSharedElementReturnTransition().setStartDelay(200);
         }
 
         //String url = foodPhotos[new Random().nextInt(foodPhotos.length)];
