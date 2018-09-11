@@ -9,13 +9,17 @@
         <item name="android:windowContentTransitions">true</item>
     </style>
 
+    <style name="HomeTheme.Launcher">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+
     <style name="HomeTheme.Transparent" parent="HomeTheme">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
-    <!-- Base application theme. -->
+    <!-- View Activity theme. -->
     <style name="ViewRecipeTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -31,6 +35,10 @@
 
         <item name="android:windowSharedElementEnterTransition">@transition/view_activity_shared_image</item>
         <item name="android:windowSharedElementReturnTransition">@transition/view_activity_shared_image</item>
+    </style>
+
+    <style name="AddRecipeTheme" parent="HomeTheme">
+
     </style>
 
     <style name="SearchView">

@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.HomeTheme);
         super.onCreate(savedInstanceState);
 
         //setContentView(R.layout.activity_main);
@@ -139,6 +140,14 @@ public class MainActivity extends AppCompatActivity
             String path = Environment.getExternalStorageDirectory().getPath();
             InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
         }
+
+//        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
+//        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
+//        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
+//        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
+//        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
+//        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
+//        recipesAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -564,6 +573,8 @@ public class MainActivity extends AppCompatActivity
                         return false;
                     }
                 });
+
+                //postponeEnterTransition();
             }
 
             @Override
@@ -604,6 +615,8 @@ public class MainActivity extends AppCompatActivity
                         return false;
                     }
                 });
+
+                //postponeEnterTransition();
             }
 
             @Override

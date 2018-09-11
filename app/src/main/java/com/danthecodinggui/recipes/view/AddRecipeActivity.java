@@ -75,11 +75,10 @@ public class AddRecipeActivity extends AppCompatActivity {
         if (savedInstanceState == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
                 intent.hasExtra(EXTRA_CIRCULAR_REVEAL_X) &&
                 intent.hasExtra(EXTRA_CIRCULAR_REVEAL_Y)) {
-            binding.addRoot.setVisibility(View.INVISIBLE);
+            //binding.addRoot.setVisibility(View.INVISIBLE);
 
             revealX = intent.getIntExtra(EXTRA_CIRCULAR_REVEAL_X, 0);
             revealY = intent.getIntExtra(EXTRA_CIRCULAR_REVEAL_Y, 0);
-
 
             ViewTreeObserver viewTreeObserver = binding.addRoot.getViewTreeObserver();
             if (viewTreeObserver.isAlive()) {
@@ -108,8 +107,6 @@ public class AddRecipeActivity extends AppCompatActivity {
     private void SetupImageView() {
 
     }
-
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
