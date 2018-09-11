@@ -95,8 +95,6 @@ public class IngredientsTabFragment extends Fragment
     public void onLoadFinished(@NonNull Loader<List<Ingredient>> loader, List<Ingredient> remainingIngredients) {
         ingredientsList.addAll(remainingIngredients);
         ingredientsAdapter.notifyDataSetChanged();
-
-        getLoaderManager().destroyLoader(loader.getId());
     }
 
     @Override

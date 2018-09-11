@@ -97,8 +97,6 @@ public class MethodTabFragment extends Fragment
     public void onLoadFinished(@NonNull Loader<List<MethodStep>> loader, List<MethodStep> remainingSteps) {
         methodStepsList.addAll(remainingSteps);
         methodStepsAdapter.notifyDataSetChanged();
-
-        getLoaderManager().destroyLoader(loader.getId());
     }
 
     @Override

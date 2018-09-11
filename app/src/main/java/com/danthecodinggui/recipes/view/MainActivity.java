@@ -73,8 +73,6 @@ import static com.danthecodinggui.recipes.msc.LogTags.PERMISSIONS;
  */
 public class MainActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<List<Recipe>>,
-        UpdatingAsyncTaskLoader.ProgressUpdateListener,
-        GetRecipesLoader.ImagePermissionsListener,
         Utility.PermissionDialogListener {
 
     ActivityMainBinding binding;
@@ -285,23 +283,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onImagePermRequested() {
-        int response = PermissionsHandler.AskForPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL, false);
-
-        switch(response) {
-            case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
-                Log.v(PERMISSIONS, "Storage permission already granted");
-                UnblockLoader();
-                break;
-            case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
-                Log.v(PERMISSIONS, "Storage permission denied, app won't load images");
-                noImage = true;
-                UnblockLoader();
-                break;
-        }
-    }
-    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch(requestCode) {
             case REQ_CODE_READ_EXTERNAL:
@@ -355,20 +336,40 @@ public class MainActivity extends AppCompatActivity
         startActivity(addRecipe);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public android.support.v4.content.Loader<List<Recipe>> onCreateLoader(int id, Bundle args) {
+    public android.support.v4.content.AsyncTaskLoader<List<Recipe>> onCreateLoader(int id, Bundle args) {
         Handler uiThread = new Handler(getMainLooper());
-        return recipesLoader = new GetRecipesLoader(this, uiThread, this,
-                this, LOADER_RECIPE_PREVIEWS);
-    }
+        return recipesLoader = new GetRecipesLoader(this, uiThread,
+                new UpdatingAsyncTaskLoader.ProgressUpdateListener() {
+                    @Override
+                    public <T> void onProgressUpdate(int loaderId, T updateValue) {
+                        switch (loaderId) {
+                            case LOADER_RECIPE_PREVIEWS:
+                                UpdateRecipesList((List) updateValue);
+                                break;
+                        }
+                    }
+                },
+                new GetRecipesLoader.ImagePermissionsListener() {
+                    @Override
+                    public void onImagePermRequested() {
+                        int response = PermissionsHandler.AskForPermission(MainActivity.this,
+                                Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL, false);
 
-    @Override
-    public <T> void onProgressUpdate(int loaderId, T updateValue) {
-        switch(loaderId) {
-            case LOADER_RECIPE_PREVIEWS:
-                UpdateRecipesList((List)updateValue);
-                break;
-        }
+                        switch(response) {
+                            case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
+                                Log.v(PERMISSIONS, "Storage permission already granted");
+                                UnblockLoader();
+                                break;
+                            case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
+                                Log.v(PERMISSIONS, "Storage permission denied, app won't load images");
+                                noImage = true;
+                                UnblockLoader();
+                                break;
+                        }
+                    }
+                }, LOADER_RECIPE_PREVIEWS);
     }
 
     @Override
@@ -376,8 +377,6 @@ public class MainActivity extends AppCompatActivity
 
         //Add the remaining records (not passed through onProgressUpdate) to recipeList
         UpdateRecipesList(remainingRecords);
-
-        getLoaderManager().destroyLoader(loader.getId());
     }
 
     @Override
