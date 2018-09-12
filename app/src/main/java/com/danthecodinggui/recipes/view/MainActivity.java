@@ -139,7 +139,8 @@ public class MainActivity extends AppCompatActivity
             getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, this);
         else {
             String path = Environment.getExternalStorageDirectory().getPath();
-            InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg");
+            InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", true);
+            InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", false);
         }
 
 //        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
@@ -155,17 +156,18 @@ public class MainActivity extends AppCompatActivity
      * Test method to insert dummy recipe, used until AddRecipeActivity is functional
      * @param imagePath
      */
-    private void InsertValue(String imagePath) {
+    private void InsertValue(String imagePath, boolean image) {
 
         ContentResolver resolver = getContentResolver();
 
         ContentValues values = new ContentValues();
 
-        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, 1);
+        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, 2);
         values.put(ProviderContract.RecipeEntry.TITLE, "Pasta Aglio E Olio");
         values.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, 340);
         values.put(ProviderContract.RecipeEntry.DURATION, 20);
-        values.put(ProviderContract.RecipeEntry.IMAGE_PATH, imagePath);
+        if (image)
+            values.put(ProviderContract.RecipeEntry.IMAGE_PATH, imagePath);
 
         Uri result = resolver.insert(
                 ProviderContract.RECIPES_URI,
