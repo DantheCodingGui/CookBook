@@ -21,7 +21,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.util.Pair;
+//import android.support.v4.util.Pair;
+import android.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,6 +35,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
@@ -62,9 +64,10 @@ import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
+import static com.danthecodinggui.recipes.msc.IntentConstants.IMAGE_TRANSITION_NAME;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_BUNDLE;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_OBJECT;
+import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 import static com.danthecodinggui.recipes.msc.LogTags.GLIDE;
 import static com.danthecodinggui.recipes.msc.LogTags.PERMISSIONS;
 
@@ -323,8 +326,8 @@ public class MainActivity extends AppCompatActivity
     public void AddRecipe(View view) {
         Intent addRecipe = new Intent(getApplicationContext(), AddRecipeActivity.class);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this, Pair.create(view, getString(R.string.add_transition)));
+        if (Utility.atLeastLollipop()) {
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this, Pair.create(view, getString(R.string.add_transition)));
             int revealX = (int) (view.getX() + view.getWidth() / 2);
             int revealY = (int) (view.getY() + view.getHeight() / 2);
 
@@ -377,21 +380,16 @@ public class MainActivity extends AppCompatActivity
 
         //Add the remaining records (not passed through onProgressUpdate) to recipeList
         UpdateRecipesList(remainingRecords);
-    }
 
-    @Override
-    public void onStop() {
-        super.onStop();
+        //TODO: loaders broken, need to get it to work always BOTH with/without dontkeepactivities
 
-        //Loader will always reload data in onStart, so reset here
-        recipesList.clear();
-        recipesAdapter.notifyDataSetChanged();
+        Log.v(DATA_LOADING, "LOAD FINISHED");
     }
 
     private void UpdateRecipesList(List<Recipe> newRecords) {
 
         int oldSize = recipesList.size();
-        recipesList.addAll(newRecords);
+        recipesList.addAll(new ArrayList<>(newRecords));
         recipesAdapter.notifyItemRangeInserted(oldSize, oldSize + 10);
     }
 
@@ -639,12 +637,18 @@ public class MainActivity extends AppCompatActivity
 
             if (sharedImageView != null) {
 
-                viewRecipe.putExtra(CARD_TRANSITION_NAME, ViewCompat.getTransitionName(sharedImageView));
+                //To have both the image and navbar as shared elements, must both pass Pairs and manually
+                //set transition name for image
+                viewRecipe.putExtra(IMAGE_TRANSITION_NAME, ViewCompat.getTransitionName(sharedImageView));
 
-                options = ActivityOptions.makeSceneTransitionAnimation(
-                        this,
-                        sharedImageView,
-                        ViewCompat.getTransitionName(sharedImageView));
+                Pair<View, String> image = Pair.create((View)sharedImageView, ViewCompat.getTransitionName(sharedImageView));
+                Pair<View, String> navbar = Pair.create(
+                        findViewById(android.R.id.navigationBarBackground),
+                        Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
+
+                Pair[] transitions = {image, navbar};
+
+                options = ActivityOptions.makeSceneTransitionAnimation(this, transitions);
                 startActivity(viewRecipe, options.toBundle());
                 return;
 

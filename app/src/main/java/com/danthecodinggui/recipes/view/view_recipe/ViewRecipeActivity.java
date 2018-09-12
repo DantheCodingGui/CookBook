@@ -1,6 +1,7 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
 import android.Manifest;
+import android.app.SharedElementCallback;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 
@@ -14,6 +15,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
+import android.transition.Explode;
+import android.transition.Transition;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -34,7 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
+import static com.danthecodinggui.recipes.msc.IntentConstants.IMAGE_TRANSITION_NAME;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_BUNDLE;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_OBJECT;
 
@@ -49,6 +53,7 @@ public class ViewRecipeActivity extends AppCompatActivity
     private static final int REQ_CODE_READ_EXTERNAL = 211;
 
     private String imageTransitionName;
+    private String navBarTransitionName;
 
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
@@ -78,7 +83,7 @@ public class ViewRecipeActivity extends AppCompatActivity
         recipe = extras.getBundle(RECIPE_DETAIL_BUNDLE).getParcelable(RECIPE_DETAIL_OBJECT);
 
         if (recipe.hasPhoto()) {
-            imageTransitionName = extras.getString(CARD_TRANSITION_NAME);
+            imageTransitionName = extras.getString(IMAGE_TRANSITION_NAME);
 
             int response = PermissionsHandler.AskForPermission(this,
                     Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL, false);
@@ -200,8 +205,6 @@ public class ViewRecipeActivity extends AppCompatActivity
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-
-        //Todo check why icons not setting
 
         List<String> tabTitles = new ArrayList<>(Arrays.asList(
                 getString(R.string.tab_ingredients),

@@ -15,7 +15,7 @@
     </slide>
     <fade
         android:startDelay="200"
-        android:duration="100">
+        android:duration="0">
         <targets>
             <target android:targetId="@+id/tly_view_recipe"/>
             <target android:targetId="@+id/ctl_vw_recipe"/>

@@ -7,7 +7,7 @@ import android.support.v4.content.AsyncTaskLoader;
 /**
  * Extension to AsyncTaskLoader adding the ability to periodically update UI whilst loading data
  */
-public abstract class UpdatingAsyncTaskLoader extends AsyncTaskLoader {
+public abstract class UpdatingAsyncTaskLoader<T> extends AsyncTaskLoader<T> {
 
     private int loaderId;
 

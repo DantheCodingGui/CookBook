@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">CookBook</string>
-    <string name="transition_image_preview">CardToView_image_preview</string>
-    <string name="transition_recipe_title">CardToView_recipe_title</string>
 
 
     <string name="tab_ingredients">Ingredients</string>
@@ -27,7 +25,9 @@
     <string name="perm_dialog_butt_permit">No</string>
     <string name="perm_snackbar_msg">You can re-enable this permission in your device\'s settings</string>
     <string name="txt_no_recipes">You haven\'t got any recipes yet,\n Lets Get Started!</string>
-    <string name="transition_rounded_to_square">transition_round_edges_to_square</string>
+
+    <string name="transition_navbar">transition_nav_bar</string>
+    <string name="transition_image_preview">CardToView_image_preview</string>
 
     <string name="empty" />
 </resources>
