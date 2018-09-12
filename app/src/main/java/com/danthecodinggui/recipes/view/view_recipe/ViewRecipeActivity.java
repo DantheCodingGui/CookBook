@@ -52,8 +52,12 @@ public class ViewRecipeActivity extends AppCompatActivity
     //Permission request codes
     private static final int REQ_CODE_READ_EXTERNAL = 211;
 
+    //Instance State tags
+    private static final String STATE_MATERIAL_COLOUR = "STATE_MATERIAL_COLOUR";
+
     private String imageTransitionName;
-    private String navBarTransitionName;
+
+    private int randMaterialCol = -1;
 
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
@@ -97,8 +101,18 @@ public class ViewRecipeActivity extends AppCompatActivity
                     break;
             }
         }
-        else
+        else {
+            if (savedInstanceState != null)
+                randMaterialCol = savedInstanceState.getInt(STATE_MATERIAL_COLOUR);
             SetupNoPhotoLayout();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        savedInstanceState.putInt(STATE_MATERIAL_COLOUR, randMaterialCol);
     }
 
     /**
@@ -170,7 +184,8 @@ public class ViewRecipeActivity extends AppCompatActivity
      * apply it to the toolbar
      */
     private void SetLayoutColour() {
-        int randMaterialCol = MaterialColours.nextColour();
+        if (randMaterialCol == -1)
+            randMaterialCol = MaterialColours.nextColour();
 
         binding.tbarVwRecipe.setBackgroundColor(randMaterialCol);
         binding.tlyViewRecipe.setBackgroundColor(randMaterialCol);
