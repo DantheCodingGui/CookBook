@@ -23,7 +23,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
 
     private ContentResolver contentResolver;
 
-    private List<Recipe> records;
+    private List<Recipe> cachedRecords;
 
     private ImagePermissionsListener permissionsCallback;
 
@@ -43,11 +43,11 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
     @Override
     protected void onStartLoading() {
         //Cache records so can handle orientation changes and such
-        if (records != null) {
+        if (cachedRecords != null) {
             Log.v(DATA_LOADING, "Recipe loading started: Using cached values");
-            deliverResult(records);
+            deliverResult(cachedRecords);
         }
-        if (takeContentChanged() || records == null){
+        else if (takeContentChanged() || cachedRecords == null){
             Log.v(DATA_LOADING, "Recipe loading started: Load new values");
             forceLoad();
         }
@@ -61,43 +61,10 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
     }
 
     @Override
-    protected void onStopLoading() {
-        cancelLoad();
-        Log.v(DATA_LOADING, "onStopLoading()");
-    }
-
-    @Override
-    protected void onReset() {
-        Log.v(DATA_LOADING, "onReset()");
-
-        onStopLoading();
-
-        if (records != null)
-            records = null;
-
-        if (contentObserver != null) {
-            contentResolver.unregisterContentObserver(contentObserver);
-            contentObserver = null;
-        }
-    }
-
-    @Override
-    public void deliverResult(List<Recipe> data) {
-        Log.v(DATA_LOADING, "deliverResult()");
-        if (isReset())
-            return;
-
-        records = data;
-
-        if (isStarted())
-            super.deliverResult(data);
-    }
-
-    @Override
     public List<Recipe> loadInBackground() {
         Log.v(DATA_LOADING, "loadInBackground()");
 
-        records = new ArrayList<>();
+        List<Recipe> records = new ArrayList<>();
 
         //Query recipes table for all records
         Cursor baseCursor = contentResolver.query(
@@ -119,10 +86,10 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
             //Get base recipe data
             temp = BuildBaseModel(baseCursor);
 
-                    //Add ingredients data to record
+            //Add ingredients data to record
             String[] countSelArgs = { Long.toString(
                     baseCursor.getLong(baseCursor.getColumnIndexOrThrow(
-                    ProviderContract.RecipeEntry._ID))) };
+                            ProviderContract.RecipeEntry._ID))) };
 
             countCursor = contentResolver.query(
                     ProviderContract.RECIPE_INGREDIENTS_URI,
@@ -156,7 +123,7 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
 
 
                 while (waitingForPermissionResponse)
-                    Log.v("busy", "waiting!!");
+                    ;//Log.v("busy", "waiting!!");
                 Log.v("busy", "---------------------------------------------------------------------------------------------------------!");
             }
 
@@ -164,15 +131,54 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
 
             recordsGathered = records.size();
 
-            //In case there's a vast amount of records, update the ui every 10 loaded records
-            if (recordsGathered % 10 == 0)
-                UpdateProgress(records.subList(recordsGathered - 10, recordsGathered - 1));
+//            //In case there's a vast amount of records, update the ui every 10 loaded records
+//            if (recordsGathered % 10 == 0)
+//                UpdateProgress(records.subList(recordsGathered - 10, recordsGathered - 1));
         }
         baseCursor.close();
 
         Log.v(DATA_LOADING, "END OF loadInBackground()");
         //Return remaining records in list
-        return records.subList(recordsGathered - (recordsGathered % 10), recordsGathered);
+        return records;
+    }
+
+    @Override
+    protected void onStopLoading() {
+        cancelLoad();
+        Log.v(DATA_LOADING, "onStopLoading()");
+    }
+
+    @Override
+    protected void onReset() {
+        Log.v(DATA_LOADING, "onReset()");
+
+        onStopLoading();
+
+        if (cachedRecords != null)
+            cachedRecords = null;
+
+        if (contentObserver != null) {
+            contentResolver.unregisterContentObserver(contentObserver);
+            contentObserver = null;
+        }
+    }
+
+    @Override
+    public void deliverResult(List<Recipe> data) {
+        Log.v(DATA_LOADING, "deliverResult()");
+        if (isReset()) {
+            cachedRecords = null;
+            return;
+        }
+
+        List<Recipe> oldCache = cachedRecords;
+        cachedRecords = data;
+
+        if (isStarted())
+            super.deliverResult(data);
+
+        if (oldCache != null && oldCache != data)
+            cachedRecords = null;
     }
 
     /**

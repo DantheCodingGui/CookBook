@@ -12,14 +12,12 @@ import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
 //import android.support.v4.util.Pair;
 import android.util.Pair;
@@ -81,10 +79,11 @@ public class MainActivity extends AppCompatActivity
     ActivityMainBinding binding;
 
     RecipesViewAdapter recipesAdapter;
-    private List<Recipe> recipesList;
 
     //If read external files permission denied, must avoid loading images from recipes
     private boolean noImage = false;
+
+    private boolean transitioningActivity = false;
 
     private GetRecipesLoader recipesLoader;
 
@@ -105,9 +104,6 @@ public class MainActivity extends AppCompatActivity
         //setContentView(R.layout.activity_main);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-
-        recipesList = new ArrayList<>();
-
         //Conditionally set RecyclerView layout manager depending on screen orientation
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE)
@@ -116,7 +112,7 @@ public class MainActivity extends AppCompatActivity
             binding.rvwRecipes.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
         //setup RecyclerView adapter
-        recipesAdapter = new RecipesViewAdapter(recipesList);
+        recipesAdapter = new RecipesViewAdapter(null);
         binding.rvwRecipes.setAdapter(recipesAdapter);
 
         //Show/hide floating action button on recyclerview scroll
@@ -144,14 +140,6 @@ public class MainActivity extends AppCompatActivity
             InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", false, true, 3);
             InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", true, true, 4);
         }
-
-//        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
-//        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
-//        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
-//        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
-//        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
-//        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
-//        recipesAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -292,6 +280,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        transitioningActivity = false;
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch(requestCode) {
             case REQ_CODE_READ_EXTERNAL:
@@ -393,14 +388,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void UpdateRecipesList(List<Recipe> newRecords) {
-
-        int oldSize = recipesList.size();
-        recipesList.addAll(new ArrayList<>(newRecords));
-        recipesAdapter.notifyItemRangeInserted(oldSize, oldSize + 10);
+        recipesAdapter.UpdateRecords(newRecords);
     }
 
     @Override
-    public void onLoaderReset(android.support.v4.content.Loader<List<Recipe>> loader) {}
+    public void onLoaderReset(android.support.v4.content.Loader<List<Recipe>> loader) {
+    }
 
     /**
      * Allows integration between the list of recipe objects and the recyclerview
@@ -408,12 +401,13 @@ public class MainActivity extends AppCompatActivity
     class RecipesViewAdapter
             extends RecyclerView.Adapter<RecipesViewAdapter.RecipeViewHolder> implements Filterable {
 
-        List<Recipe> filteredRecipesList;
+        List<Recipe> unfilteredRecipesList;
+        List<Recipe> recipesList;
 
         private final int BASIC = 0, COMPLEX = 1, PHOTO_BASIC = 2, PHOTO_COMPLEX = 3;
 
         RecipesViewAdapter(List<Recipe> list) {
-            filteredRecipesList = list;
+            recipesList = list;
         }
 
         @Override
@@ -435,15 +429,15 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onBindViewHolder(RecipeViewHolder holder, int pos) {
 
-            Recipe recipe = filteredRecipesList.get(pos);
+            Recipe recipe = recipesList.get(pos);
 
             holder.bind(recipe);
         }
 
         @Override
         public int getItemViewType(int position) {
-            boolean isComplex = filteredRecipesList.get(position).hasExtendedInfo();
-            boolean hasPhoto = filteredRecipesList.get(position).hasPhoto() && !noImage;
+            boolean isComplex = recipesList.get(position).hasExtendedInfo();
+            boolean hasPhoto = recipesList.get(position).hasPhoto() && !noImage;
 
             if (isComplex && hasPhoto)
                 return PHOTO_COMPLEX;
@@ -457,7 +451,15 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public int getItemCount() {
-            return filteredRecipesList.size();
+            if (recipesList == null)
+                return 0;
+            return recipesList.size();
+        }
+
+        void UpdateRecords(List<Recipe> updatedRecords) {
+            recipesList = updatedRecords;
+            if (updatedRecords != null)
+                notifyDataSetChanged();
         }
 
         @Override
@@ -467,30 +469,30 @@ public class MainActivity extends AppCompatActivity
                 protected FilterResults performFiltering(CharSequence charSequence) {
                     String charString = charSequence.toString();
                     if (charString.isEmpty()) {
-                        filteredRecipesList = recipesList;
+                        recipesList = unfilteredRecipesList;
                     }
                     else {
                         List<Recipe> filteredList = new ArrayList<>();
-                        for (Recipe row : recipesList) {
+                        for (Recipe row : unfilteredRecipesList) {
 
                             if (row.getTitle().toLowerCase().contains(charString.toLowerCase())) {
                                 filteredList.add(row);
                             }
                         }
 
-                        filteredRecipesList = filteredList;
+                        recipesList = filteredList;
                     }
 
                     FilterResults filterResults = new FilterResults();
-                    filterResults.values = filteredRecipesList;
+                    filterResults.values = recipesList;
                     return filterResults;
                 }
 
                 @Override
                 protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                     filteredRecipesList = (ArrayList<Recipe>) filterResults.values;
+                     recipesList = (ArrayList<Recipe>) filterResults.values;
 
-                    if (filteredRecipesList.size() == 0)
+                    if (recipesList.size() == 0)
                         binding.txtSearchNoItems.setVisibility(View.VISIBLE);
                     else
                         binding.txtSearchNoItems.setVisibility(View.INVISIBLE);
@@ -577,7 +579,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
-                //postponeEnterTransition();
+                postponeEnterTransition();
             }
 
             @Override
@@ -619,7 +621,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
-                //postponeEnterTransition();
+                postponeEnterTransition();
             }
 
             @Override
@@ -638,6 +640,8 @@ public class MainActivity extends AppCompatActivity
         recipeBundle.putParcelable(RECIPE_DETAIL_OBJECT, recipe);
 
         viewRecipe.putExtra(RECIPE_DETAIL_BUNDLE, recipeBundle);
+
+        transitioningActivity = true;
 
         if (Utility.atLeastLollipop()) {
 
