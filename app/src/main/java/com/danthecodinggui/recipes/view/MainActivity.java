@@ -633,6 +633,9 @@ public class MainActivity extends AppCompatActivity
 
     private void ViewRecipe(Recipe recipe, ImageView sharedImageView) {
 
+        if (transitioningActivity)
+            return;
+
         Intent viewRecipe = new Intent(this, ViewRecipeActivity.class);
         ActivityOptions options;
 
