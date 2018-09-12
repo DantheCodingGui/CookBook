@@ -139,8 +139,10 @@ public class MainActivity extends AppCompatActivity
             getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, this);
         else {
             String path = Environment.getExternalStorageDirectory().getPath();
-            InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", true);
-            InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", false);
+            InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", false, false, 1);
+            InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", true, false, 2);
+            InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", false, true, 3);
+            InsertValue(path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", true, true, 4);
         }
 
 //        recipesList.add(new Recipe.RecipeBuilder(2, "Spag Bol").build());
@@ -156,16 +158,18 @@ public class MainActivity extends AppCompatActivity
      * Test method to insert dummy recipe, used until AddRecipeActivity is functional
      * @param imagePath
      */
-    private void InsertValue(String imagePath, boolean image) {
+    private void InsertValue(String imagePath, boolean image, boolean complex, int viewOrder) {
 
         ContentResolver resolver = getContentResolver();
 
         ContentValues values = new ContentValues();
 
-        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, 2);
+        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, viewOrder);
         values.put(ProviderContract.RecipeEntry.TITLE, "Pasta Aglio E Olio");
-        values.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, 340);
-        values.put(ProviderContract.RecipeEntry.DURATION, 20);
+        if (complex) {
+            values.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, 340);
+            values.put(ProviderContract.RecipeEntry.DURATION, 20);
+        }
         if (image)
             values.put(ProviderContract.RecipeEntry.IMAGE_PATH, imagePath);
 
