@@ -30,6 +30,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.DataSource;
@@ -347,9 +349,16 @@ public class MainActivity extends AppCompatActivity
         }
 
         void UpdateRecords(List<Recipe> updatedRecords) {
-            unfilteredRecipesList = recipesList = updatedRecords;
-            if (updatedRecords != null)
-                notifyDataSetChanged();
+            if (updatedRecords != null) {
+                if (unfilteredRecipesList == null || unfilteredRecipesList.isEmpty()) {
+                    unfilteredRecipesList = recipesList = updatedRecords;
+                    notifyItemRangeInserted(0, updatedRecords.size());
+                }
+                else {
+                    unfilteredRecipesList = recipesList = updatedRecords;
+                    notifyItemRangeChanged(0, updatedRecords.size());
+                }
+            }
         }
 
         void filter(String searchText) {
@@ -436,19 +445,15 @@ public class MainActivity extends AppCompatActivity
 
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                        startPostponedEnterTransition();
                         return false;
                     }
 
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
-                        startPostponedEnterTransition();
                         Log.e(GLIDE, "Data Binding image loading failed (from filepath)", e);
                         return false;
                     }
                 });
-
-                postponeEnterTransition();
             }
 
             @Override
@@ -478,19 +483,15 @@ public class MainActivity extends AppCompatActivity
 
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
-                        startPostponedEnterTransition();
                         Log.e(GLIDE, "Data Binding image loading failed (from filepath)", e);
                         return false;
                     }
 
                     @Override
                     public boolean onResourceReady(Object resource, Object model, Target target, DataSource dataSource, boolean isFirstResource) {
-                        startPostponedEnterTransition();
                         return false;
                     }
                 });
-
-                postponeEnterTransition();
             }
 
             @Override
