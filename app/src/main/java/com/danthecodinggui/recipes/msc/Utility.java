@@ -1,16 +1,21 @@
 package com.danthecodinggui.recipes.msc;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.net.Uri;
 import android.os.Build;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.model.ProviderContract;
 
 /**
  * Set of miscellaneous methods without a link to any other class
@@ -95,6 +100,104 @@ public class Utility {
     public static void showPermissionDeniedSnackbar(View snackbarAnchor) {
         Snackbar.make(snackbarAnchor, R.string.perm_snackbar_msg, Snackbar.LENGTH_LONG)
                 .show();
+    }
+
+    /**
+     * Test method to insert dummy recipe, used until AddRecipeActivity is functional
+     * @param imagePath
+     */
+    public static void InsertValue(Context context, String imagePath, boolean image, boolean complex, int viewOrder) {
+
+        //TODO remove later
+
+        ContentResolver resolver = context.getContentResolver();
+
+        ContentValues values = new ContentValues();
+
+        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, viewOrder);
+        values.put(ProviderContract.RecipeEntry.TITLE, "Pasta Aglio E Olio");
+        if (complex) {
+            values.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, 340);
+            values.put(ProviderContract.RecipeEntry.DURATION, 20);
+        }
+        if (image)
+            values.put(ProviderContract.RecipeEntry.IMAGE_PATH, imagePath);
+
+        Uri result = resolver.insert(
+                ProviderContract.RECIPES_URI,
+                values);
+
+        long recipeId = ContentUris.parseId(result);
+
+        //Ingredients
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Spaghetti");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Garlic");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Parsley");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Olive Oil");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Red Pepper Flake");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Chicken (Optional)");
+        resolver.insert(
+                ProviderContract.RECIPE_INGREDIENTS_URI,
+                values);
+
+        //Method
+
+        values = new ContentValues();
+        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.MethodStepEntry.STEP_NO, 1);
+        values.put(ProviderContract.MethodStepEntry.TEXT, "Gradually heat up oil in pan and saute garlic until golden");
+        resolver.insert(
+                ProviderContract.METHOD_URI,
+                values);
+
+        values = new ContentValues();
+        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.MethodStepEntry.STEP_NO, 2);
+        values.put(ProviderContract.MethodStepEntry.TEXT, "Add Red Pepper Flake and chopped Parsley");
+        resolver.insert(
+                ProviderContract.METHOD_URI,
+                values);
+
+
+        values = new ContentValues();
+        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
+        values.put(ProviderContract.MethodStepEntry.STEP_NO, 3);
+        values.put(ProviderContract.MethodStepEntry.TEXT, "Toss with cooked spaghetti and add cooked chicken if desired");
+        resolver.insert(
+                ProviderContract.METHOD_URI,
+                values);
     }
 
     public interface PermissionDialogListener {

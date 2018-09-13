@@ -1,5 +1,6 @@
 package com.danthecodinggui.recipes.view.Loaders;
 
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -8,6 +9,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.provider.BaseColumns;
 import android.support.annotation.Nullable;
+import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.danthecodinggui.recipes.model.ProviderContract;
@@ -19,7 +21,7 @@ import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 
-public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
+public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
 
     private ContentResolver contentResolver;
 
@@ -28,16 +30,17 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
     private ImagePermissionsListener permissionsCallback;
 
     private boolean waitingForPermissionResponse = false;
+//
+//    private ForceLoadContentObserver contentObserver;
+//
+    private Handler uiThread;
 
-    private ForceLoadContentObserver contentObserver;
-
-    public GetRecipesLoader(Context context, Handler uiThread, ProgressUpdateListener updateCallback,
-                     ImagePermissionsListener permissionCallback, int loaderId) {
-        super(context, uiThread, updateCallback, loaderId);
+    public GetRecipesLoader(Context context, Handler uiThread,
+                     ImagePermissionsListener permissionCallback) {
+        super(context);
+        this.uiThread = uiThread;
         contentResolver = context.getContentResolver();
         this.permissionsCallback = permissionCallback;
-
-        Log.v(DATA_LOADING, "Constructor()");
     }
 
     @Override
@@ -47,22 +50,20 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
             Log.v(DATA_LOADING, "Recipe loading started: Using cached values");
             deliverResult(cachedRecords);
         }
-        else if (takeContentChanged() || cachedRecords == null){
+        if (takeContentChanged() || cachedRecords == null){
             Log.v(DATA_LOADING, "Recipe loading started: Load new values");
             forceLoad();
         }
 
-        if (contentObserver == null) {
-            contentObserver = new ForceLoadContentObserver();
-            contentResolver.registerContentObserver(ProviderContract.METHOD_URI, false, contentObserver);
-        }
-
-        Log.v(DATA_LOADING, "onStartLoading()");
+//        if (contentObserver == null) {
+//            contentObserver = new ForceLoadContentObserver();
+//            contentResolver.registerContentObserver(ProviderContract.METHOD_URI, false, contentObserver);
+//        }
     }
+
 
     @Override
     public List<Recipe> loadInBackground() {
-        Log.v(DATA_LOADING, "loadInBackground()");
 
         List<Recipe> records = new ArrayList<>();
 
@@ -79,8 +80,6 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
 
         //Temporary holder variable
         Recipe temp;
-
-        int recordsGathered = 0;
 
         while (baseCursor.moveToNext()) {
             //Get base recipe data
@@ -121,24 +120,20 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
             if (temp.hasPhoto() && permissionsCallback != null) {
                 AskForReadPermission();
 
-
-                while (waitingForPermissionResponse)
-                    ;//Log.v("busy", "waiting!!");
-                Log.v("busy", "---------------------------------------------------------------------------------------------------------!");
+                while (waitingForPermissionResponse) {
+                    //Busy waiting, but check 10 times a second
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
 
             records.add(temp);
-
-            recordsGathered = records.size();
-
-//            //In case there's a vast amount of records, update the ui every 10 loaded records
-//            if (recordsGathered % 10 == 0)
-//                UpdateProgress(records.subList(recordsGathered - 10, recordsGathered - 1));
         }
         baseCursor.close();
 
-        Log.v(DATA_LOADING, "END OF loadInBackground()");
-        //Return remaining records in list
         return records;
     }
 
@@ -157,10 +152,10 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
         if (cachedRecords != null)
             cachedRecords = null;
 
-        if (contentObserver != null) {
-            contentResolver.unregisterContentObserver(contentObserver);
-            contentObserver = null;
-        }
+//        if (contentObserver != null) {
+//            contentResolver.unregisterContentObserver(contentObserver);
+//            contentObserver = null;
+//        }
     }
 
     @Override
@@ -190,8 +185,6 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader<List<Recipe>>{
             @Override
             public void run() {
                 permissionsCallback.onImagePermRequested();
-                //Nullify reference to avoid memory leak
-                permissionsCallback = null;
             }
         });
         waitingForPermissionResponse = true;
