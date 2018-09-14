@@ -30,8 +30,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.DataSource;
@@ -72,6 +70,7 @@ public class MainActivity extends AppCompatActivity
 
     ActivityMainBinding binding;
 
+    List<Recipe> recipesList;
     RecipesViewAdapter recipesAdapter;
 
     //If read external files permission denied, must avoid loading images from recipes
@@ -104,6 +103,8 @@ public class MainActivity extends AppCompatActivity
             binding.rvwRecipes.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         else
             binding.rvwRecipes.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+
+        recipesList = new ArrayList<>();
 
         //setup RecyclerView adapter
         recipesAdapter = new RecipesViewAdapter(null);
@@ -150,8 +151,10 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                recipesAdapter.filter(newText);
-                return false;
+                final List<Recipe> filteredRecipes = filter(recipesList, newText);
+                recipesAdapter.animateTo(filteredRecipes);
+                binding.rvwRecipes.scrollToPosition(0);
+                return true;
             }
         });
 
@@ -177,6 +180,18 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private List<Recipe> filter(List<Recipe> items, String query) {
+        query = query.toLowerCase();
+
+        final List<Recipe> filteredRecipes = new ArrayList<>();
+        for (Recipe r: items) {
+            final String title = r.getTitle().toLowerCase();
+            if (title.contains(query))
+                filteredRecipes.add(r);
+        }
+        return filteredRecipes;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -192,12 +207,12 @@ public class MainActivity extends AppCompatActivity
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
                         UnblockLoader();
                     if (grantResults[0] == PackageManager.PERMISSION_DENIED)
-                    Utility.showPermissionDeniedDialog(this,
-                            R.string.perm_dialog_read_external,
-                            binding.clyMainRoot,
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                            REQ_CODE_READ_EXTERNAL,
-                            this);
+                        Utility.showPermissionDeniedDialog(this,
+                                R.string.perm_dialog_read_external,
+                                binding.clyMainRoot,
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                REQ_CODE_READ_EXTERNAL,
+                                this);
                 }
                 break;
         }
@@ -273,6 +288,7 @@ public class MainActivity extends AppCompatActivity
             else
                 binding.txtNoItems.setVisibility(View.INVISIBLE);
 
+            recipesList = loadedRecipes;
             recipesAdapter.UpdateRecords(loadedRecipes);
 
             Log.v(DATA_LOADING, "Load complete");
@@ -292,14 +308,13 @@ public class MainActivity extends AppCompatActivity
     class RecipesViewAdapter
             extends RecyclerView.Adapter<RecipesViewAdapter.RecipeViewHolder> {
 
-        List<Recipe> unfilteredRecipesList;
-        List<Recipe> recipesList;
+        List<Recipe> displayedRecipesList;
 
         private final int BASIC = 0, COMPLEX = 1, PHOTO_BASIC = 2, PHOTO_COMPLEX = 3;
 
         RecipesViewAdapter(List<Recipe> list) {
-            recipesList = list;
-            unfilteredRecipesList = new ArrayList<>();
+            //TODO change to include list if not null
+            displayedRecipesList = new ArrayList<>();
         }
 
         @Override
@@ -321,15 +336,15 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onBindViewHolder(RecipeViewHolder holder, int pos) {
 
-            Recipe recipe = recipesList.get(pos);
+            Recipe recipe = displayedRecipesList.get(pos);
 
             holder.bind(recipe);
         }
 
         @Override
         public int getItemViewType(int position) {
-            boolean isComplex = recipesList.get(position).hasExtendedInfo();
-            boolean hasPhoto = recipesList.get(position).hasPhoto() && !noImage;
+            boolean isComplex = displayedRecipesList.get(position).hasExtendedInfo();
+            boolean hasPhoto = displayedRecipesList.get(position).hasPhoto() && !noImage;
 
             if (isComplex && hasPhoto)
                 return PHOTO_COMPLEX;
@@ -343,41 +358,65 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public int getItemCount() {
-            if (recipesList == null)
+            if (displayedRecipesList == null)
                 return 0;
-            return recipesList.size();
+            return displayedRecipesList.size();
         }
 
         void UpdateRecords(List<Recipe> updatedRecords) {
             if (updatedRecords != null) {
-                if (unfilteredRecipesList == null || unfilteredRecipesList.isEmpty()) {
-                    unfilteredRecipesList = recipesList = updatedRecords;
-                    notifyItemRangeInserted(0, updatedRecords.size());
+                if (displayedRecipesList == null || displayedRecipesList.isEmpty()) {
+                    displayedRecipesList = new ArrayList<>(updatedRecords);
+                    notifyItemRangeInserted(0, updatedRecords.size() + 4);
                 }
                 else {
-                    unfilteredRecipesList = recipesList = updatedRecords;
-                    notifyItemRangeChanged(0, updatedRecords.size());
+                    displayedRecipesList = new ArrayList<>(updatedRecords);
+                    notifyItemRangeChanged(0, updatedRecords.size() + 4);
                 }
             }
         }
 
-        void filter(String searchText) {
-            recipesList.clear();
-            if (searchText.isEmpty())
-                recipesList.addAll(unfilteredRecipesList);
-            else {
-                searchText = searchText.toLowerCase();
-                for (Recipe r : unfilteredRecipesList) {
-                    if (r.getTitle().toLowerCase().contains(searchText))
-                        recipesList.add(r);
-                }
-            }
-            if (recipesList.size() == 0)
-                binding.txtSearchNoItems.setVisibility(View.VISIBLE);
-            else
-                binding.txtSearchNoItems.setVisibility(View.INVISIBLE);
+        Recipe removeItem(int pos) {
+            final Recipe item = displayedRecipesList.remove(pos);
+            notifyItemRemoved(pos);
+            return item;
+        }
+        void addItem(int pos, Recipe item) {
+            displayedRecipesList.add(pos, item);
+            notifyItemInserted(pos);
+        }
+        void moveItem(int fromPos, int toPos) {
+            final Recipe item = displayedRecipesList.remove(fromPos);
+            displayedRecipesList.add(toPos, item);
+            notifyItemMoved(fromPos, toPos);
+        }
+        void animateTo(List<Recipe> items) {
+            applyAndAnimateRemovals(items);
+            applyAndAnimateAdditions(items);
+            applyAndAnimateMovedItems(items);
+        }
 
-            notifyDataSetChanged();
+        private void applyAndAnimateRemovals(List<Recipe> filteredList) {
+            for (int i = displayedRecipesList.size() - 1; i >= 0; --i) {
+                final Recipe item = displayedRecipesList.get(i);
+                if (!filteredList.contains(item))
+                    removeItem(i);
+            }
+        }
+        private void applyAndAnimateAdditions(List<Recipe> filteredList) {
+            for (int i = 0, count = filteredList.size(); i < count; ++i) {
+                final Recipe item = filteredList.get(i);
+                if (!displayedRecipesList.contains(item))
+                    addItem(i, item);
+            }
+        }
+        private void applyAndAnimateMovedItems(List<Recipe> filteredList) {
+            for (int toPos = filteredList.size() - 1; toPos >= 0; --toPos) {
+                final Recipe item = filteredList.get(toPos);
+                final int fromPos = displayedRecipesList.indexOf(item);
+                if (fromPos >= 0 && fromPos != toPos)
+                    moveItem(fromPos, toPos);
+            }
         }
 
         class RecipeViewHolder extends RecyclerView.ViewHolder
@@ -399,7 +438,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
-                ViewRecipe(recipesList.get(getAdapterPosition()), null);
+                ViewRecipe(displayedRecipesList.get(getAdapterPosition()), null);
             }
 
             @Override
@@ -458,7 +497,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
-                ViewRecipe(recipesList.get(getAdapterPosition()), photoBinding.ivwCrdPreview);
+                ViewRecipe(displayedRecipesList.get(getAdapterPosition()), photoBinding.ivwCrdPreview);
             }
         }
         class ComplexPhotoViewHolder extends RecipeViewHolder {
@@ -496,7 +535,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
-                ViewRecipe(recipesList.get(getAdapterPosition()), photoBinding.ivwCrdPreview);
+                ViewRecipe(displayedRecipesList.get(getAdapterPosition()), photoBinding.ivwCrdPreview);
             }
         }
     }
