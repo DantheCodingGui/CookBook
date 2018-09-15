@@ -10,7 +10,8 @@
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:elevation="10dp">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/tbar_home"
@@ -18,10 +19,8 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/colorPrimary"
                 app:titleTextColor="@android:color/white"
-                android:theme="@style/SearchView"
                 app:collapseIcon="@drawable/ic_arrow_back"
-                app:layout_scrollFlags="scroll|enterAlways|snap"
-                android:elevation="10dp"/>
+                app:layout_scrollFlags="scroll|enterAlways|snap" />
         </android.support.design.widget.AppBarLayout>
 
         <android.support.v7.widget.RecyclerView

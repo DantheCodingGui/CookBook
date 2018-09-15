@@ -30,6 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.DataSource;
@@ -55,6 +56,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import jp.wasabeef.recyclerview.animators.ScaleInAnimator;
+
 import static com.danthecodinggui.recipes.msc.IntentConstants.IMAGE_TRANSITION_NAME;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_BUNDLE;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_OBJECT;
@@ -77,6 +80,9 @@ public class MainActivity extends AppCompatActivity
     private boolean noImage = false;
 
     private boolean transitioningActivity = false;
+
+    private String currentSearchFilter;
+    private boolean searchOpen = false;
 
     private GetRecipesLoader recipesLoader;
 
@@ -109,6 +115,14 @@ public class MainActivity extends AppCompatActivity
         //setup RecyclerView adapter
         recipesAdapter = new RecipesViewAdapter(null);
         binding.rvwRecipes.setAdapter(recipesAdapter);
+
+
+        ScaleInAnimator animator = new ScaleInAnimator(new OvershootInterpolator(1.f));
+        animator.setAddDuration(250);
+        animator.setRemoveDuration(250);
+        animator.setChangeDuration(250);
+        animator.setMoveDuration(250);
+        binding.rvwRecipes.setItemAnimator(animator);
 
         //Show/hide floating action button on recyclerview scroll
         binding.rvwRecipes.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -143,20 +157,7 @@ public class MainActivity extends AppCompatActivity
         final MenuItem searchItem = menu.findItem(R.id.menu_search);
         SearchView searchView = (SearchView) searchItem.getActionView();
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                final List<Recipe> filteredRecipes = filter(recipesList, newText);
-                recipesAdapter.animateTo(filteredRecipes);
-                binding.rvwRecipes.scrollToPosition(0);
-                return true;
-            }
-        });
+        searchView.setOnQueryTextListener(searchTextChangedListener);
 
         searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
@@ -165,6 +166,8 @@ public class MainActivity extends AppCompatActivity
                 if (searchItem.isActionViewExpanded()) {
                     AnimUtils.animateSearchToolbar(MainActivity.this, binding.tbarHome, 1, false, false);
                     binding.txtSearchNoItems.setVisibility(View.INVISIBLE);
+                    searchOpen = false;
+
                 }
                 return true;
             }
@@ -173,6 +176,7 @@ public class MainActivity extends AppCompatActivity
             public boolean onMenuItemActionExpand(MenuItem item) {
                 // Called when SearchView is expanding
                 AnimUtils.animateSearchToolbar(MainActivity.this, binding.tbarHome, 1, true, true);
+                searchOpen = true;
                 return true;
             }
         });
@@ -180,7 +184,36 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private List<Recipe> filter(List<Recipe> items, String query) {
+    private SearchView.OnQueryTextListener searchTextChangedListener = new SearchView.OnQueryTextListener() {
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            return false;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            final List<Recipe> filteredRecipes = Filter(recipesList, newText);
+            recipesAdapter.animateTo(filteredRecipes);
+            binding.rvwRecipes.scrollToPosition(0);
+
+            currentSearchFilter = newText;
+
+            //Show message if search shows no results
+            if (filteredRecipes.size() == 0 && binding.txtNoItems.getVisibility() != View.VISIBLE)
+                binding.txtSearchNoItems.setVisibility(View.VISIBLE);
+            else
+                binding.txtSearchNoItems.setVisibility(View.INVISIBLE);
+            return true;
+        }
+    };
+
+    /**
+     * Filters recipesList based on query from a searchview
+     * @param items The original list of items/Recipes
+     * @param query The text to search against
+     * @return The filtered list
+     */
+    private List<Recipe> Filter(List<Recipe> items, String query) {
         query = query.toLowerCase();
 
         final List<Recipe> filteredRecipes = new ArrayList<>();
@@ -289,11 +322,12 @@ public class MainActivity extends AppCompatActivity
                 binding.txtNoItems.setVisibility(View.INVISIBLE);
 
             recipesList = loadedRecipes;
-            recipesAdapter.UpdateRecords(loadedRecipes);
+            if (searchOpen)
+                searchTextChangedListener.onQueryTextChange(currentSearchFilter);
+            else
+                recipesAdapter.UpdateRecords(loadedRecipes);
 
             Log.v(DATA_LOADING, "Load complete");
-
-            //TODO: loaders broken, need to get it to work always BOTH with/without dontkeepactivities
         }
 
         @Override
@@ -367,35 +401,21 @@ public class MainActivity extends AppCompatActivity
             if (updatedRecords != null) {
                 if (displayedRecipesList == null || displayedRecipesList.isEmpty()) {
                     displayedRecipesList = new ArrayList<>(updatedRecords);
-                    notifyItemRangeInserted(0, updatedRecords.size() + 4);
+                    notifyItemRangeInserted(0, updatedRecords.size()*2);
                 }
                 else {
                     displayedRecipesList = new ArrayList<>(updatedRecords);
-                    notifyItemRangeChanged(0, updatedRecords.size() + 4);
+                    notifyItemRangeChanged(0, updatedRecords.size()* 2);
                 }
             }
         }
 
-        Recipe removeItem(int pos) {
-            final Recipe item = displayedRecipesList.remove(pos);
-            notifyItemRemoved(pos);
-            return item;
-        }
-        void addItem(int pos, Recipe item) {
-            displayedRecipesList.add(pos, item);
-            notifyItemInserted(pos);
-        }
-        void moveItem(int fromPos, int toPos) {
-            final Recipe item = displayedRecipesList.remove(fromPos);
-            displayedRecipesList.add(toPos, item);
-            notifyItemMoved(fromPos, toPos);
-        }
+        //Methods required for animated RecyclerView filtering
         void animateTo(List<Recipe> items) {
             applyAndAnimateRemovals(items);
             applyAndAnimateAdditions(items);
             applyAndAnimateMovedItems(items);
         }
-
         private void applyAndAnimateRemovals(List<Recipe> filteredList) {
             for (int i = displayedRecipesList.size() - 1; i >= 0; --i) {
                 final Recipe item = displayedRecipesList.get(i);
@@ -417,6 +437,20 @@ public class MainActivity extends AppCompatActivity
                 if (fromPos >= 0 && fromPos != toPos)
                     moveItem(fromPos, toPos);
             }
+        }
+        Recipe removeItem(int pos) {
+            final Recipe item = displayedRecipesList.remove(pos);
+            notifyItemRemoved(pos);
+            return item;
+        }
+        void addItem(int pos, Recipe item) {
+            displayedRecipesList.add(pos, item);
+            notifyItemInserted(pos);
+        }
+        void moveItem(int fromPos, int toPos) {
+            final Recipe item = displayedRecipesList.remove(fromPos);
+            displayedRecipesList.add(toPos, item);
+            notifyItemMoved(fromPos, toPos);
         }
 
         class RecipeViewHolder extends RecyclerView.ViewHolder

@@ -13,8 +13,7 @@
         style="@style/RecipeCard">
 
         <android.support.constraint.ConstraintLayout
-            android:padding="10dp"
-            style="@style/CardBody">
+            android:padding="10dp"            style="@style/CardBody">
 
             <TextView
                 android:id="@+id/txt_crd_title"
