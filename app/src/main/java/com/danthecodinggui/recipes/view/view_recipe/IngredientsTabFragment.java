@@ -3,8 +3,6 @@ package com.danthecodinggui.recipes.view.view_recipe;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -20,10 +18,7 @@ import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.FragmentIngredientsBinding;
 import com.danthecodinggui.recipes.databinding.IngredientItemBinding;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
-import com.danthecodinggui.recipes.model.object_models.Recipe;
-import com.danthecodinggui.recipes.msc.NoScrollLinearLayout;
 import com.danthecodinggui.recipes.view.Loaders.GetIngredientsLoader;
-import com.danthecodinggui.recipes.view.Loaders.UpdatingAsyncTaskLoader;
 
 import java.util.ArrayList;
 import java.util.Collections;
