@@ -83,9 +83,10 @@
             <android.support.design.widget.TabLayout
                 android:id="@+id/tly_view_recipe"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="55dp"
                 android:layout_gravity="bottom"
-                app:tabGravity="center"
+                app:tabMaxWidth="0dp"
+                app:tabGravity="fill"
                 app:tabIndicatorColor="@android:color/white"
                 app:tabMode="fixed"/>
 
@@ -96,7 +97,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
-
 
     </android.support.design.widget.CoordinatorLayout>
 </layout>

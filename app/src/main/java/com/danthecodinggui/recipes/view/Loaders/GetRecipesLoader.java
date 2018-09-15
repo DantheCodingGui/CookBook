@@ -1,10 +1,15 @@
 package com.danthecodinggui.recipes.view.Loaders;
 
+
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Handler;
 import android.provider.BaseColumns;
+import android.support.annotation.Nullable;
+import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.danthecodinggui.recipes.model.ProviderContract;
@@ -16,17 +21,24 @@ import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 
-public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
+public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
 
     private ContentResolver contentResolver;
 
-    private List<Recipe> records;
+    private List<Recipe> cachedRecords;
 
     private ImagePermissionsListener permissionsCallback;
 
-    public GetRecipesLoader(Context context, Handler uiThread, ProgressUpdateListener updateCallback,
-                     ImagePermissionsListener permissionCallback, int loaderId) {
-        super(context, uiThread, updateCallback, loaderId);
+    private boolean waitingForPermissionResponse = false;
+//
+//    private ForceLoadContentObserver contentObserver;
+//
+    private Handler uiThread;
+
+    public GetRecipesLoader(Context context, Handler uiThread,
+                     ImagePermissionsListener permissionCallback) {
+        super(context);
+        this.uiThread = uiThread;
         contentResolver = context.getContentResolver();
         this.permissionsCallback = permissionCallback;
     }
@@ -34,19 +46,26 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
     @Override
     protected void onStartLoading() {
         //Cache records so can handle orientation changes and such
-        if (records != null) {
+        if (cachedRecords != null) {
             Log.v(DATA_LOADING, "Recipe loading started: Using cached values");
-            deliverResult(records);
+            deliverResult(cachedRecords);
         }
-        else {
+        if (takeContentChanged() || cachedRecords == null){
             Log.v(DATA_LOADING, "Recipe loading started: Load new values");
-            records = new ArrayList<>();
             forceLoad();
         }
+
+//        if (contentObserver == null) {
+//            contentObserver = new ForceLoadContentObserver();
+//            contentResolver.registerContentObserver(ProviderContract.METHOD_URI, false, contentObserver);
+//        }
     }
+
 
     @Override
     public List<Recipe> loadInBackground() {
+
+        List<Recipe> records = new ArrayList<>();
 
         //Query recipes table for all records
         Cursor baseCursor = contentResolver.query(
@@ -62,16 +81,14 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
         //Temporary holder variable
         Recipe temp;
 
-        int recordsGathered = 0;
-
         while (baseCursor.moveToNext()) {
             //Get base recipe data
             temp = BuildBaseModel(baseCursor);
 
-                    //Add ingredients data to record
+            //Add ingredients data to record
             String[] countSelArgs = { Long.toString(
                     baseCursor.getLong(baseCursor.getColumnIndexOrThrow(
-                    ProviderContract.RecipeEntry._ID))) };
+                            ProviderContract.RecipeEntry._ID))) };
 
             countCursor = contentResolver.query(
                     ProviderContract.RECIPE_INGREDIENTS_URI,
@@ -100,21 +117,62 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
 
 
             //Need to ask for permission if a recipe includes a photo
-            if (temp.hasPhoto() && permissionsCallback != null)
+            if (temp.hasPhoto() && permissionsCallback != null) {
                 AskForReadPermission();
 
+                while (waitingForPermissionResponse) {
+                    //Busy waiting, but check 10 times a second
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
             records.add(temp);
-
-            recordsGathered = records.size();
-
-            //In case there's a vast amount of records, update the ui every 10 loaded records
-            if (recordsGathered % 10 == 0)
-                UpdateProgress(records.subList(recordsGathered - 10, recordsGathered - 1));
         }
         baseCursor.close();
 
-        //Return remaining records in list
-        return records.subList(recordsGathered - (recordsGathered % 10), recordsGathered);
+        return records;
+    }
+
+    @Override
+    protected void onStopLoading() {
+        cancelLoad();
+        Log.v(DATA_LOADING, "onStopLoading()");
+    }
+
+    @Override
+    protected void onReset() {
+        Log.v(DATA_LOADING, "onReset()");
+
+        onStopLoading();
+
+        if (cachedRecords != null)
+            cachedRecords = null;
+
+//        if (contentObserver != null) {
+//            contentResolver.unregisterContentObserver(contentObserver);
+//            contentObserver = null;
+//        }
+    }
+
+    @Override
+    public void deliverResult(List<Recipe> data) {
+        if (isReset()) {
+            cachedRecords = null;
+            return;
+        }
+
+        List<Recipe> oldCache = cachedRecords;
+        cachedRecords = data;
+
+        if (isStarted())
+            super.deliverResult(data);
+
+        if (oldCache != null && oldCache != data)
+            cachedRecords = null;
     }
 
     /**
@@ -126,10 +184,16 @@ public class GetRecipesLoader extends UpdatingAsyncTaskLoader {
             @Override
             public void run() {
                 permissionsCallback.onImagePermRequested();
-                //Nullify reference to avoid memory leak
-                permissionsCallback = null;
             }
         });
+        waitingForPermissionResponse = true;
+    }
+
+    /**
+     * Called to cancel busy waiting of loader, can now continue loading data
+     */
+    public void onPermissionResponse() {
+        waitingForPermissionResponse = false;
     }
 
     /**

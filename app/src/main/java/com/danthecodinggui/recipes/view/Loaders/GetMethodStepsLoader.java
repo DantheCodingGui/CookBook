@@ -3,8 +3,8 @@ package com.danthecodinggui.recipes.view.Loaders;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.danthecodinggui.recipes.model.ProviderContract;
@@ -15,16 +15,16 @@ import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 
-public class GetMethodStepsLoader extends UpdatingAsyncTaskLoader {
+public class GetMethodStepsLoader extends AsyncTaskLoader<List<MethodStep>> {
 
-    ContentResolver contentResolver;
+    private ContentResolver contentResolver;
 
-    private List<MethodStep> methodSteps;
+    private List<MethodStep> cachedRecords;
 
     private long recipePk;
 
-    public GetMethodStepsLoader(Context context, Handler uiThread, ProgressUpdateListener progressCallback, int loaderId, long recipePk) {
-        super(context, uiThread, progressCallback, loaderId);
+    public GetMethodStepsLoader(Context context, long recipePk) {
+        super(context);
 
         contentResolver = context.getContentResolver();
         this.recipePk = recipePk;
@@ -33,20 +33,22 @@ public class GetMethodStepsLoader extends UpdatingAsyncTaskLoader {
     @Override
     protected void onStartLoading() {
         //Cache records so can handle orientation changes and such
-        if (methodSteps != null) {
-            Log.v(DATA_LOADING, "Method Steps loading started: Using cached values");
-            deliverResult(methodSteps);
+        if (cachedRecords != null) {
+            Log.v(DATA_LOADING, "Ingredients loading started: Using cached values");
+            deliverResult(cachedRecords);
         }
         else {
-            Log.v(DATA_LOADING, "Method Steps loading started: Load new values");
-            methodSteps = new ArrayList<>();
+            Log.v(DATA_LOADING, "Ingredients loading started: Load new values");
             forceLoad();
         }
     }
 
     @Nullable
     @Override
-    public Object loadInBackground() {
+    public List<MethodStep> loadInBackground() {
+
+        List<MethodStep> methodSteps = new ArrayList<>();
+
         String[] projection = {
                 ProviderContract.MethodStepEntry.TEXT,
                 ProviderContract.MethodStepEntry.STEP_NO
@@ -63,7 +65,6 @@ public class GetMethodStepsLoader extends UpdatingAsyncTaskLoader {
                 ProviderContract.MethodStepEntry.STEP_NO + " ASC"
         );
 
-        int recordsGathered = 0;
 
         MethodStep temp;
 
@@ -76,13 +77,39 @@ public class GetMethodStepsLoader extends UpdatingAsyncTaskLoader {
                         ProviderContract.MethodStepEntry.STEP_NO)));
 
             methodSteps.add(temp);
-
-            recordsGathered = methodSteps.size();
-            if (recordsGathered % 10 == 0)
-                UpdateProgress(methodSteps.subList(recordsGathered - 10, recordsGathered - 1));
         }
         cursor.close();
 
-        return methodSteps.subList(recordsGathered - (recordsGathered % 10), recordsGathered);
+        return methodSteps;
+    }
+
+    @Override
+    public void deliverResult(List<MethodStep> data) {
+        if (isReset()) {
+            cachedRecords = null;
+            return;
+        }
+
+        List<MethodStep> oldCache = cachedRecords;
+        cachedRecords = data;
+
+        if (isStarted())
+            super.deliverResult(data);
+
+        if (oldCache != null && oldCache != data)
+            cachedRecords = null;
+    }
+
+    @Override
+    protected void onStopLoading() {
+        cancelLoad();
+    }
+
+    @Override
+    protected void onReset() {
+        onStopLoading();
+
+        if (cachedRecords != null)
+            cachedRecords = null;
     }
 }

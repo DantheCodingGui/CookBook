@@ -3,8 +3,6 @@ package com.danthecodinggui.recipes.view.view_recipe;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -21,9 +19,9 @@ import com.danthecodinggui.recipes.databinding.FragmentIngredientsBinding;
 import com.danthecodinggui.recipes.databinding.IngredientItemBinding;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.view.Loaders.GetIngredientsLoader;
-import com.danthecodinggui.recipes.view.Loaders.UpdatingAsyncTaskLoader;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
@@ -31,9 +29,7 @@ import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class IngredientsTabFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<List<Ingredient>>,
-        UpdatingAsyncTaskLoader.ProgressUpdateListener {
+public class IngredientsTabFragment extends Fragment {
 
     FragmentIngredientsBinding binding;
 
@@ -54,7 +50,7 @@ public class IngredientsTabFragment extends Fragment
 
         recipeId = getArguments().getLong(RECIPE_DETAIL_ID);
 
-        getActivity().getSupportLoaderManager().initLoader(INGREDIENTS_LOADER, null, this);
+        getActivity().getSupportLoaderManager().initLoader(INGREDIENTS_LOADER, null, loaderCallbacks);
 
         return view;
     }
@@ -64,34 +60,30 @@ public class IngredientsTabFragment extends Fragment
         super.onActivityCreated(savedInstanceState);
 
         ingredientsAdapter = new IngredientsViewAdapter();
-        ingredientsList = new ArrayList<>();
         binding.rvwIngredients.setAdapter(ingredientsAdapter);
+
         binding.rvwIngredients.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
-    @NonNull
-    @Override
-    public Loader<List<Ingredient>> onCreateLoader(int id, @Nullable Bundle args) {
-        Handler uiThread = new Handler(Looper.getMainLooper());
-        return new GetIngredientsLoader(getActivity(), uiThread, this, id, recipeId);
-    }
+    private LoaderManager.LoaderCallbacks<List<Ingredient>> loaderCallbacks = new LoaderManager.LoaderCallbacks<List<Ingredient>>() {
+        @NonNull
+        @Override
+        public Loader<List<Ingredient>> onCreateLoader(int id, @Nullable Bundle args) {
+            return new GetIngredientsLoader(getContext(), recipeId);
+        }
 
-    @Override
-    public <T> void onProgressUpdate(int loaderId, T updateValue) {
-        ingredientsList.addAll((List)updateValue);
-        ingredientsAdapter.notifyDataSetChanged();
-    }
+        @Override
+        public void onLoadFinished(@NonNull Loader<List<Ingredient>> loader, List<Ingredient> data) {
+            ingredientsList = new ArrayList<>(data);
+            ingredientsAdapter.notifyDataSetChanged();
+        }
 
-    @Override
-    public void onLoadFinished(@NonNull Loader<List<Ingredient>> loader, List<Ingredient> remainingIngredients) {
-        ingredientsList.addAll(remainingIngredients);
-        ingredientsAdapter.notifyDataSetChanged();
-
-        getLoaderManager().destroyLoader(loader.getId());
-    }
-
-    @Override
-    public void onLoaderReset(@NonNull Loader<List<Ingredient>> loader) { }
+        @Override
+        public void onLoaderReset(@NonNull Loader<List<Ingredient>> loader) {
+            ingredientsList = new ArrayList<>(Collections.<Ingredient>emptyList());
+            ingredientsAdapter.notifyDataSetChanged();
+        }
+    };
 
     class IngredientsViewAdapter extends RecyclerView.Adapter<IngredientsViewAdapter.IngredientViewHolder> {
 
@@ -109,6 +101,8 @@ public class IngredientsTabFragment extends Fragment
 
         @Override
         public int getItemCount() {
+            if (ingredientsList == null)
+                return 0;
             return ingredientsList.size();
         }
 
@@ -119,7 +113,6 @@ public class IngredientsTabFragment extends Fragment
             IngredientViewHolder(IngredientItemBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
-                binding.crdIngredientItem.setCardBackgroundColor(getResources().getColor(R.color.colorIngredients));
             }
 
             public void bind(Ingredient item) {

@@ -33,7 +33,7 @@ public class Recipe implements Parcelable {
      * @return
      */
     public boolean hasExtendedInfo() {
-        return calories != -1 || timeInMins != -1;
+        return calories != 0 || timeInMins != 0;
     }
 
     /**

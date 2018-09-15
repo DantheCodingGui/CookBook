@@ -5,25 +5,19 @@
             name="methodStep"
             type="com.danthecodinggui.recipes.model.object_models.MethodStep"/>
     </data>
-    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/crd_method_item"
+    <TextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        app:cardCornerRadius="15dp"
-        android:layout_margin="3dp"
-        android:elevation="10dp">
-
-        <TextView
-            android:id="@+id/txt_method_item"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:padding="5dp"
-            android:textColor="@android:color/white"
-            android:text="@{methodStep.stepText}"/>
-
-    </android.support.v7.widget.CardView>
+        android:id="@+id/txt_method_item"
+        android:fontFamily="@font/open_sans_light"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:textSize="20sp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:padding="5dp"
+        android:textColor="@color/grey_text"
+        app:stepNum="@{methodStep.getStepNumber()}"
+        app:stepText="@{methodStep.getStepText()}"/>
 </layout>

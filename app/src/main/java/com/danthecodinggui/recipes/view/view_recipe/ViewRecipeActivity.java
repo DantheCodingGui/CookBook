@@ -1,6 +1,7 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
 import android.Manifest;
+import android.app.SharedElementCallback;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 
@@ -14,6 +15,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
+import android.transition.Explode;
+import android.transition.Transition;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -34,7 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.danthecodinggui.recipes.msc.IntentConstants.CARD_TRANSITION_NAME;
+import static com.danthecodinggui.recipes.msc.IntentConstants.IMAGE_TRANSITION_NAME;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_BUNDLE;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_OBJECT;
 
@@ -48,12 +52,19 @@ public class ViewRecipeActivity extends AppCompatActivity
     //Permission request codes
     private static final int REQ_CODE_READ_EXTERNAL = 211;
 
+    //Instance State tags
+    private static final String STATE_MATERIAL_COLOUR = "STATE_MATERIAL_COLOUR";
+
     private String imageTransitionName;
+
+    private int randMaterialCol = -1;
 
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
 
     private Recipe recipe;
+
+    private boolean closingAnimating = false;
 
 //    private String[] foodPhotos = {
 //            "https://images.pexels.com/photos/46239/salmon-dish-food-meal-46239.jpeg?cs=srgb&dl=food-salad-healthy-46239.jpg&fm=jpg",
@@ -67,6 +78,7 @@ public class ViewRecipeActivity extends AppCompatActivity
 //            "https://media.istockphoto.com/photos/health-food-for-fitness-picture-id855098134?k=6&m=855098134&s=612x612&w=0&h=eIWWpYWKTz_z2ryYAo0Dd97igUZVExzl4AKRIhUrFj4="
 //    };
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,7 +87,7 @@ public class ViewRecipeActivity extends AppCompatActivity
         recipe = extras.getBundle(RECIPE_DETAIL_BUNDLE).getParcelable(RECIPE_DETAIL_OBJECT);
 
         if (recipe.hasPhoto()) {
-            imageTransitionName = extras.getString(CARD_TRANSITION_NAME);
+            imageTransitionName = extras.getString(IMAGE_TRANSITION_NAME);
 
             int response = PermissionsHandler.AskForPermission(this,
                     Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL, false);
@@ -89,8 +101,18 @@ public class ViewRecipeActivity extends AppCompatActivity
                     break;
             }
         }
-        else
+        else {
+            if (savedInstanceState != null)
+                randMaterialCol = savedInstanceState.getInt(STATE_MATERIAL_COLOUR);
             SetupNoPhotoLayout();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        savedInstanceState.putInt(STATE_MATERIAL_COLOUR, randMaterialCol);
     }
 
     /**
@@ -123,6 +145,8 @@ public class ViewRecipeActivity extends AppCompatActivity
             Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
+
+            window.getSharedElementReturnTransition().setStartDelay(200);
         }
 
         //String url = foodPhotos[new Random().nextInt(foodPhotos.length)];
@@ -160,7 +184,8 @@ public class ViewRecipeActivity extends AppCompatActivity
      * apply it to the toolbar
      */
     private void SetLayoutColour() {
-        int randMaterialCol = MaterialColours.nextColour();
+        if (randMaterialCol == -1)
+            randMaterialCol = MaterialColours.nextColour();
 
         binding.tbarVwRecipe.setBackgroundColor(randMaterialCol);
         binding.tlyViewRecipe.setBackgroundColor(randMaterialCol);
@@ -196,8 +221,6 @@ public class ViewRecipeActivity extends AppCompatActivity
         tabLayout.addTab(tabLayout.newTab());
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        //Todo check why icons not setting
-
         List<String> tabTitles = new ArrayList<>(Arrays.asList(
                 getString(R.string.tab_ingredients),
                 getString(R.string.tab_method)));
@@ -230,18 +253,28 @@ public class ViewRecipeActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        supportFinishAfterTransition();
+        if (bindingPhoto != null) {
+            //Animate the appbar layout to expand before exiting
+            bindingPhoto.ablViewRecipe.setExpanded(true, true);
+            closingAnimating = true;
+        }
+        else
+            supportFinishAfterTransition();
     }
 
     @Override
     public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-        //Will set the alpha of the image based on collapsing toolbar scroll
-        //ie. the image is fully visible when scrolled down, but fades away into the toolbar colour
-        // when scrolled up
+        //Fades the scrim colour into the photo as appbar scrolls up/down
+        //Fully extended = normal image, Fully retracted = image partially obscured by colour
         int toolBarHeight = bindingPhoto.tbarVwRecipe.getMeasuredHeight();
         int appBarHeight = appBarLayout.getMeasuredHeight();
-        float transitionSpace = (float)appBarHeight - toolBarHeight;// - tabLayout.getMeasuredHeight() - 80;
+        float transitionSpace = (float)appBarHeight - toolBarHeight;
+
         Float f = ((transitionSpace + verticalOffset) / transitionSpace) * 255;
         bindingPhoto.ivwToolbarPreview.setImageAlpha(Math.round(f));
+
+        //When AppBarLayout expansion fully animated, THEN the activity can close
+        if (closingAnimating && verticalOffset == 0)
+            supportFinishAfterTransition();
     }
 }

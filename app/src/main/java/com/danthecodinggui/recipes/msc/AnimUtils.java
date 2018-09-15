@@ -32,12 +32,12 @@ public class AnimUtils {
                         ((res.getDimensionPixelSize(R.dimen.abc_action_button_min_width_material) * numberOfMenuIcon) / 2);
                 Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(toolbar,
                         Utility.isRightToLeft(res) ? toolbar.getWidth() - width : width, toolbar.getHeight() / 2, 0.0f, (float) width);
-                createCircularReveal.setDuration(250);
+                createCircularReveal.setDuration(200);
                 createCircularReveal.start();
             }
             else {
                 TranslateAnimation translateAnimation = new TranslateAnimation(0.0f, 0.0f, (float) (-toolbar.getHeight()), 0.0f);
-                translateAnimation.setDuration(220);
+                translateAnimation.setDuration(200);
                 toolbar.clearAnimation();
                 toolbar.startAnimation(translateAnimation);
             }
@@ -49,7 +49,7 @@ public class AnimUtils {
                         ((res.getDimensionPixelSize(R.dimen.abc_action_button_min_width_material) * numberOfMenuIcon) / 2);
                 Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(toolbar,
                         Utility.isRightToLeft(res) ? toolbar.getWidth() - width : width, toolbar.getHeight() / 2, (float) width, 0.0f);
-                createCircularReveal.setDuration(250);
+                createCircularReveal.setDuration(200);
                 createCircularReveal.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -65,12 +65,10 @@ public class AnimUtils {
                 AnimationSet animationSet = new AnimationSet(true);
                 animationSet.addAnimation(alphaAnimation);
                 animationSet.addAnimation(translateAnimation);
-                animationSet.setDuration(220);
+                animationSet.setDuration(200);
                 animationSet.setAnimationListener(new Animation.AnimationListener() {
                     @Override
-                    public void onAnimationStart(Animation animation) {
-
-                    }
+                    public void onAnimationStart(Animation animation) { }
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
@@ -78,9 +76,7 @@ public class AnimUtils {
                     }
 
                     @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
+                    public void onAnimationRepeat(Animation animation) { }
                 });
                 toolbar.startAnimation(animationSet);
             }
