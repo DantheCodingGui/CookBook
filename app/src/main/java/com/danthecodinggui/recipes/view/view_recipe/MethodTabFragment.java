@@ -19,11 +19,14 @@ import android.view.ViewGroup;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.FragmentMethodBinding;
 import com.danthecodinggui.recipes.databinding.MethodItemBinding;
+import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.model.object_models.MethodStep;
+import com.danthecodinggui.recipes.msc.NoScrollLinearLayout;
 import com.danthecodinggui.recipes.view.Loaders.GetMethodStepsLoader;
 import com.danthecodinggui.recipes.view.Loaders.UpdatingAsyncTaskLoader;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -32,9 +35,7 @@ import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
 /**
  * Holds list of steps for a given recipe
  */
-public class MethodTabFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<List<MethodStep>>,
-        UpdatingAsyncTaskLoader.ProgressUpdateListener {
+public class MethodTabFragment extends Fragment {
 
     FragmentMethodBinding binding;
 
@@ -56,7 +57,7 @@ public class MethodTabFragment extends Fragment
 
         recipeId = getArguments().getLong(RECIPE_DETAIL_ID);
 
-        getActivity().getSupportLoaderManager().initLoader(METHOD_LOADER, null, this);
+        getActivity().getSupportLoaderManager().initLoader(METHOD_LOADER, null, loaderCallbacks);
 
         return view;
     }
@@ -80,27 +81,25 @@ public class MethodTabFragment extends Fragment
         methodStepsAdapter.notifyDataSetChanged();
     }
 
-    @NonNull
-    @Override
-    public Loader<List<MethodStep>> onCreateLoader(int id, @Nullable Bundle args) {
-        Handler uiThread = new Handler(Looper.getMainLooper());
-        return new GetMethodStepsLoader(getActivity(), uiThread, this, id, recipeId);
-    }
+    private LoaderManager.LoaderCallbacks<List<MethodStep>> loaderCallbacks = new LoaderManager.LoaderCallbacks<List<MethodStep>>() {
+        @NonNull
+        @Override
+        public Loader<List<MethodStep>> onCreateLoader(int id, @Nullable Bundle args) {
+            return new GetMethodStepsLoader(getActivity(), recipeId);
+        }
 
-    @Override
-    public <T> void onProgressUpdate(int loaderId, T updateValue) {
-        methodStepsList.addAll((List)updateValue);
-        methodStepsAdapter.notifyDataSetChanged();
-    }
+        @Override
+        public void onLoadFinished(@NonNull Loader<List<MethodStep>> loader, List<MethodStep> data) {
+            methodStepsList = new ArrayList<>(data);
+            methodStepsAdapter.notifyDataSetChanged();
+        }
 
-    @Override
-    public void onLoadFinished(@NonNull Loader<List<MethodStep>> loader, List<MethodStep> remainingSteps) {
-        methodStepsList.addAll(remainingSteps);
-        methodStepsAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onLoaderReset(@NonNull Loader<List<MethodStep>> loader) {}
+        @Override
+        public void onLoaderReset(@NonNull Loader<List<MethodStep>> loader) {
+            methodStepsList = new ArrayList<>(Collections.<MethodStep>emptyList());
+            methodStepsAdapter.notifyDataSetChanged();
+        }
+    };
 
     class MethodViewAdapter extends RecyclerView.Adapter<MethodViewAdapter.StepViewHolder> {
 

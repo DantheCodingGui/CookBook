@@ -21,6 +21,7 @@ import com.danthecodinggui.recipes.databinding.FragmentIngredientsBinding;
 import com.danthecodinggui.recipes.databinding.IngredientItemBinding;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
+import com.danthecodinggui.recipes.msc.NoScrollLinearLayout;
 import com.danthecodinggui.recipes.view.Loaders.GetIngredientsLoader;
 import com.danthecodinggui.recipes.view.Loaders.UpdatingAsyncTaskLoader;
 
