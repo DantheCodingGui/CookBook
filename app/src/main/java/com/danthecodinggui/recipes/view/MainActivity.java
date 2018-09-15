@@ -81,6 +81,8 @@ public class MainActivity extends AppCompatActivity
 
     private boolean transitioningActivity = false;
 
+    private boolean alreadyShownPermDeniedDialog = false;
+
     private String currentSearchFilter;
     private boolean searchOpen = false;
 
@@ -91,6 +93,9 @@ public class MainActivity extends AppCompatActivity
 
     //Permission request codes
     private static final int REQ_CODE_READ_EXTERNAL = 201;
+
+    //Instance state IDs
+    private static final String ALREADY_SHOWN_PERM_DIALOG = "ALREADY_SHOWN_PERM_DIALOG";
 
     //TODO remove later
     private boolean inserting = false;
@@ -116,12 +121,11 @@ public class MainActivity extends AppCompatActivity
         recipesAdapter = new RecipesViewAdapter(null);
         binding.rvwRecipes.setAdapter(recipesAdapter);
 
-
         ScaleInAnimator animator = new ScaleInAnimator(new OvershootInterpolator(1.f));
-        animator.setAddDuration(250);
-        animator.setRemoveDuration(250);
-        animator.setChangeDuration(250);
-        animator.setMoveDuration(250);
+        animator.setAddDuration(200);
+        animator.setRemoveDuration(200);
+        animator.setChangeDuration(200);
+        animator.setMoveDuration(200);
         binding.rvwRecipes.setItemAnimator(animator);
 
         //Show/hide floating action button on recyclerview scroll
@@ -139,6 +143,12 @@ public class MainActivity extends AppCompatActivity
         });
 
         setSupportActionBar(binding.tbarHome);
+
+        if (savedInstanceState != null) {
+            alreadyShownPermDeniedDialog = savedInstanceState.getBoolean(ALREADY_SHOWN_PERM_DIALOG);
+            //searchOpen = savedInstanceState.getBoolean(SEARCH_OPEN);
+            //currentSearchFilter = savedInstanceState.getString(SEARCH_FILTER);
+        }
 
         if (!inserting)
             getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, loaderCallbacks);
@@ -167,7 +177,6 @@ public class MainActivity extends AppCompatActivity
                     AnimUtils.animateSearchToolbar(MainActivity.this, binding.tbarHome, 1, false, false);
                     binding.txtSearchNoItems.setVisibility(View.INVISIBLE);
                     searchOpen = false;
-
                 }
                 return true;
             }
@@ -182,6 +191,13 @@ public class MainActivity extends AppCompatActivity
         });
 
         return true;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(ALREADY_SHOWN_PERM_DIALOG, alreadyShownPermDeniedDialog);
     }
 
     private SearchView.OnQueryTextListener searchTextChangedListener = new SearchView.OnQueryTextListener() {
@@ -239,13 +255,17 @@ public class MainActivity extends AppCompatActivity
                 if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
                         UnblockLoader();
-                    if (grantResults[0] == PackageManager.PERMISSION_DENIED)
-                        Utility.showPermissionDeniedDialog(this,
-                                R.string.perm_dialog_read_external,
-                                binding.clyMainRoot,
-                                Manifest.permission.READ_EXTERNAL_STORAGE,
-                                REQ_CODE_READ_EXTERNAL,
-                                this);
+                    if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                        if (!alreadyShownPermDeniedDialog) {
+                            Utility.showPermissionDeniedDialog(this,
+                                    R.string.perm_dialog_read_external,
+                                    binding.clyMainRoot,
+                                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                                    REQ_CODE_READ_EXTERNAL,
+                                    this);
+                            alreadyShownPermDeniedDialog = true;
+                        }
+                    }
                 }
                 break;
         }
@@ -255,6 +275,10 @@ public class MainActivity extends AppCompatActivity
         noImage = true;
         UnblockLoader();
     }
+
+    /**
+     * Allow the loader to continue loading recipes now that noImage state has been determined
+     */
     private void UnblockLoader() {
         recipesLoader.onPermissionResponse();
     }
@@ -306,8 +330,7 @@ public class MainActivity extends AppCompatActivity
                                     break;
                                 case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
                                     Log.v(PERMISSIONS, "Storage permission denied, app won't load images");
-                                    noImage = true;
-                                    UnblockLoader();
+                                    onFeatureDisabled();
                                     break;
                             }
                         }
@@ -347,8 +370,10 @@ public class MainActivity extends AppCompatActivity
         private final int BASIC = 0, COMPLEX = 1, PHOTO_BASIC = 2, PHOTO_COMPLEX = 3;
 
         RecipesViewAdapter(List<Recipe> list) {
-            //TODO change to include list if not null
-            displayedRecipesList = new ArrayList<>();
+            if (list != null)
+                displayedRecipesList = new ArrayList<>(list);
+            else
+                displayedRecipesList = new ArrayList<>();
         }
 
         @Override
@@ -401,11 +426,11 @@ public class MainActivity extends AppCompatActivity
             if (updatedRecords != null) {
                 if (displayedRecipesList == null || displayedRecipesList.isEmpty()) {
                     displayedRecipesList = new ArrayList<>(updatedRecords);
-                    notifyItemRangeInserted(0, updatedRecords.size()*2);
+                    notifyItemRangeInserted(0, updatedRecords.size());
                 }
                 else {
                     displayedRecipesList = new ArrayList<>(updatedRecords);
-                    notifyItemRangeChanged(0, updatedRecords.size()* 2);
+                    notifyItemRangeChanged(0, updatedRecords.size());
                 }
             }
         }

@@ -128,7 +128,6 @@ public class MethodTabFragment extends Fragment
             StepViewHolder(MethodItemBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
-                binding.crdMethodItem.setCardBackgroundColor(getResources().getColor(R.color.colorMethodStep));
             }
 
             public void bind(MethodStep item) {

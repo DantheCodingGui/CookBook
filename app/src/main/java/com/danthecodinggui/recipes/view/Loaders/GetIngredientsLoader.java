@@ -3,9 +3,9 @@ package com.danthecodinggui.recipes.view.Loaders;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.danthecodinggui.recipes.model.ProviderContract;
@@ -17,19 +17,18 @@ import java.util.List;
 import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 
 /**
- * Load list of ingredients of a particular recipe
+ * Load list of cachedRecords of a particular recipe
  */
-public class GetIngredientsLoader extends UpdatingAsyncTaskLoader {
+public class GetIngredientsLoader extends AsyncTaskLoader<List<Ingredient>> {
 
     private ContentResolver contentResolver;
 
-    private List<Ingredient> ingredients;
+    private List<Ingredient> cachedRecords;
 
     private long recipePk;
 
-    public GetIngredientsLoader(@NonNull Context context, Handler uiThread,
-                                ProgressUpdateListener progressCallback, int loaderId, long recipePk) {
-        super(context, uiThread, progressCallback, loaderId);
+    public GetIngredientsLoader(@NonNull Context context, long recipePk) {
+        super(context);
 
         contentResolver = context.getContentResolver();
         this.recipePk = recipePk;
@@ -38,20 +37,21 @@ public class GetIngredientsLoader extends UpdatingAsyncTaskLoader {
     @Override
     protected void onStartLoading() {
         //Cache records so can handle orientation changes and such
-        if (ingredients != null) {
+        if (cachedRecords != null) {
             Log.v(DATA_LOADING, "Ingredients loading started: Using cached values");
-            deliverResult(ingredients);
+            deliverResult(cachedRecords);
         }
         else {
             Log.v(DATA_LOADING, "Ingredients loading started: Load new values");
-            ingredients = new ArrayList<>();
             forceLoad();
         }
     }
 
     @Nullable
     @Override
-    public Object loadInBackground() {
+    public List<Ingredient> loadInBackground() {
+
+        List<Ingredient> ingredients = new ArrayList<>();
 
         String[] projection = {
                 ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME
@@ -68,8 +68,6 @@ public class GetIngredientsLoader extends UpdatingAsyncTaskLoader {
                 null
         );
 
-        int recordsGathered = 0;
-
         Ingredient temp;
 
         while (cursor.moveToNext()) {
@@ -77,13 +75,39 @@ public class GetIngredientsLoader extends UpdatingAsyncTaskLoader {
             temp = new Ingredient(cursor.getString(
                     cursor.getColumnIndexOrThrow(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME)));
             ingredients.add(temp);
-
-            recordsGathered = ingredients.size();
-            if (recordsGathered % 10 == 0)
-                UpdateProgress(ingredients.subList(recordsGathered - 10, recordsGathered - 1));
         }
         cursor.close();
 
-        return ingredients.subList(recordsGathered - (recordsGathered % 10), recordsGathered);
+        return ingredients;
+    }
+
+    @Override
+    public void deliverResult(List<Ingredient> data) {
+        if (isReset()) {
+            cachedRecords = null;
+            return;
+        }
+
+        List<Ingredient> oldCache = cachedRecords;
+        cachedRecords = data;
+
+        if (isStarted())
+            super.deliverResult(data);
+
+        if (oldCache != null && oldCache != data)
+            cachedRecords = null;
+    }
+
+    @Override
+    protected void onStopLoading() {
+        cancelLoad();
+    }
+
+    @Override
+    protected void onReset() {
+        onStopLoading();
+
+        if (cachedRecords != null)
+            cachedRecords = null;
     }
 }

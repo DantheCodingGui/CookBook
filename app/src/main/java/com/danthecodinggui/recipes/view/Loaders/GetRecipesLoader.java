@@ -160,7 +160,6 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
 
     @Override
     public void deliverResult(List<Recipe> data) {
-        Log.v(DATA_LOADING, "deliverResult()");
         if (isReset()) {
             cachedRecords = null;
             return;

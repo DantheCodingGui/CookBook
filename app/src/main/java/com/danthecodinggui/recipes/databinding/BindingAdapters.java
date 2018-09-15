@@ -1,10 +1,12 @@
 package com.danthecodinggui.recipes.databinding;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.databinding.BindingAdapter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestListener;
@@ -17,7 +19,7 @@ import java.io.File;
  * Set of methods to be called when specific data binding attributes are set in layout files,
  * specifically those related to Glide image loading.
  */
-public class GlideBindingAdapters {
+public class BindingAdapters {
 
     /**
      * Loads an image into an imageView from a local filepath
@@ -44,5 +46,16 @@ public class GlideBindingAdapters {
                 .listener(onLoadedListener)
                 .into(view);
 
+    }
+
+    @BindingAdapter(value = {"stepNum", "stepText"})
+    public static void setMethodText(final TextView view, int stepNum, String stepText) {
+
+        //Add full stop if not already there
+        if (!stepText.substring(stepText.length() - 1).equals("."))
+            stepText = stepText.concat(".");
+
+        Resources res = view.getContext().getResources();
+        view.setText(res.getString(R.string.txt_method_step_item, stepNum, stepText));
     }
 }
