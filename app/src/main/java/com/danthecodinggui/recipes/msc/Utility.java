@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.util.TypedValue;
 import android.view.View;
 
 import com.danthecodinggui.recipes.R;
@@ -201,8 +202,16 @@ public class Utility {
                 values);
     }
 
+    /**
+     * Verifies version of operating system, so can use features post-nougat such as split screen
+     */
     public static boolean isMultiWindow(Activity activity) {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && activity.isInMultiWindowMode();
+    }
+
+    public static int dpToPx(Context context, int dp) {
+        Resources res = context.getResources();
+        return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, res.getDisplayMetrics());
     }
 
     public interface PermissionDialogListener {

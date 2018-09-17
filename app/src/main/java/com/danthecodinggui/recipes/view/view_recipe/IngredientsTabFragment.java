@@ -1,7 +1,8 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
-
+import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,6 +19,7 @@ import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.FragmentIngredientsBinding;
 import com.danthecodinggui.recipes.databinding.IngredientItemBinding;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
+import com.danthecodinggui.recipes.msc.Utility;
 import com.danthecodinggui.recipes.view.Loaders.GetIngredientsLoader;
 
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ import java.util.List;
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Shows the ingredients associated with a particular recipe
  */
 public class IngredientsTabFragment extends Fragment {
 
@@ -45,14 +47,14 @@ public class IngredientsTabFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_ingredients, container, false);
-        View view = binding.getRoot();
 
         recipeId = getArguments().getLong(RECIPE_DETAIL_ID);
 
         getActivity().getSupportLoaderManager().initLoader(INGREDIENTS_LOADER, null, loaderCallbacks);
 
-        return view;
+        return binding.getRoot();
     }
 
     @Override
@@ -61,6 +63,11 @@ public class IngredientsTabFragment extends Fragment {
 
         ingredientsAdapter = new IngredientsViewAdapter();
         binding.rvwIngredients.setAdapter(ingredientsAdapter);
+
+        int orientation = getResources().getConfiguration().orientation;
+        boolean isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE;
+
+        binding.setIsLandscapeLayout(isLandscape && !Utility.isMultiWindow(getActivity()));
 
         binding.rvwIngredients.setLayoutManager(new LinearLayoutManager(getContext()));
     }

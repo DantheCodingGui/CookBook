@@ -1,7 +1,6 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
 import android.Manifest;
-import android.app.SharedElementCallback;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 
@@ -15,9 +14,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
-import android.transition.Explode;
-import android.transition.Transition;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -211,7 +207,8 @@ public class ViewRecipeActivity extends AppCompatActivity
 
         tabLayout.setupWithViewPager(viewPager);
 
-        final RecipePagerAdapter adapter = new RecipePagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount(), tabTitles, recipe.getRecipeId());
+        final RecipePagerAdapter adapter = new RecipePagerAdapter(getSupportFragmentManager(),
+                tabLayout.getTabCount(), tabTitles, recipe.getRecipeId());
         viewPager.setAdapter(adapter);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override

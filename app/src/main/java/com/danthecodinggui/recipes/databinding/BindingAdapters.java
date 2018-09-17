@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.databinding.BindingAdapter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -12,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.msc.Utility;
 
 import java.io.File;
 
@@ -57,5 +59,18 @@ public class BindingAdapters {
 
         Resources res = view.getContext().getResources();
         view.setText(res.getString(R.string.txt_method_step_item, stepNum, stepText));
+    }
+
+    @BindingAdapter(value = "shouldShowLandscapePadding")
+    public static void setLandscapeLayout(View view, boolean isLandscapeLayout) {
+
+        Context context = view.getContext();
+        int landscapePadding = Utility.dpToPx(context, 99);
+        int portraitPadding = Utility.dpToPx(context, 19);
+
+        if (isLandscapeLayout)
+            view.setPadding(landscapePadding, 0, landscapePadding, 0);
+        else
+            view.setPadding(portraitPadding, 0, portraitPadding, 0);
     }
 }
