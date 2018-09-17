@@ -66,19 +66,6 @@ public class ViewRecipeActivity extends AppCompatActivity
 
     private boolean closingAnimating = false;
 
-//    private String[] foodPhotos = {
-//            "https://images.pexels.com/photos/46239/salmon-dish-food-meal-46239.jpeg?cs=srgb&dl=food-salad-healthy-46239.jpg&fm=jpg",
-//            "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?cs=srgb&dl=food-dinner-lunch-70497.jpg&fm=jpg",
-//            "https://images.pexels.com/photos/247685/pexels-photo-247685.png?cs=srgb&dl=food-plate-healthy-247685.jpg&fm=jpg",
-//            "https://images.pexels.com/photos/8313/food-eating-potatoes-beer-8313.jpg?auto=compress&cs=tinysrgb&h=350",
-//            "https://drop.ndtv.com/albums/COOKS/corngallery/creolespicedcornthumb_640x480.jpg",
-//            "https://cdn.cnn.com/cnnnext/dam/assets/171027052520-processed-foods-exlarge-tease.jpg",
-//            "https://drop.ndtv.com/albums/COOKS/pasta-vegetarian/pastaveg_640x480.jpg",
-//            "http://www.parkdeanholidays.co.uk/resources/images/foodanddrink/foodMainImg.jpg",
-//            "https://media.istockphoto.com/photos/health-food-for-fitness-picture-id855098134?k=6&m=855098134&s=612x612&w=0&h=eIWWpYWKTz_z2ryYAo0Dd97igUZVExzl4AKRIhUrFj4="
-//    };
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,9 +135,6 @@ public class ViewRecipeActivity extends AppCompatActivity
 
             window.getSharedElementReturnTransition().setStartDelay(200);
         }
-
-        //String url = foodPhotos[new Random().nextInt(foodPhotos.length)];
-        //String url = foodPhotos[1];
 
         bindingPhoto.ablViewRecipe.addOnOffsetChangedListener(this);
 

@@ -96,6 +96,8 @@ public class MainActivity extends AppCompatActivity
 
     //Instance state IDs
     private static final String ALREADY_SHOWN_PERM_DIALOG = "ALREADY_SHOWN_PERM_DIALOG";
+    private static final String SEARCH_OPEN = "SEARCH_OPEN";
+    private static final String SEARCH_FILTER = "SEARCH_FILTER";
 
     //TODO remove later
     private boolean inserting = false;
@@ -105,12 +107,12 @@ public class MainActivity extends AppCompatActivity
         setTheme(R.style.HomeTheme);
         super.onCreate(savedInstanceState);
 
-        //setContentView(R.layout.activity_main);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         //Conditionally set RecyclerView layout manager depending on screen orientation
+        //Also ensure that landscape layout isn't used in split screen mode
         int orientation = getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE)
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE && !Utility.isMultiWindow(this))
             binding.rvwRecipes.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         else
             binding.rvwRecipes.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -146,8 +148,8 @@ public class MainActivity extends AppCompatActivity
 
         if (savedInstanceState != null) {
             alreadyShownPermDeniedDialog = savedInstanceState.getBoolean(ALREADY_SHOWN_PERM_DIALOG);
-            //searchOpen = savedInstanceState.getBoolean(SEARCH_OPEN);
-            //currentSearchFilter = savedInstanceState.getString(SEARCH_FILTER);
+            searchOpen = savedInstanceState.getBoolean(SEARCH_OPEN);
+            currentSearchFilter = savedInstanceState.getString(SEARCH_FILTER);
         }
 
         if (!inserting)
@@ -190,14 +192,12 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        if (searchOpen) {
+            searchItem.expandActionView();
+            searchView.setQuery(currentSearchFilter, false);
+        }
+
         return true;
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putBoolean(ALREADY_SHOWN_PERM_DIALOG, alreadyShownPermDeniedDialog);
     }
 
     private SearchView.OnQueryTextListener searchTextChangedListener = new SearchView.OnQueryTextListener() {
@@ -222,6 +222,15 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
     };
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(ALREADY_SHOWN_PERM_DIALOG, alreadyShownPermDeniedDialog);
+        outState.putBoolean(SEARCH_OPEN, searchOpen);
+        outState.putString(SEARCH_FILTER, currentSearchFilter);
+    }
 
     /**
      * Filters recipesList based on query from a searchview
@@ -428,10 +437,8 @@ public class MainActivity extends AppCompatActivity
                     displayedRecipesList = new ArrayList<>(updatedRecords);
                     notifyItemRangeInserted(0, updatedRecords.size());
                 }
-                else {
-                    displayedRecipesList = new ArrayList<>(updatedRecords);
-                    notifyItemRangeChanged(0, updatedRecords.size());
-                }
+                else
+                    animateTo(updatedRecords);
             }
         }
 
@@ -628,9 +635,10 @@ public class MainActivity extends AppCompatActivity
                         findViewById(android.R.id.navigationBarBackground),
                         Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
 
-                Pair[] transitions = {image, navbar};
-
-                options = ActivityOptions.makeSceneTransitionAnimation(this, transitions);
+                if (navbar.first != null)
+                    options = ActivityOptions.makeSceneTransitionAnimation(this, image, navbar);
+                else
+                    options = ActivityOptions.makeSceneTransitionAnimation(this, image);
                 startActivity(viewRecipe, options.toBundle());
                 return;
 

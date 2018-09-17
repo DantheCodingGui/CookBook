@@ -16,6 +16,7 @@ import android.view.View;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.model.ProviderContract;
+import com.danthecodinggui.recipes.view.MainActivity;
 
 /**
  * Set of miscellaneous methods without a link to any other class
@@ -198,6 +199,10 @@ public class Utility {
         resolver.insert(
                 ProviderContract.METHOD_URI,
                 values);
+    }
+
+    public static boolean isMultiWindow(Activity activity) {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && activity.isInMultiWindowMode();
     }
 
     public interface PermissionDialogListener {
