@@ -31,7 +31,7 @@
             <android.support.design.widget.CollapsingToolbarLayout
                 android:id="@+id/ctl_vw_recipe"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="150dp"
                 app:title="@{recipe.getTitle()}"
                 app:expandedTitleMarginBottom="5dp"
                 app:collapsedTitleTextAppearance="@font/open_sans_light"
@@ -44,7 +44,7 @@
                 <ImageView
                     android:id="@+id/ivw_toolbar_preview"
                     android:layout_width="match_parent"
-                    android:layout_height="256dp"
+                    android:layout_height="206dp"
                     android:scaleType="centerCrop"
                     android:fitsSystemWindows="true"
                     app:imageFilePath="@{recipe.getImageFilePath()}"
@@ -54,7 +54,7 @@
                 <!--Gradient mask to make back button more visible-->
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="70dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="top"
                     android:background="@drawable/top_scrim"
                     android:fitsSystemWindows="true"
@@ -63,7 +63,7 @@
                 <!--Gradient mask to make title text/tab buttons more visible-->
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
+                    android:layout_height="150dp"
                     android:layout_gravity="bottom"
                     android:layout_marginBottom="-57dp"
                     android:background="@drawable/bottom_scrim"
