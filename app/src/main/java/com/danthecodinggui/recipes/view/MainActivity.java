@@ -30,6 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 
@@ -83,8 +84,9 @@ public class MainActivity extends AppCompatActivity
 
     private boolean alreadyShownPermDeniedDialog = false;
 
-    private String currentSearchFilter;
+    private String lastSearchFilter;
     private boolean searchOpen = false;
+    private boolean restoringState = false;
 
     private GetRecipesLoader recipesLoader;
 
@@ -149,7 +151,7 @@ public class MainActivity extends AppCompatActivity
         if (savedInstanceState != null) {
             alreadyShownPermDeniedDialog = savedInstanceState.getBoolean(ALREADY_SHOWN_PERM_DIALOG);
             searchOpen = savedInstanceState.getBoolean(SEARCH_OPEN);
-            currentSearchFilter = savedInstanceState.getString(SEARCH_FILTER);
+            lastSearchFilter = savedInstanceState.getString(SEARCH_FILTER);
         }
 
         if (!inserting)
@@ -167,7 +169,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         final MenuItem searchItem = menu.findItem(R.id.menu_search);
-        SearchView searchView = (SearchView) searchItem.getActionView();
+        final SearchView searchView = (SearchView) searchItem.getActionView();
 
         searchView.setOnQueryTextListener(searchTextChangedListener);
 
@@ -192,9 +194,11 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        if (searchOpen) {
+        if (lastSearchFilter != null && !lastSearchFilter.isEmpty()) {
+            restoringState = true;
             searchItem.expandActionView();
-            searchView.setQuery(currentSearchFilter, false);
+            searchView.setQuery(lastSearchFilter, false);
+            searchView.clearFocus();
         }
 
         return true;
@@ -208,15 +212,25 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public boolean onQueryTextChange(String newText) {
+
+            if (restoringState && newText.isEmpty()) {
+                restoringState = false;
+                return true;
+            }
+
             final List<Recipe> filteredRecipes = Filter(recipesList, newText);
             recipesAdapter.animateTo(filteredRecipes);
-            binding.rvwRecipes.scrollToPosition(0);
 
-            currentSearchFilter = newText;
+            lastSearchFilter = newText;
 
             //Show message if search shows no results
-            if (filteredRecipes.size() == 0 && binding.txtNoItems.getVisibility() != View.VISIBLE)
+            if (filteredRecipes.size() == 0 && binding.txtNoItems.getVisibility() != View.VISIBLE) {
+                AlphaAnimation anim = new AlphaAnimation(0.f, 1.0f);
+                anim.setDuration(100);
+                anim.setStartOffset(200);
+                binding.txtSearchNoItems.startAnimation(anim);
                 binding.txtSearchNoItems.setVisibility(View.VISIBLE);
+            }
             else
                 binding.txtSearchNoItems.setVisibility(View.INVISIBLE);
             return true;
@@ -229,7 +243,7 @@ public class MainActivity extends AppCompatActivity
 
         outState.putBoolean(ALREADY_SHOWN_PERM_DIALOG, alreadyShownPermDeniedDialog);
         outState.putBoolean(SEARCH_OPEN, searchOpen);
-        outState.putString(SEARCH_FILTER, currentSearchFilter);
+        outState.putString(SEARCH_FILTER, lastSearchFilter);
     }
 
     /**
@@ -355,7 +369,7 @@ public class MainActivity extends AppCompatActivity
 
             recipesList = loadedRecipes;
             if (searchOpen)
-                searchTextChangedListener.onQueryTextChange(currentSearchFilter);
+                searchTextChangedListener.onQueryTextChange(lastSearchFilter);
             else
                 recipesAdapter.UpdateRecords(loadedRecipes);
 
@@ -613,7 +627,6 @@ public class MainActivity extends AppCompatActivity
             return;
 
         Intent viewRecipe = new Intent(this, ViewRecipeActivity.class);
-        ActivityOptions options;
 
         Bundle recipeBundle = new Bundle();
         recipeBundle.putParcelable(RECIPE_DETAIL_OBJECT, recipe);
@@ -622,26 +635,25 @@ public class MainActivity extends AppCompatActivity
 
         transitioningActivity = true;
 
-        if (Utility.atLeastLollipop()) {
-
-            if (sharedImageView != null) {
+        if (sharedImageView != null) {
+            if (Utility.atLeastLollipop()) {
 
                 //To have both the image and navbar as shared elements, must both pass Pairs and manually
                 //set transition name for image
                 viewRecipe.putExtra(IMAGE_TRANSITION_NAME, ViewCompat.getTransitionName(sharedImageView));
 
                 Pair<View, String> image = Pair.create((View)sharedImageView, ViewCompat.getTransitionName(sharedImageView));
-                Pair<View, String> navbar = Pair.create(
-                        findViewById(android.R.id.navigationBarBackground),
+                Pair<View, String> navBar = Pair.create(findViewById(android.R.id.navigationBarBackground),
                         Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
 
-                if (navbar.first != null)
-                    options = ActivityOptions.makeSceneTransitionAnimation(this, image, navbar);
+                ActivityOptions options;
+                if (navBar.first != null)
+                    options = ActivityOptions.makeSceneTransitionAnimation(this, image, navBar);
                 else
                     options = ActivityOptions.makeSceneTransitionAnimation(this, image);
+
                 startActivity(viewRecipe, options.toBundle());
                 return;
-
             }
         }
         //Should just start activity normally
