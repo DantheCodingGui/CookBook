@@ -82,47 +82,4 @@ public class AnimUtils {
             }
         }
     }
-
-    public static void revealAddActivity(Activity activity, View viewRoot, int x, int y) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            float finalRadius = (float) (Math.max(viewRoot.getWidth(), viewRoot.getHeight()) * 1.1);
-
-            // create the animator for this view (the start radius is zero)
-            Animator circularReveal = ViewAnimationUtils.createCircularReveal(viewRoot, x, y, 0, finalRadius);
-            circularReveal.setDuration(300);
-            circularReveal.setInterpolator(new AccelerateInterpolator());
-
-            // make the view visible and start the animation
-            viewRoot.setVisibility(View.VISIBLE);
-            circularReveal.start();
-        } else {
-            activity.finish();
-        }
-    }
-
-    public static boolean unRevealAddActivity(final Activity activity, final View viewRoot, int revealX, int revealY, boolean openMenuOpen) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            activity.finish();
-        } else {
-            float finalRadius = (float) (Math.max(viewRoot.getWidth(), viewRoot.getHeight()) * 1.1);
-            Animator circularReveal = ViewAnimationUtils.createCircularReveal(
-                    viewRoot, revealX, revealY, finalRadius, 0);
-
-            circularReveal.setDuration(300);
-            circularReveal.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    viewRoot.setVisibility(View.INVISIBLE);
-                    activity.finish();
-                }
-            });
-
-            circularReveal.start();
-
-            //Close menu if open
-            if (openMenuOpen)
-                return true;
-        }
-        return false;
-    }
 }

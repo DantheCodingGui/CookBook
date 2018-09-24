@@ -16,6 +16,7 @@
     <string name="txt_add_method_step">Steps</string>
     <string name="txt_ingredient_item">\u25CB %s</string>
     <string name="txt_method_step_item">%1$d. %2$s</string>
+    <string name="txt_kcal_per_person">%d Kcal Per Person</string>
     <string name="add_transition">add_recipe_transition</string>
     <string name="txt_search_no_recipes">Uh oh, can\'t seem to find that one...</string>
     <string name="search_hint">Search...</string>

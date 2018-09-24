@@ -28,7 +28,7 @@
         <activity
             android:name=".view.AddRecipeActivity"
             android:parentActivityName=".view.MainActivity"
-            android:theme="@style/HomeTheme.Transparent"
+            android:theme="@style/AddRecipeTheme"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity android:name=".view.CameraActivity"
             android:parentActivityName=".view.AddRecipeActivity"

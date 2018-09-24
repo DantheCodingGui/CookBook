@@ -1,99 +1,49 @@
 package com.danthecodinggui.recipes.view;
 
-import android.content.Intent;
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
 import android.databinding.DataBindingUtil;
-import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.RotateAnimation;
-import android.widget.EditText;
-import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityAddRecipeBinding;
-import com.danthecodinggui.recipes.msc.AnimUtils;
-import com.danthecodinggui.recipes.msc.NoScrollLinearLayout;
+import com.danthecodinggui.recipes.msc.StringUtils;
+import com.danthecodinggui.recipes.msc.Utility;
 
-import java.util.ArrayList;
-import java.util.List;
 
-import static com.danthecodinggui.recipes.msc.IntentConstants.EXTRA_CIRCULAR_REVEAL_X;
-import static com.danthecodinggui.recipes.msc.IntentConstants.EXTRA_CIRCULAR_REVEAL_Y;
 
-public class AddRecipeActivity extends AppCompatActivity {
+public class AddRecipeActivity extends AppCompatActivity implements
+        CaloriesPickerFragment.onCaloriesSetListener,
+        DurationPickerFragment.onDurationSetListener{
 
     ActivityAddRecipeBinding binding;
 
-    private int revealX, revealY;
+    private static final String FRAG_TAG_TIME = "FRAG_TAG_TIME";
+    private static final String FRAG_TAG_KCAL = "FRAG_TAG_KCAL";
+
+    private static final int FRAG_TARGET_TIME = 1;
+
+    private static final String DURATION = "DURATION";
+    private static final String KCAL = "KCAL";
 
     private boolean openMenuOpen = false;
 
-    private static final int LIST_INGREDIENTS = 0;
-    private static final int LIST_METHOD = 1;
-
-    private IngredientsViewAdapter ingredientsAdapter;
-    private List<String> ingredientsList;
-
-    private MethodViewAdapter methodAdapter;
-    private List<String> methodList;
+    private int recipeDuration;
+    private int recipeKcalPerPerson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_add_recipe);
-        //TODO maybe make a layout without photo to support devices without a camera
-
-
-        //TODO Dude, you need to change these from textviews to edit texts, people will want to edit these at some point
-
-        ingredientsAdapter = new IngredientsViewAdapter();
-        ingredientsList = new ArrayList<>();
-        binding.rvwAddIngredients.setAdapter(ingredientsAdapter);
-        binding.rvwAddIngredients.setLayoutManager(new NoScrollLinearLayout(getApplicationContext()));
-
-        methodAdapter = new MethodViewAdapter();
-        methodList = new ArrayList<>();
-        binding.rvwAddMethod.setAdapter(methodAdapter);
-        binding.rvwAddMethod.setLayoutManager(new NoScrollLinearLayout(getApplicationContext()));
-
-        binding.incAddIngredient.etxtAddIngredient.setOnKeyListener(newIngredientListener);
-
-        binding.incAddStep.etxtAddStep.setOnKeyListener(newStepListener);
-
-        final Intent intent = getIntent();
-
-        if (savedInstanceState == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-                intent.hasExtra(EXTRA_CIRCULAR_REVEAL_X) &&
-                intent.hasExtra(EXTRA_CIRCULAR_REVEAL_Y)) {
-            //binding.addRoot.setVisibility(View.INVISIBLE);
-
-            revealX = intent.getIntExtra(EXTRA_CIRCULAR_REVEAL_X, 0);
-            revealY = intent.getIntExtra(EXTRA_CIRCULAR_REVEAL_Y, 0);
-
-            ViewTreeObserver viewTreeObserver = binding.addRoot.getViewTreeObserver();
-            if (viewTreeObserver.isAlive()) {
-                viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        AnimUtils.revealAddActivity(AddRecipeActivity.this, binding.addRoot, revealX, revealY);
-                        binding.addRoot.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    }
-                });
-            }
-        }
-        else {
-            binding.addRoot.setVisibility(View.VISIBLE);
-        }
 
         setSupportActionBar(binding.tbarAdd);
         if (getSupportActionBar() != null) {
@@ -101,85 +51,51 @@ public class AddRecipeActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        SetupImageView();
-    }
+        if (savedInstanceState != null) {
+            recipeDuration = savedInstanceState.getInt(DURATION);
+            recipeKcalPerPerson = savedInstanceState.getInt(KCAL);
+            if (recipeDuration != 0)
+                onDurationSet(recipeDuration);
+            if (recipeKcalPerPerson != 0)
+                onCaloriesSet(recipeKcalPerPerson);
 
-    private void SetupImageView() {
+            DurationPickerFragment timeFrag = (DurationPickerFragment) getFragmentManager().findFragmentByTag(FRAG_TAG_TIME);
+            CaloriesPickerFragment kcalFrag = (CaloriesPickerFragment) getFragmentManager().findFragmentByTag(FRAG_TAG_KCAL);
+            if (timeFrag != null)
+                SetDurationFragListener(timeFrag);
+            if (kcalFrag != null)
+                SetKcalFragListener(kcalFrag);
+        }
 
+        SetupLayoutAnimator();
+
+        Glide.with(this)
+                .load(R.drawable.sample_image)
+                .into(binding.imvAddImage);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                unRevealActivity();
-                break;
-        }
-        return true;
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(DURATION, recipeDuration);
+        outState.putInt(KCAL, recipeKcalPerPerson);
     }
 
-    @Override
-    public void onBackPressed() {
-        unRevealActivity();
+    /**
+     * Setup image enter/exit animation in toolbar
+     */
+    private void SetupLayoutAnimator() {
+        ObjectAnimator slideDown = (ObjectAnimator) AnimatorInflater.loadAnimator(this, R.animator.slide_down_animator);
+
+        Animator slideUp = AnimatorInflater.loadAnimator(this, R.animator.slide_up_animator);
+
+        LayoutTransition imageSlider = new LayoutTransition();
+        imageSlider.setAnimator(LayoutTransition.APPEARING, slideDown);
+        imageSlider.setAnimator(LayoutTransition.DISAPPEARING, slideUp);
+
+        binding.llyToolbarContainer.setLayoutTransition(imageSlider);
     }
-
-    private void unRevealActivity() {
-        if (AnimUtils.unRevealAddActivity(this, binding.addRoot, revealX, revealY, openMenuOpen))
-            AnimateFabMenu(null);
-    }
-
-    private void addItem(int listFlag) {
-
-        EditText input;
-        List<String> list;
-        RecyclerView.Adapter adapter;
-
-        if (listFlag == LIST_INGREDIENTS) {
-            input = binding.incAddIngredient.etxtAddIngredient;
-            list = ingredientsList;
-            adapter = ingredientsAdapter;
-        }
-        else {
-            input = binding.incAddStep.etxtAddStep;
-            list = methodList;
-            adapter = methodAdapter;
-        }
-
-        String ingredient = input.getText().toString();
-        list.add(ingredient);
-        adapter.notifyItemChanged(list.size());
-
-        input.getText().clear();
-
-        input.clearFocus();
-        input.requestFocus();
-    }
-
-    TextView.OnKeyListener newIngredientListener = new TextView.OnKeyListener() {
-        @Override
-        public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-            //Detect when enter pressed while in edittext
-            if (keyEvent.getAction() == KeyEvent.ACTION_DOWN
-                && keyCode == KeyEvent.KEYCODE_ENTER) {
-                addItem(LIST_INGREDIENTS);
-                return true;
-            }
-            return false;
-        }
-    };
-
-    TextView.OnKeyListener newStepListener = new TextView.OnKeyListener() {
-        @Override
-        public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-            //Detect when enter pressed while in edittext
-            if (keyEvent.getAction() == KeyEvent.ACTION_DOWN
-                    && keyCode == KeyEvent.KEYCODE_ENTER) {
-                addItem(LIST_METHOD);
-                return true;
-            }
-            return false;
-        }
-    };
 
     public void AnimateFabMenu(View view) {
         if (openMenuOpen) {
@@ -239,61 +155,60 @@ public class AddRecipeActivity extends AppCompatActivity {
         menuItem.startAnimation(set);
     }
 
-    class IngredientsViewAdapter extends RecyclerView.Adapter<IngredientsViewAdapter.IngredientViewHolder> {
-
-        @Override
-        public IngredientViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new IngredientViewHolder(LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.ingredient_item, parent, false));
+    public void addPhoto(View view) {
+        if (binding.imvAddImage.getVisibility() == View.GONE) {
+            binding.imvAddImage.setVisibility(View.VISIBLE);
+            binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
+            binding.clyAddTbar.setElevation(10);
         }
-
-        @Override
-        public void onBindViewHolder(IngredientViewHolder holder, int position) {
-            holder.ingredient.setText(getString(R.string.txt_ingredient_item, ingredientsList.get(position)));
-        }
-
-        @Override
-        public int getItemCount() {
-            return ingredientsList.size();
-        }
-
-        class IngredientViewHolder extends RecyclerView.ViewHolder {
-
-            TextView ingredient;
-
-            IngredientViewHolder(View itemView) {
-                super(itemView);
-                ingredient = itemView.findViewById(R.id.txt_method_item);
-            }
+        else {
+            binding.imvAddImage.setVisibility(View.GONE);
+            binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
+            binding.clyAddTbar.setElevation(Utility.dpToPx(this, 10));
         }
     }
 
-    class MethodViewAdapter extends RecyclerView.Adapter<MethodViewAdapter.StepViewHolder> {
+    public void AddKcal(View view) {
 
-        @Override
-        public StepViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new StepViewHolder(LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.method_item, parent, false));
-        }
+        CaloriesPickerFragment kcalFrag = new CaloriesPickerFragment();
+        SetKcalFragListener(kcalFrag);
+        kcalFrag.show(getFragmentManager(), FRAG_TAG_KCAL);
+    }
 
-        @Override
-        public void onBindViewHolder(StepViewHolder holder, int position) {
-            holder.step.setText(getString(R.string.txt_method_step_item, methodList.get(position)));
-        }
+    /**
+     * Opens duration picker dialog
+     * @param view
+     */
+    public void AddTime(View view) {
 
-        @Override
-        public int getItemCount() {
-            return methodList.size();
-        }
+        DurationPickerFragment timeFrag = new DurationPickerFragment();
+        SetDurationFragListener(timeFrag);
 
-        class StepViewHolder extends RecyclerView.ViewHolder {
+        timeFrag.show(getFragmentManager(), FRAG_TAG_TIME);
+    }
 
-            TextView step;
+    private void SetDurationFragListener(DurationPickerFragment timeFrag) {
+        timeFrag.SetDurationListener(this);
+    }
 
-            StepViewHolder(View itemView) {
-                super(itemView);
-                step = itemView.findViewById(R.id.txt_method_item);
-            }
-        }
+    private void SetKcalFragListener(CaloriesPickerFragment kcalFrag) {
+        kcalFrag.SetCaloriesListener(this);
+    }
+
+    @Override
+    public void onCaloriesSet(int kcal) {
+        binding.butKcal.setVisibility(View.VISIBLE);
+
+        String kcalFormatted = getResources().getString(R.string.txt_kcal_per_person, kcal);
+        binding.txtKcal.setText(kcalFormatted);
+
+        recipeKcalPerPerson = kcal;
+    }
+
+    @Override
+    public void onDurationSet(int minutes) {
+        binding.butTime.setVisibility(View.VISIBLE);
+        binding.txtTime.setText(StringUtils.minsToHourMins(minutes));
+        recipeDuration = minutes;
     }
 }

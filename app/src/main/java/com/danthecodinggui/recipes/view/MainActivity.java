@@ -319,17 +319,6 @@ public class MainActivity extends AppCompatActivity
 
     public void AddRecipe(View view) {
         Intent addRecipe = new Intent(getApplicationContext(), AddRecipeActivity.class);
-
-        if (Utility.atLeastLollipop()) {
-            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this, Pair.create(view, getString(R.string.add_transition)));
-            int revealX = (int) (view.getX() + view.getWidth() / 2);
-            int revealY = (int) (view.getY() + view.getHeight() / 2);
-
-            addRecipe.putExtra(IntentConstants.EXTRA_CIRCULAR_REVEAL_X, revealX);
-            addRecipe.putExtra(IntentConstants.EXTRA_CIRCULAR_REVEAL_Y, revealY);
-            ActivityCompat.startActivity(MainActivity.this, addRecipe, options.toBundle());
-            return;
-        }
         startActivity(addRecipe);
     }
 
