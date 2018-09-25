@@ -7,10 +7,12 @@ import android.os.Bundle;
 import android.app.AlertDialog;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.danthecodinggui.recipes.R;
 
+/**
+ * Shows simple dialog to enter number of kcal per person for a recipe
+ */
 public class CaloriesPickerFragment extends DialogFragment {
 
     private onCaloriesSetListener callback;
@@ -25,15 +27,15 @@ public class CaloriesPickerFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                .setTitle("Calories Per Person")
+                .setTitle(R.string.dialog_kcal_title)
                 .setView(R.layout.fragment_kcal_picker)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         callback.onCaloriesSet(Integer.parseInt(editKcal.getText().toString()));
                     }
                 })
-                .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {}
                 })

@@ -31,4 +31,8 @@
     <string name="transition_image_preview">CardToView_image_preview</string>
 
     <string name="empty" />
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">CANCEL</string>
+    <string name="dialog_kcal_title">Calories Per Person</string>
+    <string name="etxt_hint_addTitle">Name</string>
 </resources>

@@ -55,7 +55,8 @@
                         app:layout_constraintHorizontal_bias="0.0"
                         android:singleLine="true"
                         android:background="@android:color/transparent"
-                        android:hint="Name"
+                        android:hint="@string/etxt_hint_addTitle"
+                        android:inputType="textNoSuggestions|textVisiblePassword"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -89,7 +90,6 @@
                             android:src="@drawable/ic_edit_textview"
                             android:gravity="bottom"
                             android:layout_margin="3dp"/>
-
                     </LinearLayout>
 
                     <LinearLayout
