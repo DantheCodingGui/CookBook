@@ -23,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/image/ic_edit_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/content/ic_remove_circle_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -33,12 +33,12 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="color" value="636363" />
-                            <entry key="height" value="10" />
-                            <entry key="outputName" value="ic_edit_textview" />
+                            <entry key="color" value="ba1317" />
+                            <entry key="height" value="15" />
+                            <entry key="outputName" value="ic_remove_textview" />
                             <entry key="overrideSize" value="true" />
                             <entry key="sourceFile" value="C:\Users\Dan" />
-                            <entry key="width" value="10" />
+                            <entry key="width" value="15" />
                           </map>
                         </option>
                       </PersistentState>

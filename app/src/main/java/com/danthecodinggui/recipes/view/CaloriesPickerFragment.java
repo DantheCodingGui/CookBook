@@ -19,6 +19,9 @@ public class CaloriesPickerFragment extends DialogFragment {
 
     private EditText editKcal;
 
+    /**
+     * Sets the callback method to be called when the dialog has a result
+     */
     public void SetCaloriesListener(onCaloriesSetListener callback) {
         this.callback = callback;
     }
@@ -32,7 +35,9 @@ public class CaloriesPickerFragment extends DialogFragment {
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        callback.onCaloriesSet(Integer.parseInt(editKcal.getText().toString()));
+                        String kcal = editKcal.getText().toString();
+                        if (!kcal.equals(""))
+                            callback.onCaloriesSet(Integer.parseInt(kcal));
                     }
                 })
                 .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
@@ -53,7 +58,17 @@ public class CaloriesPickerFragment extends DialogFragment {
         editKcal = getDialog().findViewById(R.id.etxt_add_kcal);
     }
 
+    /**
+     * Callback interface to alert implementors when the CaloriesPickerFragment has a result.<br/>
+     * IMPORTANT: implementors must call {@link #SetCaloriesListener(onCaloriesSetListener) SetCaloriesListener}
+     * when instantiating the fragment
+     */
     public interface onCaloriesSetListener {
+
+        /**
+         * Called when the DialogFragment's 'OK' is clicked, ie. it has a result
+         * @param kcal  The quantity of calories entered in the dialog ie. the result of the dialog
+         */
         void onCaloriesSet(int kcal);
     }
 }
