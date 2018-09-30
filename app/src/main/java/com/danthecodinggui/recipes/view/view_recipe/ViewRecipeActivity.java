@@ -202,8 +202,8 @@ public class ViewRecipeActivity extends AppCompatActivity
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         List<String> tabTitles = new ArrayList<>(Arrays.asList(
-                getString(R.string.tab_ingredients),
-                getString(R.string.tab_method)));
+                getString(R.string.ingredients),
+                getString(R.string.method)));
 
         tabLayout.setupWithViewPager(viewPager);
 

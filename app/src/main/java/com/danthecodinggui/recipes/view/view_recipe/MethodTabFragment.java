@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.FragmentMethodBinding;
-import com.danthecodinggui.recipes.databinding.MethodItemBinding;
+import com.danthecodinggui.recipes.databinding.ViewMethodItemBinding;
 import com.danthecodinggui.recipes.model.object_models.MethodStep;
 import com.danthecodinggui.recipes.view.Loaders.GetMethodStepsLoader;
 
@@ -101,7 +101,7 @@ public class MethodTabFragment extends Fragment {
         @Override
         public StepViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            return new StepViewHolder(MethodItemBinding.inflate(inflater, parent, false));
+            return new StepViewHolder(ViewMethodItemBinding.inflate(inflater, parent, false));
         }
 
         @Override
@@ -117,9 +117,9 @@ public class MethodTabFragment extends Fragment {
 
         class StepViewHolder extends RecyclerView.ViewHolder {
 
-            MethodItemBinding binding;
+            ViewMethodItemBinding binding;
 
-            StepViewHolder(MethodItemBinding binding) {
+            StepViewHolder(ViewMethodItemBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
             }

@@ -2,13 +2,13 @@
     <string name="app_name">CookBook</string>
 
 
-    <string name="tab_ingredients">Ingredients</string>
-    <string name="tab_method">Method</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="method">Method</string>
 
     <string name="txt_time_to_make"></string>
     <string name="search_title">Search Recipes</string>
     <string name="main_card_transition_name">transition_card</string>
-    <string name="txt_add_photo">Add Photo</string>
+    <string name="txt_add_image">Add Photo</string>
     <string name="txt_add_time">Add Time</string>
     <string name="txt_add_kcal">Add Calorie Count</string>
     <string name="title_hint">Name</string>
@@ -35,4 +35,7 @@
     <string name="dialog_cancel">CANCEL</string>
     <string name="dialog_kcal_title">Calories Per Person</string>
     <string name="etxt_hint_addTitle">Name</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -17,7 +17,7 @@ import android.view.ViewGroup;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.FragmentIngredientsBinding;
-import com.danthecodinggui.recipes.databinding.IngredientItemBinding;
+import com.danthecodinggui.recipes.databinding.ViewIngredientItemBinding;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.msc.Utility;
 import com.danthecodinggui.recipes.view.Loaders.GetIngredientsLoader;
@@ -97,7 +97,7 @@ public class IngredientsTabFragment extends Fragment {
         @Override
         public IngredientViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            return new IngredientViewHolder(IngredientItemBinding.inflate(inflater, parent, false));
+            return new IngredientViewHolder(ViewIngredientItemBinding.inflate(inflater, parent, false));
         }
 
         @Override
@@ -115,9 +115,9 @@ public class IngredientsTabFragment extends Fragment {
 
         class IngredientViewHolder extends RecyclerView.ViewHolder {
 
-            IngredientItemBinding binding;
+            ViewIngredientItemBinding binding;
 
-            IngredientViewHolder(IngredientItemBinding binding) {
+            IngredientViewHolder(ViewIngredientItemBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
             }

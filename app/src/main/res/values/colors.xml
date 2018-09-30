@@ -17,4 +17,5 @@
     <color name="grey_text">#757575</color>
     <color name="colorIngredients">#1A237E</color>
     <color name="colorMethodStep">#E65100</color>
+    <color name="scrimGrey">#77000000</color>
 </resources>
