@@ -7,11 +7,14 @@ import android.animation.ObjectAnimator;
 import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,6 +53,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private static final String DURATION = "DURATION";
     private static final String KCAL = "KCAL";
 
+    //Various Flags
     private boolean openMenuOpen = false;
 
     private int recipeDuration;
@@ -95,19 +99,14 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         SetupLayoutAnimator();
 
-        //TODO: remove later and replace with data binding variable
-        Glide.with(this)
-                .load(R.drawable.sample_image)
-                .into(binding.imvAddImage);
-
         newIngredients = new ArrayList<>();
         newMethod = new ArrayList<>();
 
-        //TODO move to dedicated class
         binding.rvwNewIngredients.setLayoutManager(new LinearLayoutManager(this));
         ingAdapter = new IngredientsAddAdapter();
         binding.rvwNewIngredients.setAdapter(ingAdapter);
 
+        //Setup add image photo sheet
         photoSheetBehaviour = BottomSheetBehavior.from(binding.includeImageSheet.addImage);
         photoSheetBehaviour.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -121,30 +120,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
         });
-
-        newIngredients.add(new Ingredient("a"));
-//        newIngredients.add(new Ingredient("b"));
-//        newIngredients.add(new Ingredient("c"));
-//        newIngredients.add(new Ingredient("d"));
-//        newIngredients.add(new Ingredient("e"));
-//        newIngredients.add(new Ingredient("f"));
-//        newIngredients.add(new Ingredient("g"));
-//        newIngredients.add(new Ingredient("h"));
-//        newIngredients.add(new Ingredient("i"));
-//        newIngredients.add(new Ingredient("j"));
-//        newIngredients.add(new Ingredient("k"));
-//        newIngredients.add(new Ingredient("a"));
-//        newIngredients.add(new Ingredient("b"));
-//        newIngredients.add(new Ingredient("c"));
-//        newIngredients.add(new Ingredient("d"));
-//        newIngredients.add(new Ingredient("e"));
-//        newIngredients.add(new Ingredient("f"));
-//        newIngredients.add(new Ingredient("g"));
-//        newIngredients.add(new Ingredient("h"));
-//        newIngredients.add(new Ingredient("i"));
-//        newIngredients.add(new Ingredient("j"));
-//        newIngredients.add(new Ingredient("k"));
-        ingAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -269,7 +244,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         menuItem.startAnimation(set);
     }
 
-    public void addPhoto(View view) {
+    public void addImage(View view) {
 //        if (binding.imvImageContainer.getVisibility() == View.GONE) {
 //            binding.imvImageContainer.setVisibility(View.VISIBLE);
 //            binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
@@ -320,9 +295,13 @@ public class AddRecipeActivity extends AppCompatActivity implements
     }
 
     public void RemoveImage(View view) {
-        binding.imvImageContainer.setVisibility(View.GONE);
-        binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
-        binding.clyAddTbar.setElevation(Utility.dpToPx(this, 10));
+        if (binding.imvImageContainer.getVisibility() == View.VISIBLE) {
+            binding.imvImageContainer.setVisibility(View.GONE);
+            binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
+            binding.clyAddTbar.setElevation(Utility.dpToPx(this, 10));
+
+            //Todo also remove any references to actual image objects
+        }
     }
 
     /**
@@ -347,10 +326,10 @@ public class AddRecipeActivity extends AppCompatActivity implements
         binding.imvNoIngredients.setVisibility(View.GONE);
         binding.rvwNewIngredients.setVisibility(View.VISIBLE);
 
-//        int rvwSize = binding.cdlyAddRoot.getMeasuredHeight() - Utility.dpToPx(this, 150) - binding.txtIngredientsTitle.getMeasuredHeight() - binding.etxtAddIngredient.getMeasuredHeight();
-//
-//        binding.rvwNewIngredients.setLayoutParams(new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-//                rvwSize));
+        binding.rvwNewIngredients.setLayoutFrozen(false);
+
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
+        params.height = 0;
 
         binding.crdvIngredients.setElevation(Utility.dpToPx(this, 10));
         binding.crdvMethod.setVisibility(View.GONE);
@@ -373,6 +352,28 @@ public class AddRecipeActivity extends AppCompatActivity implements
             binding.imvNoIngredients.setVisibility(View.VISIBLE);
             binding.rvwNewIngredients.setVisibility(View.GONE);
         }
+
+        //Scroll to first ingredient and then freeze recylerview (as its in retracted state)
+        binding.rvwNewIngredients.smoothScrollToPosition(0);
+
+        //If RecyclerView already scrolled to the top
+        if (((LinearLayoutManager) binding.rvwNewIngredients.getLayoutManager())
+                .findFirstCompletelyVisibleItemPosition() == 0)
+            binding.rvwNewIngredients.setLayoutFrozen(true);
+        else {
+            binding.rvwNewIngredients.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                        binding.rvwNewIngredients.setLayoutFrozen(true);
+                        binding.rvwNewIngredients.removeOnScrollListener(this);
+                    }
+                }
+            });
+        }
+
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
+        params.height = binding.rvwNewIngredients.getHeight();
 
         binding.crdvIngredients.setElevation(Utility.dpToPx(this, 3));
         binding.llyToolbarContainer.setVisibility(View.VISIBLE);
@@ -406,6 +407,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         Ingredient temp = new Ingredient(ingredientName);
         newIngredients.add(temp);
         ingAdapter.notifyItemInserted(newIngredients.size() - 1);
+        binding.rvwNewIngredients.smoothScrollToPosition(newIngredients.size() - 1);
 
         binding.etxtAddIngredient.setText("");
     }
@@ -416,13 +418,15 @@ public class AddRecipeActivity extends AppCompatActivity implements
         @Override
         public IngredientViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            return new IngredientViewHolder(AddIngredientItemBinding.inflate(inflater, parent, false));
+            AddIngredientItemBinding binding = AddIngredientItemBinding.inflate(inflater, parent, false);
+            return new IngredientViewHolder(binding);
         }
 
         @Override
         public void onBindViewHolder(IngredientViewHolder holder, int position) {
             Ingredient ingredient = newIngredients.get(position);
             holder.bind(ingredient);
+
         }
 
         @Override

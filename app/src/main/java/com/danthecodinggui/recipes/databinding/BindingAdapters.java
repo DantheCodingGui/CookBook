@@ -24,15 +24,15 @@ import java.io.File;
 public class BindingAdapters {
 
     /**
-     * Loads an image into an imageView from a local filepath
+     * Loads an image into an imageView from a local filepath </br>
+     * NOTE: Cannot use file path and url in the same view, will prioritise file path
      * @param imageFilePath The path to the image
+     * @param imageUrl The URL of an image
      * @param onLoadedListener A callback to be used for any actions once the image is loaded
      */
-    @BindingAdapter(value = {"imageFilePath", "onLoadedListener"}, requireAll = false)
-    public static void setImageResource(final ImageView view, String imageFilePath, RequestListener<Drawable> onLoadedListener) {
+    @BindingAdapter(value = {"imageFilePath", "imageUrl", "onLoadedListener"}, requireAll = false)
+    public static void setImageResource(final ImageView view, String imageFilePath, String imageUrl, RequestListener<Drawable> onLoadedListener) {
 
-        //Get Uri from filepath
-        Uri photoUri = Uri.fromFile(new File(imageFilePath));
 
         //Load an image (local storage) into an ImageView from a Uri
 
@@ -42,11 +42,23 @@ public class BindingAdapters {
                 .dontTransform()
                 .error(R.drawable.ic_imageload_error);
 
-        Glide.with(context)
-                .setDefaultRequestOptions(options)
-                .load(photoUri)
-                .listener(onLoadedListener)
-                .into(view);
+        if (imageFilePath != null) {
+            //Get Uri from filepath
+            Uri imageUri = Uri.fromFile(new File(imageFilePath));
+
+            Glide.with(context)
+                    .setDefaultRequestOptions(options)
+                    .load(imageUri)
+                    .listener(onLoadedListener)
+                    .into(view);
+        }
+        else if (imageUrl != null) {
+            Glide.with(context)
+                    .setDefaultRequestOptions(options)
+                    .load(imageUrl)
+                    .listener(onLoadedListener)
+                    .into(view);
+        }
 
     }
 

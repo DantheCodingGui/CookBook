@@ -3,6 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable name="imagePath" type="String"/>
+    </data>
 
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -70,6 +73,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
+                        app:imageUrl="@{imagePath}"
                         tools:src="@drawable/sample_image" />
                 </android.support.constraint.ConstraintLayout>
 
@@ -181,17 +185,20 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <com.danthecodinggui.recipes.msc.NoTouchRecyclerView
+                    <android.support.v7.widget.RecyclerView
                         android:id="@+id/rvw_new_ingredients"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
+                        android:layout_marginTop="70dp"
+                        android:overScrollMode="never"
                         android:padding="10dp"
                         android:visibility="gone"
-                        android:overScrollMode="never"
                         app:layout_constraintBottom_toTopOf="@+id/etxt_add_ingredient"
                         app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/txt_ingredients_title" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.094" />
 
                     <ImageView
                         android:id="@+id/imv_no_ingredients"
@@ -206,12 +213,14 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/txt_ingredients_title" />
 
-                    <Button
+                    <ImageButton
                         android:id="@+id/but_add_ingredient"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="add"
+                        android:layout_marginBottom="1dp"
+                        android:background="@android:color/transparent"
                         android:onClick="AddIngredient"
+                        android:src="@drawable/ic_add_light"
                         android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent" />
@@ -221,10 +230,13 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:visibility="gone"
+                        android:background="@drawable/rounded_corner_edittext"
+                        android:padding="10dp"
+                        android:singleLine="true"
+                        android:hint="@string/etxt_hint_addIngredient"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/but_add_ingredient"
                         app:layout_constraintStart_toStartOf="parent" />
-
                 </android.support.constraint.ConstraintLayout>
             </android.support.v7.widget.CardView>
 
@@ -309,7 +321,7 @@
             app:fabSize="mini"
             android:layout_margin="70dp"
             android:src="@drawable/ic_image"
-            android:onClick="addPhoto" />
+            android:onClick="addImage" />
         <TextView
             android:id="@+id/txt_add_photo"
             style="@style/FabTag"
