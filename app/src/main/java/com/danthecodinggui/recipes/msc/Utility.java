@@ -14,6 +14,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.model.ProviderContract;
@@ -211,6 +213,14 @@ public class Utility {
     public static int dpToPx(Context context, int dp) {
         Resources res = context.getResources();
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, res.getDisplayMetrics());
+    }
+
+    public static void setKeyboardVisibility(Context context, View view, boolean shouldShow) {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        if (shouldShow)
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+        else
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     public interface PermissionDialogListener {

@@ -1,35 +1,29 @@
 package com.danthecodinggui.recipes.view;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.app.AlertDialog;
-import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
 import com.danthecodinggui.recipes.R;
+import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.msc.Utility;
 
-/**
- * Shows simple dialog to enter number of kcal per person for a recipe
- */
-public class CaloriesPickerFragment extends DialogFragment {
+import static com.danthecodinggui.recipes.msc.IntentConstants.INGREDIENT_OBJECT;
 
-    private onCaloriesSetListener callback;
+public class EditIngredientFragment extends DialogFragment {
 
-    private EditText editKcal;
+    private onIngredientEditedListener callback;
 
-    /**
-     * Sets the callback method to be called when the dialog has a result
-     */
-    public void SetCaloriesListener(onCaloriesSetListener callback) {
+    private EditText editIngredient;
+
+    public void SetIngredientsListener(onIngredientEditedListener callback) {
         this.callback = callback;
     }
 
@@ -37,22 +31,23 @@ public class CaloriesPickerFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.dialog_kcal_title)
-                .setView(R.layout.fragment_kcal_picker)
+                .setView(R.layout.fragment_edit_ingredient)
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        String kcal = editKcal.getText().toString();
-                        callback.onCaloriesSet(Integer.parseInt(kcal));
+                        String editedIngredient = editIngredient.getText().toString();
+                        callback.onIngredientEdited(editedIngredient);
                     }
                 })
                 .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Utility.setKeyboardVisibility(getActivity(), editKcal, false);
+                        Utility.setKeyboardVisibility(getActivity(), editIngredient, false);
                     }
                 })
                 .create();
+
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         return dialog;
     }
@@ -61,9 +56,15 @@ public class CaloriesPickerFragment extends DialogFragment {
     public void onStart() {
         super.onStart();
 
-        editKcal = getDialog().findViewById(R.id.etxt_add_kcal);
-        Utility.setKeyboardVisibility(getActivity(), editKcal, true);
-        editKcal.addTextChangedListener(new TextWatcher() {
+        Bundle args = getArguments();
+        Ingredient i = args.getParcelable(INGREDIENT_OBJECT);
+
+        editIngredient = getDialog().findViewById(R.id.etxt_edit_ingredient);
+        editIngredient.setText(i.getIngredientText());
+        editIngredient.setSelection(editIngredient.getText().length());
+
+        Utility.setKeyboardVisibility(getActivity(), editIngredient, true);
+        editIngredient.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
@@ -75,8 +76,6 @@ public class CaloriesPickerFragment extends DialogFragment {
             @Override
             public void afterTextChanged(Editable editable) {}
         });
-
-        CheckButtonEnabled(editKcal.getText().toString());
     }
 
     /**
@@ -91,17 +90,18 @@ public class CaloriesPickerFragment extends DialogFragment {
             positiveButton.setEnabled(true);
     }
 
+
     /**
-     * Callback interface to alert implementors when the CaloriesPickerFragment has a result.<br/>
-     * IMPORTANT: implementors must call {@link #SetCaloriesListener(onCaloriesSetListener) SetCaloriesListener}
+     * Callback interface to alert implementors when the EditIngredientFragment has a result.<br/>
+     * IMPORTANT: implementors must call {@link #SetIngredientsListener(onIngredientEditedListener) SetCaloriesListener}
      * when instantiating the fragment
      */
-    public interface onCaloriesSetListener {
+    public interface onIngredientEditedListener {
 
         /**
          * Called when the DialogFragment's 'OK' is clicked, ie. it has a result
-         * @param kcal  The quantity of calories entered in the dialog ie. the result of the dialog
+         * @param ingredientName  The new name of the ingredient
          */
-        void onCaloriesSet(int kcal);
+        void onIngredientEdited(String ingredientName);
     }
 }

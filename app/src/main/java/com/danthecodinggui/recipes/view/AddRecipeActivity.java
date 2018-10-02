@@ -1,12 +1,12 @@
 package com.danthecodinggui.recipes.view;
 
-import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
-import android.animation.TimeInterpolator;
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
+import android.renderscript.ScriptGroup;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
@@ -17,17 +17,14 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.transition.TransitionManager;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
-import android.widget.Toast;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityAddRecipeBinding;
@@ -39,6 +36,8 @@ import com.danthecodinggui.recipes.msc.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.danthecodinggui.recipes.msc.IntentConstants.INGREDIENT_OBJECT;
 
 
 /**
@@ -52,6 +51,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
     private static final String FRAG_TAG_TIME = "FRAG_TAG_TIME";
     private static final String FRAG_TAG_KCAL = "FRAG_TAG_KCAL";
+    private static final String FRAG_TAG_EDIT_INGREDIENT = "FRAG_TAG_EDIT_INGREDIENT";
 
     //Instance State Tags
     private static final String DURATION = "DURATION";
@@ -285,10 +285,10 @@ public class AddRecipeActivity extends AppCompatActivity implements
     }
 
     public void addImage(View view) {
-//        if (binding.imvImageContainer.getVisibility() == View.GONE) {
-//            binding.imvImageContainer.setVisibility(View.VISIBLE);
-//            binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
-//            binding.clyAddTbar.setElevation(10);
+//        if (holderBinding.imvImageContainer.getVisibility() == View.GONE) {
+//            holderBinding.imvImageContainer.setVisibility(View.VISIBLE);
+//            holderBinding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
+//            holderBinding.clyAddTbar.setElevation(10);
 //        }
 
         photoSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -432,12 +432,11 @@ public class AddRecipeActivity extends AppCompatActivity implements
         Slide anim = new Slide();
         anim.addTarget(binding.fabAddMenu);
 
+        //Reset elevation AFTER size reduction to avoid toolbar and card cross-fading
         final LayoutTransition transition = binding.ctlyIngredientsContainer.getLayoutTransition();
         transition.addTransitionListener(new LayoutTransition.TransitionListener() {
             @Override
-            public void startTransition(LayoutTransition layoutTransition, ViewGroup viewGroup, View view, int i) {
-
-            }
+            public void startTransition(LayoutTransition layoutTransition, ViewGroup viewGroup, View view, int i) {}
 
             @Override
             public void endTransition(LayoutTransition layoutTransition, ViewGroup viewGroup, View view, int i) {
@@ -488,10 +487,47 @@ public class AddRecipeActivity extends AppCompatActivity implements
         }
 
         @Override
-        public void onBindViewHolder(IngredientViewHolder holder, int position) {
+        public void onBindViewHolder(IngredientViewHolder holder, final int position) {
             Ingredient ingredient = newIngredients.get(position);
             holder.bind(ingredient);
 
+            holder.holderBinding.getRoot().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (ingredientsExpanded) {
+                        EditIngredientFragment kcalFrag = new EditIngredientFragment();
+                        kcalFrag.SetIngredientsListener(new EditIngredientFragment.onIngredientEditedListener() {
+                            @Override
+                            public void onIngredientEdited(String ingredientName) {
+                                newIngredients.get(position).setIngredientText(ingredientName);
+                                ingAdapter.notifyItemChanged(position);
+                            }
+                        });
+
+                        Bundle args = new Bundle();
+                        args.putParcelable(INGREDIENT_OBJECT, newIngredients.get(position));
+                        kcalFrag.setArguments(args);
+
+                        kcalFrag.show(getFragmentManager(), FRAG_TAG_EDIT_INGREDIENT);
+                    }
+                    else
+                        ExpandIngredientsCard();
+                }
+            });
+
+            //Enable remove button functionality
+            holder.holderBinding.imbRemoveIngredient.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (ingredientsExpanded) {
+                        newIngredients.remove(position);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position, newIngredients.size());
+                    }
+                    else
+                        ExpandIngredientsCard();
+                }
+            });
         }
 
         @Override
@@ -503,16 +539,16 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         class IngredientViewHolder extends RecyclerView.ViewHolder {
 
-            AddIngredientItemBinding binding;
+            AddIngredientItemBinding holderBinding;
 
             IngredientViewHolder(AddIngredientItemBinding binding) {
                 super(binding.getRoot());
-                this.binding = binding;
+                this.holderBinding = binding;
             }
 
             public void bind(Ingredient item) {
-                binding.setIngredient(item);
-                binding.executePendingBindings();
+                holderBinding.setIngredient(item);
+                holderBinding.executePendingBindings();
             }
         }
     }
