@@ -8,9 +8,9 @@
     </data>
 
     <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/cdly_add_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/cdly_add_root"
         android:animateLayoutChanges="true">
 
         <android.support.constraint.ConstraintLayout
@@ -309,8 +309,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_add"
-            android:elevation="5dp"
-            android:focusable="false"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
             android:onClick="AnimateFabMenu"/>
