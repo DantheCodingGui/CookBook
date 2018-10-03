@@ -624,26 +624,35 @@ public class MainActivity extends AppCompatActivity
 
         transitioningActivity = true;
 
-        if (sharedImageView != null) {
-            if (Utility.atLeastLollipop()) {
+        ActivityOptions options;
+
+        if (Utility.atLeastLollipop()) {
+
+            Pair<View, String> navBar = Pair.create(findViewById(android.R.id.navigationBarBackground),
+                    Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
+
+            if (sharedImageView != null) {
 
                 //To have both the image and navbar as shared elements, must both pass Pairs and manually
                 //set transition name for image
                 viewRecipe.putExtra(IMAGE_TRANSITION_NAME, ViewCompat.getTransitionName(sharedImageView));
 
-                Pair<View, String> image = Pair.create((View)sharedImageView, ViewCompat.getTransitionName(sharedImageView));
-                Pair<View, String> navBar = Pair.create(findViewById(android.R.id.navigationBarBackground),
-                        Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
+                Pair<View, String> image = Pair.create((View) sharedImageView, ViewCompat.getTransitionName(sharedImageView));
 
-                ActivityOptions options;
                 if (navBar.first != null)
                     options = ActivityOptions.makeSceneTransitionAnimation(this, image, navBar);
                 else
                     options = ActivityOptions.makeSceneTransitionAnimation(this, image);
 
-                startActivity(viewRecipe, options.toBundle());
-                return;
             }
+            else {
+                if (navBar.first != null)
+                    options = ActivityOptions.makeSceneTransitionAnimation(this, navBar);
+                else
+                    options = ActivityOptions.makeSceneTransitionAnimation(this);
+            }
+            startActivity(viewRecipe, options.toBundle());
+            return;
         }
         //Should just start activity normally
         startActivity(viewRecipe);

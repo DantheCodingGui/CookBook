@@ -14,6 +14,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
+import android.transition.TransitionInflater;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -89,6 +90,9 @@ public class ViewRecipeActivity extends AppCompatActivity
                 randMaterialCol = savedInstanceState.getInt(STATE_MATERIAL_COLOUR);
             SetupNoPhotoLayout();
         }
+
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -103,6 +107,10 @@ public class ViewRecipeActivity extends AppCompatActivity
      *  data bindings
      */
     private void SetupPhotoLayout() {
+
+        getWindow().setEnterTransition(TransitionInflater.from(this).inflateTransition(R.transition.view_activity_photo_enter));
+        getWindow().setReturnTransition(TransitionInflater.from(this).inflateTransition(R.transition.view_activity_photo_return));
+
         bindingPhoto = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe_photo);
         bindingPhoto.setRecipe(recipe);
         bindingPhoto.setVariable(BR.imageLoadedCallback, new RequestListener<Drawable>() {
@@ -135,8 +143,6 @@ public class ViewRecipeActivity extends AppCompatActivity
         bindingPhoto.ablViewRecipe.addOnOffsetChangedListener(this);
 
         setSupportActionBar(bindingPhoto.tbarVwRecipe);
-        if (getSupportActionBar() != null)
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         SetupTabLayout(bindingPhoto.tlyViewRecipe, bindingPhoto.vprViewRecipe);
     }
@@ -145,13 +151,15 @@ public class ViewRecipeActivity extends AppCompatActivity
      * Setup layout with standard toolbar and tablayout, including the relevant data bindings
      */
     private void SetupNoPhotoLayout() {
+
+        getWindow().setEnterTransition(TransitionInflater.from(this).inflateTransition(R.transition.view_activity_enter));
+        getWindow().setReturnTransition(TransitionInflater.from(this).inflateTransition(R.transition.view_activity_return));
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe);
 
         binding.setRecipe(recipe);
 
         setSupportActionBar(binding.tbarVwRecipe);
-        if (getSupportActionBar() != null)
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         SetupTabLayout(binding.tlyViewRecipe, binding.vprViewRecipe);
 
