@@ -1,31 +1,30 @@
 package com.danthecodinggui.recipes.view;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.widget.Button;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.msc.Utility;
 
+import static com.danthecodinggui.recipes.msc.IntentConstants.METHOD_STEP_OBJECT;
+
 /**
- * Shows simple dialog to enter number of kcal per person for a recipe
+ * Shows simple dialog to edit an method step
  */
-public class CaloriesPickerFragment extends DialogFragment {
+public class EditMethodStepFragment extends DialogFragment {
 
-    private onCaloriesSetListener callback;
+    private onStepEditedListener callback;
 
-    private EditText editKcal;
+    private EditText editStep;
 
-    /**
-     * Sets the callback method to be called when the dialog has a result
-     */
-    public void SetCaloriesListener(onCaloriesSetListener callback) {
+    public void SetStepListener(onStepEditedListener callback) {
         this.callback = callback;
     }
 
@@ -33,22 +32,23 @@ public class CaloriesPickerFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.dialog_kcal_title)
-                .setView(R.layout.fragment_kcal_picker)
+                .setView(R.layout.fragment_edit_step)
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        String kcal = editKcal.getText().toString();
-                        callback.onCaloriesSet(Integer.parseInt(kcal));
+                        String editedStep = editStep.getText().toString();
+                        callback.onStepEdited(editedStep);
                     }
                 })
                 .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Utility.setKeyboardVisibility(getActivity(), editKcal, false);
+                        Utility.setKeyboardVisibility(getActivity(), editStep, false);
                     }
                 })
                 .create();
+
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         return dialog;
     }
@@ -57,9 +57,14 @@ public class CaloriesPickerFragment extends DialogFragment {
     public void onStart() {
         super.onStart();
 
-        editKcal = getDialog().findViewById(R.id.etxt_add_kcal);
-        Utility.setKeyboardVisibility(getActivity(), editKcal, true);
-        editKcal.addTextChangedListener(new TextWatcher() {
+        Bundle args = getArguments();
+        String stepText = args.getString(METHOD_STEP_OBJECT);
+
+        editStep = getDialog().findViewById(R.id.etxt_edit_step);
+        editStep.setText(stepText);
+        editStep.setSelection(editStep.getText().length());
+
+        editStep.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
@@ -74,20 +79,21 @@ public class CaloriesPickerFragment extends DialogFragment {
         });
 
         Utility.CheckButtonEnabled(((AlertDialog)getDialog()).getButton(AlertDialog.BUTTON_POSITIVE),
-                editKcal.getText().toString());
+                editStep.getText().toString());
     }
 
+
     /**
-     * Callback interface to alert implementors when the CaloriesPickerFragment has a result.<br/>
-     * IMPORTANT: implementors must call {@link #SetCaloriesListener(onCaloriesSetListener) SetCaloriesListener}
+     * Callback interface to alert implementors when the EditStepFragment has a result.<br/>
+     * IMPORTANT: implementors must call {@link #SetStepListener(onStepEditedListener) SetStepListener}
      * when instantiating the fragment
      */
-    public interface onCaloriesSetListener {
+    public interface onStepEditedListener {
 
         /**
          * Called when the DialogFragment's 'OK' is clicked, ie. it has a result
-         * @param kcal  The quantity of calories entered in the dialog ie. the result of the dialog
+         * @param stepText  The new text of the step
          */
-        void onCaloriesSet(int kcal);
+        void onStepEdited(String stepText);
     }
 }

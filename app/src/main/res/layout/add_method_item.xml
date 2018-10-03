@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
-            name="ingredient"
-            type="com.danthecodinggui.recipes.model.object_models.Ingredient"/>
+            name="methodStep"
+            type="com.danthecodinggui.recipes.model.object_models.MethodStep"/>
     </data>
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackground">
+        android:layout_height="wrap_content">
 
         <ImageButton
-            android:id="@+id/imb_remove_ingredient"
+            android:id="@+id/imb_remove_step"
             style="@style/AddRecipeRemoveButton"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
@@ -25,25 +23,25 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/txt_ingredient_item"
+            android:id="@+id/txt_method_item"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
             android:fontFamily="@font/open_sans_light"
             android:padding="5dp"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
-            android:singleLine="true"
-            android:text="@{ingredient.ingredientText}"
             android:textColor="@color/grey_text"
-            android:textSize="25sp"
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/imageView"
-            app:layout_constraintStart_toEndOf="@+id/imb_remove_ingredient"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/imb_remove_step"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Cherry Tomatoes" />
+            app:layout_constraintVertical_bias="0.6"
+            app:stepNum="@{methodStep.getStepNumber()}"
+            app:stepText="@{methodStep.getStepText()}" />
 
         <ImageView
             android:id="@+id/imageView"

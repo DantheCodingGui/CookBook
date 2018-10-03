@@ -3,10 +3,8 @@ package com.danthecodinggui.recipes.view;
 import android.animation.AnimatorInflater;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
-import android.renderscript.ScriptGroup;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
@@ -17,6 +15,8 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.transition.TransitionManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,6 +29,7 @@ import android.view.animation.RotateAnimation;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityAddRecipeBinding;
 import com.danthecodinggui.recipes.databinding.AddIngredientItemBinding;
+import com.danthecodinggui.recipes.databinding.AddMethodItemBinding;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.model.object_models.MethodStep;
 import com.danthecodinggui.recipes.msc.StringUtils;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.IntentConstants.INGREDIENT_OBJECT;
+import static com.danthecodinggui.recipes.msc.IntentConstants.METHOD_STEP_OBJECT;
 
 
 /**
@@ -49,6 +51,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
     ActivityAddRecipeBinding binding;
 
+    //Fragment Tags
     private static final String FRAG_TAG_TIME = "FRAG_TAG_TIME";
     private static final String FRAG_TAG_KCAL = "FRAG_TAG_KCAL";
     private static final String FRAG_TAG_EDIT_INGREDIENT = "FRAG_TAG_EDIT_INGREDIENT";
@@ -74,7 +77,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private List<Ingredient> newIngredients;
     private IngredientsAddAdapter ingAdapter;
 
-    private List<MethodStep> newMethod;
+    private List<MethodStep> newSteps;
+    private MethodStepAddAdapter methAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,11 +95,43 @@ public class AddRecipeActivity extends AppCompatActivity implements
         SetupLayoutAnimator();
 
         newIngredients = new ArrayList<>();
-        newMethod = new ArrayList<>();
+        newSteps = new ArrayList<>();
 
         binding.rvwNewIngredients.setLayoutManager(new LinearLayoutManager(this));
         ingAdapter = new IngredientsAddAdapter();
         binding.rvwNewIngredients.setAdapter(ingAdapter);
+
+        binding.rvwNewSteps.setLayoutManager((new LinearLayoutManager(this)));
+        methAdapter = new MethodStepAddAdapter();
+        binding.rvwNewSteps.setAdapter(methAdapter);
+
+        //Setup button enable/disable based on edittext contents
+        binding.butAddIngredient.setEnabled(false);
+        binding.etxtAddIngredient.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                Utility.CheckButtonEnabled(binding.butAddIngredient, charSequence.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
+        binding.butAddStep.setEnabled(false);
+        binding.etxtAddStep.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                Utility.CheckButtonEnabled(binding.butAddStep, charSequence.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
 
         //Setup add image photo sheet
         photoSheetBehaviour = BottomSheetBehavior.from(binding.includeImageSheet.addImage);
@@ -178,12 +214,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         return super.dispatchTouchEvent(event);
     }
-
-    private void ExpandMethodCard() {
-        if (photoSheetExpanded)
-            return;
-    }
-    private void RetractMethodCard() {}
 
     /**
      * Setup image enter/exit animation in toolbar
@@ -369,6 +399,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         binding.imvNoIngredients.setVisibility(View.GONE);
         binding.rvwNewIngredients.setVisibility(View.VISIBLE);
+        if (newIngredients.isEmpty())
+            binding.txtNoIngredients.setVisibility(View.VISIBLE);
 
         binding.rvwNewIngredients.setLayoutFrozen(false);
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
@@ -381,13 +413,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         binding.etxtAddIngredient.setVisibility(View.VISIBLE);
         binding.butAddIngredient.setVisibility(View.VISIBLE);
 
-        Slide anim = new Slide();
-        anim.addTarget(binding.fabAddMenu);
-
-        TransitionManager.beginDelayedTransition(binding.cdlyAddRoot, anim);
-        binding.fabAddMenu.setVisibility(View.INVISIBLE);
-        if (openMenuOpen)
-            AnimateFabMenu(binding.fabAddMenu);
+        AnimateOutFabMenu();
 
         ingredientsExpanded = true;
     }
@@ -397,6 +423,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         if (newIngredients.isEmpty()) {
             binding.imvNoIngredients.setVisibility(View.VISIBLE);
             binding.rvwNewIngredients.setVisibility(View.GONE);
+            binding.txtNoIngredients.setVisibility(View.GONE);
         }
 
         //Scroll to first ingredient and then freeze recylerview (as its in retracted state)
@@ -421,7 +448,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
         params.height = binding.rvwNewIngredients.getHeight();
 
-        //Do this first then set elevation
         binding.llyToolbarContainer.setVisibility(View.VISIBLE);
         binding.crdvMethod.setVisibility(View.VISIBLE);
         binding.spcAdd.setVisibility(View.VISIBLE);
@@ -429,8 +455,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
         binding.etxtAddIngredient.setVisibility(View.GONE);
         binding.butAddIngredient.setVisibility(View.GONE);
 
-        Slide anim = new Slide();
-        anim.addTarget(binding.fabAddMenu);
 
         //Reset elevation AFTER size reduction to avoid toolbar and card cross-fading
         final LayoutTransition transition = binding.ctlyIngredientsContainer.getLayoutTransition();
@@ -445,10 +469,111 @@ public class AddRecipeActivity extends AppCompatActivity implements
             }
         });
 
-        TransitionManager.beginDelayedTransition(binding.cdlyAddRoot, anim);
-        binding.fabAddMenu.setVisibility(View.VISIBLE);
+        AnimateInFabMenu();
 
         ingredientsExpanded = false;
+    }
+
+    private void ExpandMethodCard() {
+        if (photoSheetExpanded)
+            return;
+
+        //Do this first then do rest after its done
+        binding.crdvMethod.setElevation(Utility.dpToPx(this, 10));
+
+        binding.imvNoMethod.setVisibility(View.GONE);
+        binding.rvwNewSteps.setVisibility(View.VISIBLE);
+        if (newSteps.isEmpty())
+            binding.txtNoSteps.setVisibility(View.VISIBLE);
+
+        binding.rvwNewSteps.setLayoutFrozen(false);
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewSteps.getLayoutParams();
+        params.height = 0;
+
+        binding.crdvIngredients.setVisibility(View.GONE);
+        binding.llyToolbarContainer.setVisibility(View.GONE);
+        binding.spcAdd.setVisibility(View.GONE);
+
+        binding.etxtAddStep.setVisibility(View.VISIBLE);
+        binding.butAddStep.setVisibility(View.VISIBLE);
+
+        AnimateOutFabMenu();
+
+        methodExpanded = true;
+    }
+
+    private void RetractMethodCard() {
+        if (newSteps.isEmpty()) {
+            binding.imvNoMethod.setVisibility(View.VISIBLE);
+            binding.rvwNewSteps.setVisibility(View.GONE);
+            binding.txtNoSteps.setVisibility(View.GONE);
+        }
+
+        //Scroll to first ingredient and then freeze recylerview (as its in retracted state)
+        binding.rvwNewSteps.smoothScrollToPosition(0);
+
+        //If RecyclerView already scrolled to the top
+        if (((LinearLayoutManager) binding.rvwNewSteps.getLayoutManager())
+                .findFirstCompletelyVisibleItemPosition() == 0)
+            binding.rvwNewSteps.setLayoutFrozen(true);
+        else {
+            binding.rvwNewSteps.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                        binding.rvwNewSteps.setLayoutFrozen(true);
+                        binding.rvwNewSteps.removeOnScrollListener(this);
+                    }
+                }
+            });
+        }
+
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewSteps.getLayoutParams();
+        params.height = binding.rvwNewSteps.getHeight();
+
+        binding.llyToolbarContainer.setVisibility(View.VISIBLE);
+        binding.crdvIngredients.setVisibility(View.VISIBLE);
+        binding.spcAdd.setVisibility(View.VISIBLE);
+
+        binding.etxtAddStep.setVisibility(View.GONE);
+        binding.butAddStep.setVisibility(View.GONE);
+
+
+        //Reset elevation AFTER size reduction to avoid toolbar and card cross-fading
+        final LayoutTransition transition = binding.ctlyMethodContainer.getLayoutTransition();
+        transition.addTransitionListener(new LayoutTransition.TransitionListener() {
+            @Override
+            public void startTransition(LayoutTransition layoutTransition, ViewGroup viewGroup, View view, int i) {}
+
+            @Override
+            public void endTransition(LayoutTransition layoutTransition, ViewGroup viewGroup, View view, int i) {
+                binding.crdvMethod.setElevation(Utility.dpToPx(getApplicationContext(), 3));
+                transition.removeTransitionListener(this);
+            }
+        });
+
+        AnimateInFabMenu();
+
+        methodExpanded = false;
+    }
+
+    private void AnimateInFabMenu() {
+
+        Slide anim = new Slide();
+        anim.addTarget(binding.fabAddMenu);
+
+        TransitionManager.beginDelayedTransition(binding.cdlyAddRoot, anim);
+        binding.fabAddMenu.setVisibility(View.VISIBLE);
+    }
+
+    private void AnimateOutFabMenu() {
+        Slide anim = new Slide();
+        anim.addTarget(binding.fabAddMenu);
+
+        TransitionManager.beginDelayedTransition(binding.cdlyAddRoot, anim);
+        binding.fabAddMenu.setVisibility(View.INVISIBLE);
+        if (openMenuOpen)
+            AnimateFabMenu(binding.fabAddMenu);
     }
 
     public void ViewIngredients(View view) {
@@ -462,11 +587,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
     }
 
     public void AddIngredient(View view) {
-
         String ingredientName = binding.etxtAddIngredient.getText().toString();
-
-        if (ingredientName.equals(""))
-            return;
 
         Ingredient temp = new Ingredient(ingredientName);
         newIngredients.add(temp);
@@ -474,6 +595,23 @@ public class AddRecipeActivity extends AppCompatActivity implements
         binding.rvwNewIngredients.smoothScrollToPosition(newIngredients.size() - 1);
 
         binding.etxtAddIngredient.setText("");
+
+        if (newIngredients.size() == 1)
+            binding.txtNoIngredients.setVisibility(View.GONE);
+    }
+
+    public void AddMethodStep(View view) {
+        String stepText = binding.etxtAddStep.getText().toString();
+
+        MethodStep temp = new MethodStep(stepText, newSteps.size() + 1);
+        newSteps.add(temp);
+        methAdapter.notifyItemInserted(newSteps.size() - 1);
+        binding.rvwNewSteps.smoothScrollToPosition(newSteps.size() - 1);
+
+        binding.etxtAddStep.setText("");
+
+        if (newSteps.size() == 1)
+            binding.txtNoSteps.setVisibility(View.GONE);
     }
 
     //TODO: consolidate adapters for this and view ingredients (are basically the same)
@@ -495,8 +633,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
                 @Override
                 public void onClick(View view) {
                     if (ingredientsExpanded) {
-                        EditIngredientFragment kcalFrag = new EditIngredientFragment();
-                        kcalFrag.SetIngredientsListener(new EditIngredientFragment.onIngredientEditedListener() {
+                        EditIngredientFragment editIngFrag = new EditIngredientFragment();
+                        editIngFrag.SetIngredientsListener(new EditIngredientFragment.onIngredientEditedListener() {
                             @Override
                             public void onIngredientEdited(String ingredientName) {
                                 newIngredients.get(position).setIngredientText(ingredientName);
@@ -506,9 +644,9 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
                         Bundle args = new Bundle();
                         args.putParcelable(INGREDIENT_OBJECT, newIngredients.get(position));
-                        kcalFrag.setArguments(args);
+                        editIngFrag.setArguments(args);
 
-                        kcalFrag.show(getFragmentManager(), FRAG_TAG_EDIT_INGREDIENT);
+                        editIngFrag.show(getFragmentManager(), FRAG_TAG_EDIT_INGREDIENT);
                     }
                     else
                         ExpandIngredientsCard();
@@ -523,6 +661,9 @@ public class AddRecipeActivity extends AppCompatActivity implements
                         newIngredients.remove(position);
                         notifyItemRemoved(position);
                         notifyItemRangeChanged(position, newIngredients.size());
+
+                        if (newIngredients.isEmpty())
+                            binding.txtNoIngredients.setVisibility(View.VISIBLE);
                     }
                     else
                         ExpandIngredientsCard();
@@ -548,6 +689,90 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
             public void bind(Ingredient item) {
                 holderBinding.setIngredient(item);
+                holderBinding.executePendingBindings();
+            }
+        }
+    }
+
+    class MethodStepAddAdapter extends RecyclerView.Adapter<MethodStepAddAdapter.StepViewHolder> {
+
+        @Override
+        public StepViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            AddMethodItemBinding binding = AddMethodItemBinding.inflate(inflater, parent, false);
+            return new StepViewHolder(binding);
+        }
+
+        @Override
+        public void onBindViewHolder(StepViewHolder holder, final int position) {
+            MethodStep step = newSteps.get(position);
+            holder.bind(step);
+
+            holder.holderBinding.getRoot().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (methodExpanded) {
+                        EditMethodStepFragment editStepFrag = new EditMethodStepFragment();
+                        editStepFrag.SetStepListener(new EditMethodStepFragment.onStepEditedListener() {
+                            @Override
+                            public void onStepEdited(String stepText) {
+                                newSteps.get(position).setStepText(stepText);
+                                methAdapter.notifyItemChanged(position);
+                            }
+                        });
+
+                        Bundle args = new Bundle();
+                        args.putString(METHOD_STEP_OBJECT, newSteps.get(position).getStepText());
+                        editStepFrag.setArguments(args);
+
+                        editStepFrag.show(getFragmentManager(), FRAG_TAG_EDIT_INGREDIENT);
+                    }
+                    else
+                        ExpandMethodCard();
+                }
+            });
+
+            //Enable remove button functionality
+            holder.holderBinding.imbRemoveStep.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (methodExpanded) {
+                        newSteps.remove(position);
+                        notifyItemRemoved(position);
+
+                        //Update the step numbers for the rest of the list
+                        for (int i = position; i < newSteps.size(); ++i)
+                           newSteps.get(i).setStepNumber(i + 1);
+
+                        notifyItemRangeChanged(position, newSteps.size());
+
+                        if (newIngredients.isEmpty())
+                            binding.txtNoSteps.setVisibility(View.VISIBLE);
+                    }
+                    else
+                        ExpandMethodCard();
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            if (newSteps == null)
+                return 0;
+            return newSteps.size();
+        }
+
+        class StepViewHolder extends RecyclerView.ViewHolder {
+
+            AddMethodItemBinding holderBinding;
+
+            StepViewHolder(AddMethodItemBinding binding) {
+                super(binding.getRoot());
+                this.holderBinding = binding;
+            }
+
+            public void bind(MethodStep item) {
+                holderBinding.setMethodStep(item);
                 holderBinding.executePendingBindings();
             }
         }

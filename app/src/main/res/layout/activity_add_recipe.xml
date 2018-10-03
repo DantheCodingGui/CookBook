@@ -6,7 +6,6 @@
     <data>
         <variable name="imagePath" type="String"/>
     </data>
-
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/cdly_add_root"
         android:layout_width="match_parent"
@@ -165,7 +164,6 @@
                 app:cardCornerRadius="4dp"
                 app:layout_constraintBottom_toTopOf="@+id/crdv_method"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/lly_toolbar_container">
 
@@ -178,12 +176,22 @@
 
                     <TextView
                         android:id="@+id/txt_ingredients_title"
-                        style="@style/CardRecipeTitle"
+                        style="@style/Title"
+                        android:textColor="@color/colorAccent"
                         android:text="@string/ingredients"
                         android:textSize="25sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txt_no_ingredients"
+                        android:text="@string/txt_no_ingredients"
+                        style="@style/AddNone"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/rvw_new_ingredients"
@@ -215,27 +223,32 @@
 
                     <ImageButton
                         android:id="@+id/but_add_ingredient"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="1dp"
-                        android:background="@android:color/transparent"
+                        android:layout_width="47dp"
+                        android:layout_height="47dp"
+                        android:elevation="1dp"
+                        android:background="@drawable/circular_imagebutton"
                         android:onClick="AddIngredient"
-                        android:src="@drawable/ic_add_light"
+                        android:src="@drawable/ic_add"
                         android:visibility="gone"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/etxt_add_ingredient"
+                        app:layout_constraintBottom_toBottomOf="@+id/etxt_add_ingredient"
                         app:layout_constraintEnd_toEndOf="parent" />
 
                     <EditText
                         android:id="@+id/etxt_add_ingredient"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginEnd="2dp"
                         android:visibility="gone"
                         android:background="@drawable/rounded_corner_edittext"
                         android:padding="10dp"
+                        android:paddingStart="15dp"
+                        android:paddingEnd="50dp"
                         android:singleLine="true"
                         android:hint="@string/etxt_hint_addIngredient"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/but_add_ingredient"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent" />
                 </android.support.constraint.ConstraintLayout>
             </android.support.v7.widget.CardView>
@@ -244,7 +257,7 @@
                 android:id="@+id/crdv_method"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="10dp"
@@ -255,6 +268,7 @@
                 app:cardCornerRadius="4dp"
                 app:layout_constraintBottom_toTopOf="@+id/spc_add"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/crdv_ingredients">
 
                 <android.support.constraint.ConstraintLayout
@@ -262,20 +276,44 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:animateLayoutChanges="true"
-                    android:orientation="vertical"
                     android:padding="10dp">
 
                     <TextView
                         android:id="@+id/txt_method_title"
-                        style="@style/CardRecipeTitle"
+                        style="@style/Title"
+                        android:textColor="@color/colorAccent"
                         android:text="@string/method"
                         android:textSize="25sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
+                    <TextView
+                        android:id="@+id/txt_no_steps"
+                        android:text="@string/txt_no_steps"
+                        style="@style/AddNone"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rvw_new_steps"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="70dp"
+                        android:overScrollMode="never"
+                        android:padding="10dp"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toTopOf="@+id/etxt_add_step"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.094" />
+
                     <ImageView
-                        android:id="@+id/imv_no_steps"
+                        android:id="@+id/imv_no_method"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
@@ -286,6 +324,37 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/txt_method_title" />
+
+                    <ImageButton
+                        android:id="@+id/but_add_step"
+                        android:layout_width="47dp"
+                        android:layout_height="47dp"
+                        android:elevation="1dp"
+                        android:background="@drawable/circular_imagebutton"
+                        android:onClick="AddMethodStep"
+                        android:src="@drawable/ic_add"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toTopOf="@+id/etxt_add_step"
+                        app:layout_constraintBottom_toBottomOf="@+id/etxt_add_step"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <EditText
+                        android:id="@+id/etxt_add_step"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginEnd="2dp"
+                        android:visibility="gone"
+                        android:background="@drawable/rounded_corner_edittext"
+                        android:padding="10dp"
+                        android:paddingStart="15dp"
+                        android:paddingEnd="50dp"
+                        android:maxLines="3"
+                        android:inputType="textMultiLine"
+                        android:hint="@string/etxt_hint_addStep"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
                 </android.support.constraint.ConstraintLayout>
             </android.support.v7.widget.CardView>
 

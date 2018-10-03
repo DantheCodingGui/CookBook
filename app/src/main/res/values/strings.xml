@@ -42,4 +42,7 @@
     <string name="btn_add_photo">Add Photo</string>
     <string name="btn_add_photo_web">Add Photo From The Web</string>
     <string name="etxt_hint_addIngredient">Ingredient Name</string>
+    <string name="etxt_hint_addStep">Step Text</string>
+    <string name="txt_no_steps">Let\'s Add the Steps</string>
+    <string name="txt_no_ingredients">Lets Add the Ingredients</string>
 </resources>

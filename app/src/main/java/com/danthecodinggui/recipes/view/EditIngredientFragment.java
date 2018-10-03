@@ -17,6 +17,9 @@ import com.danthecodinggui.recipes.msc.Utility;
 
 import static com.danthecodinggui.recipes.msc.IntentConstants.INGREDIENT_OBJECT;
 
+/**
+ * Shows simple dialog to edit an ingredient
+ */
 public class EditIngredientFragment extends DialogFragment {
 
     private onIngredientEditedListener callback;
@@ -63,7 +66,7 @@ public class EditIngredientFragment extends DialogFragment {
         editIngredient.setText(i.getIngredientText());
         editIngredient.setSelection(editIngredient.getText().length());
 
-        Utility.setKeyboardVisibility(getActivity(), editIngredient, true);
+
         editIngredient.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
@@ -93,7 +96,7 @@ public class EditIngredientFragment extends DialogFragment {
 
     /**
      * Callback interface to alert implementors when the EditIngredientFragment has a result.<br/>
-     * IMPORTANT: implementors must call {@link #SetIngredientsListener(onIngredientEditedListener) SetCaloriesListener}
+     * IMPORTANT: implementors must call {@link #SetIngredientsListener(onIngredientEditedListener) SetIngredientsListener}
      * when instantiating the fragment
      */
     public interface onIngredientEditedListener {

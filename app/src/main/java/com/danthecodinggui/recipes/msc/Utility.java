@@ -16,6 +16,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.model.ProviderContract;
@@ -221,6 +222,17 @@ public class Utility {
             imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
         else
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    /**
+     * Sets a button's enable state based on the state of an associated EditText
+     * @param currentText Current EditText value
+     */
+    public static void CheckButtonEnabled(View button, String currentText) {
+        if (currentText.isEmpty())
+            button.setEnabled(false);
+        else
+            button.setEnabled(true);
     }
 
     public interface PermissionDialogListener {
