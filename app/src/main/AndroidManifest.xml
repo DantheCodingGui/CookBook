@@ -29,7 +29,7 @@
             android:name=".view.AddRecipeActivity"
             android:parentActivityName=".view.MainActivity"
             android:theme="@style/AddRecipeTheme"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="adjustPan" />
         <activity android:name=".view.CameraActivity"
             android:parentActivityName=".view.AddRecipeActivity"
             android:theme="@style/HomeTheme"/>
