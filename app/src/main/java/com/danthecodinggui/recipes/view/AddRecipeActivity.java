@@ -8,6 +8,7 @@ import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.transition.Slide;
 import android.support.v4.view.ViewCompat;
@@ -27,6 +28,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
 
+import com.bumptech.glide.util.Util;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityAddRecipeBinding;
 import com.danthecodinggui.recipes.databinding.AddIngredientItemBinding;
@@ -100,10 +102,17 @@ public class AddRecipeActivity extends AppCompatActivity implements
         }
 
         int orientation = getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE && !Utility.isMultiWindow(this))
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE)
             isPortrait = false;
-        else
+        else {
             isPortrait = true;
+            if (Utility.isMultiWindow(this)) {
+                ConstraintLayout.LayoutParams params =
+                        (ConstraintLayout.LayoutParams) binding.spcAdd.getLayoutParams();
+                params.height = Utility.dpToPx(this, 1);
+            }
+
+        }
 
         SetupLayoutAnimator();
 

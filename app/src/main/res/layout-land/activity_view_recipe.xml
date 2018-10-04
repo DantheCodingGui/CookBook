@@ -44,7 +44,5 @@
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-        <!--need activity_margin_content in root for rest of view-->
-
     </android.support.design.widget.CoordinatorLayout>
 </layout>
