@@ -3,6 +3,7 @@ package com.danthecodinggui.recipes.view;
 import android.animation.AnimatorInflater;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
+import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
@@ -51,6 +52,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
     ActivityAddRecipeBinding binding;
 
+    private boolean isPortrait;
+
     //Fragment Tags
     private static final String FRAG_TAG_TIME = "FRAG_TAG_TIME";
     private static final String FRAG_TAG_KCAL = "FRAG_TAG_KCAL";
@@ -61,9 +64,13 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private static final String KCAL = "KCAL";
     private static final String INGREDIENTS_EXPANDED = "INGREDIENTS_EXPANDED";
     private static final String METHOD_EXPANDED = "METHOD_EXPANDED";
+    private static final String FAB_MENU_OPEN = "FAB_MENU_OPEN";
+    private static final String PHOTO_SHEET_OPEN = "PHOTO_SHEET_OPEN";
+    private static final String INGREDIENTS_LIST = "INGREDIENTS_LIST";
+    private static final String METHOD_LIST = "METHOD_LIST";
 
     //Various Flags
-    private boolean openMenuOpen = false;
+    private boolean fabMenuOpen = false;
 
     private int recipeDuration;
     private int recipeKcalPerPerson;
@@ -91,6 +98,12 @@ public class AddRecipeActivity extends AppCompatActivity implements
             getSupportActionBar().setDisplayShowTitleEnabled(false);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        int orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE && !Utility.isMultiWindow(this))
+            isPortrait = false;
+        else
+            isPortrait = true;
 
         SetupLayoutAnimator();
 
@@ -159,6 +172,12 @@ public class AddRecipeActivity extends AppCompatActivity implements
         //Flags
         outState.putBoolean(INGREDIENTS_EXPANDED, ingredientsExpanded);
         outState.putBoolean(METHOD_EXPANDED, methodExpanded);
+        outState.putBoolean(FAB_MENU_OPEN, fabMenuOpen);
+        outState.putBoolean(PHOTO_SHEET_OPEN, photoSheetExpanded);
+
+        //Lists
+        outState.putParcelableArrayList(INGREDIENTS_LIST, new ArrayList<>(newIngredients));
+        outState.putParcelableArrayList(METHOD_LIST, new ArrayList<>(newSteps));
     }
 
     @Override
@@ -169,6 +188,23 @@ public class AddRecipeActivity extends AppCompatActivity implements
         recipeKcalPerPerson = savedInstanceState.getInt(KCAL);
         ingredientsExpanded = savedInstanceState.getBoolean(INGREDIENTS_EXPANDED);
         methodExpanded = savedInstanceState.getBoolean(METHOD_EXPANDED);
+        boolean fabMenuOpen = savedInstanceState.getBoolean(FAB_MENU_OPEN);
+        photoSheetExpanded = savedInstanceState.getBoolean(PHOTO_SHEET_OPEN);
+
+        //Restore ingredient and method steps
+        newIngredients = savedInstanceState.getParcelableArrayList(INGREDIENTS_LIST);
+        if (!newIngredients.isEmpty()) {
+            binding.imvNoIngredients.setVisibility(View.GONE);
+            binding.rvwNewIngredients.setVisibility(View.VISIBLE);
+            binding.rvwNewIngredients.setLayoutFrozen(true);
+        }
+        newSteps = savedInstanceState.getParcelableArrayList(METHOD_LIST);
+        if (!newSteps.isEmpty()) {
+            binding.imvNoMethod.setVisibility(View.GONE);
+            binding.rvwNewSteps.setVisibility(View.VISIBLE);
+            binding.rvwNewSteps.setLayoutFrozen(true);
+        }
+
         if (recipeDuration != 0)
             onDurationSet(recipeDuration);
         if (recipeKcalPerPerson != 0)
@@ -177,6 +213,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
             ExpandIngredientsCard();
         else if (methodExpanded)
             ExpandMethodCard();
+        if (fabMenuOpen)
+            AnimateFabMenu(binding.fabAddMenu);
 
         DurationPickerFragment timeFrag = (DurationPickerFragment) getFragmentManager().findFragmentByTag(FRAG_TAG_TIME);
         CaloriesPickerFragment kcalFrag = (CaloriesPickerFragment) getFragmentManager().findFragmentByTag(FRAG_TAG_KCAL);
@@ -194,7 +232,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
             RetractMethodCard();
         else if (photoSheetExpanded)
             photoSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        else if (openMenuOpen)
+        else if (fabMenuOpen)
             AnimateFabMenu(binding.fabAddMenu);
         else
             super.onBackPressed();
@@ -238,7 +276,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
      * @param view The menu fab view
      */
     public void AnimateFabMenu(View view) {
-        if (openMenuOpen) {
+        if (fabMenuOpen) {
             ViewCompat.animate(view)
                     .rotation(0.f)
                     .withLayer()
@@ -251,7 +289,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
             AnimateFabItem(binding.txtAddTime);
             AnimateFabItem(binding.fabAddKcal);
             AnimateFabItem(binding.txtAddKcal);
-            openMenuOpen = false;
+            fabMenuOpen = false;
         }
         else {
             ViewCompat.animate(view)
@@ -266,7 +304,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
             AnimateFabItem(binding.txtAddTime);
             AnimateFabItem(binding.fabAddKcal);
             AnimateFabItem(binding.txtAddKcal);
-            openMenuOpen = true;
+            fabMenuOpen = true;
         }
     }
 
@@ -283,7 +321,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         float fabMenuYDelta = (binding.fabAddMenu.getY() + binding.fabAddMenu.getHeight() / 2)
                 - (menuItem.getY() + menuItem.getHeight() / 2);
 
-        if (openMenuOpen) {
+        if (fabMenuOpen) {
             rotate = new RotateAnimation(0.f, -150.f,
                     fabMenuXDelta + binding.fabAddMenu.getWidth() / 2,
                     fabMenuYDelta + binding.fabAddMenu.getHeight() / 2);
@@ -393,6 +431,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         if (photoSheetExpanded)
             return;
+        else if (methodExpanded)
+            return;
 
         //Do this first then do rest after its done
         binding.crdvIngredients.setElevation(Utility.dpToPx(this, 10));
@@ -408,7 +448,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         binding.crdvMethod.setVisibility(View.GONE);
         binding.llyToolbarContainer.setVisibility(View.GONE);
-        binding.spcAdd.setVisibility(View.GONE);
+        if (isPortrait)
+            binding.spcAdd.setVisibility(View.GONE);
 
         binding.etxtAddIngredient.setVisibility(View.VISIBLE);
         binding.butAddIngredient.setVisibility(View.VISIBLE);
@@ -450,7 +491,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         binding.llyToolbarContainer.setVisibility(View.VISIBLE);
         binding.crdvMethod.setVisibility(View.VISIBLE);
-        binding.spcAdd.setVisibility(View.VISIBLE);
+        if (isPortrait)
+            binding.spcAdd.setVisibility(View.VISIBLE);
 
         binding.etxtAddIngredient.setVisibility(View.GONE);
         binding.butAddIngredient.setVisibility(View.GONE);
@@ -477,6 +519,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private void ExpandMethodCard() {
         if (photoSheetExpanded)
             return;
+        else if (ingredientsExpanded)
+            return;
 
         //Do this first then do rest after its done
         binding.crdvMethod.setElevation(Utility.dpToPx(this, 10));
@@ -492,7 +536,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         binding.crdvIngredients.setVisibility(View.GONE);
         binding.llyToolbarContainer.setVisibility(View.GONE);
-        binding.spcAdd.setVisibility(View.GONE);
+        if (isPortrait)
+            binding.spcAdd.setVisibility(View.GONE);
 
         binding.etxtAddStep.setVisibility(View.VISIBLE);
         binding.butAddStep.setVisibility(View.VISIBLE);
@@ -533,7 +578,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         binding.llyToolbarContainer.setVisibility(View.VISIBLE);
         binding.crdvIngredients.setVisibility(View.VISIBLE);
-        binding.spcAdd.setVisibility(View.VISIBLE);
+        if (isPortrait)
+            binding.spcAdd.setVisibility(View.VISIBLE);
 
         binding.etxtAddStep.setVisibility(View.GONE);
         binding.butAddStep.setVisibility(View.GONE);
@@ -572,7 +618,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         TransitionManager.beginDelayedTransition(binding.cdlyAddRoot, anim);
         binding.fabAddMenu.setVisibility(View.INVISIBLE);
-        if (openMenuOpen)
+        if (fabMenuOpen)
             AnimateFabMenu(binding.fabAddMenu);
     }
 
@@ -746,7 +792,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
                         notifyItemRangeChanged(position, newSteps.size());
 
-                        if (newIngredients.isEmpty())
+                        if (newSteps.isEmpty())
                             binding.txtNoSteps.setVisibility(View.VISIBLE);
                     }
                     else
