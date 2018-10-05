@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.databinding.BindingAdapter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,36 +27,44 @@ public class BindingAdapters {
     /**
      * Loads an image into an imageView from a local filepath </br>
      * NOTE: Cannot use file path and url in the same view, will prioritise file path
-     * @param imageFilePath The path to the image
-     * @param imageUrl The URL of an image
+     * @param imagePath The path to the image (either local or remote)
      * @param onLoadedListener A callback to be used for any actions once the image is loaded
      */
-    @BindingAdapter(value = {"imageFilePath", "imageUrl", "onLoadedListener"}, requireAll = false)
-    public static void setImageResource(final ImageView view, String imageFilePath, String imageUrl, RequestListener<Drawable> onLoadedListener) {
+    @BindingAdapter(value = {"imagePath", "onLoadedListener"}, requireAll = false)
+    public static void setImageResource(final ImageView view, String imagePath, RequestListener<Drawable> onLoadedListener) {
 
-
-        //Load an image (local storage) into an ImageView from a Uri
+        if (imagePath == null)
+            return;
 
         final Context context = view.getContext();
+
+        //Allows both filepath and url based image locations, let glide deal with actually getting them
+
+        boolean isURL = Patterns.WEB_URL.matcher(imagePath).matches();
+        boolean isFilepath = new File(imagePath).exists();
+
+        //checks for if url, if filepath, and if image url
 
         RequestOptions options = new RequestOptions()
                 .dontTransform()
                 .error(R.drawable.ic_imageload_error);
 
-        if (imageFilePath != null) {
+        if (isURL) {
+            //Just load from URL
+            Glide.with(context)
+                    .setDefaultRequestOptions(options)
+                    .load(imagePath)
+                    .listener(onLoadedListener)
+                    .into(view);
+        }
+        else if (isFilepath) {
+            //String is a file
             //Get Uri from filepath
-            Uri imageUri = Uri.fromFile(new File(imageFilePath));
+            Uri imageUri = Uri.fromFile(new File(imagePath));
 
             Glide.with(context)
                     .setDefaultRequestOptions(options)
                     .load(imageUri)
-                    .listener(onLoadedListener)
-                    .into(view);
-        }
-        else if (imageUrl != null) {
-            Glide.with(context)
-                    .setDefaultRequestOptions(options)
-                    .load(imageUrl)
                     .listener(onLoadedListener)
                     .into(view);
         }

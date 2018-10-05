@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view;
+package com.danthecodinggui.recipes.view.add_recipe;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -23,11 +23,13 @@ import static com.danthecodinggui.recipes.msc.IntentConstants.INGREDIENT_OBJECT;
 public class EditIngredientFragment extends DialogFragment {
 
     private onIngredientEditedListener callback;
+    private int ingredientPosision;
 
     private EditText editIngredient;
 
-    public void SetIngredientsListener(onIngredientEditedListener callback) {
+    public void SetIngredientsListener(onIngredientEditedListener callback, int position) {
         this.callback = callback;
+        this.ingredientPosision = position;
     }
 
     @Override
@@ -39,7 +41,7 @@ public class EditIngredientFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String editedIngredient = editIngredient.getText().toString();
-                        callback.onIngredientEdited(editedIngredient);
+                        callback.onIngredientEdited(editedIngredient, ingredientPosision);
                     }
                 })
                 .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
@@ -96,7 +98,7 @@ public class EditIngredientFragment extends DialogFragment {
 
     /**
      * Callback interface to alert implementors when the EditIngredientFragment has a result.<br/>
-     * IMPORTANT: implementors must call {@link #SetIngredientsListener(onIngredientEditedListener) SetIngredientsListener}
+     * IMPORTANT: implementors must call {@link #SetIngredientsListener(onIngredientEditedListener, int) SetIngredientsListener}
      * when instantiating the fragment
      */
     public interface onIngredientEditedListener {
@@ -104,7 +106,8 @@ public class EditIngredientFragment extends DialogFragment {
         /**
          * Called when the DialogFragment's 'OK' is clicked, ie. it has a result
          * @param ingredientName  The new name of the ingredient
+         * @param position  The position of the step edited (for view)
          */
-        void onIngredientEdited(String ingredientName);
+        void onIngredientEdited(String ingredientName, int position);
     }
 }

@@ -37,6 +37,7 @@
             style="@style/ButtonBottomSheet"
             android:drawableStart="@drawable/ic_internet"
             android:text="@string/btn_add_photo_web"
+            android:onClick="AddImageURL"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btn_add_photo_library" />

@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view;
+package com.danthecodinggui.recipes.view.add_recipe;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.widget.Button;
 import android.widget.EditText;
 
 import com.danthecodinggui.recipes.R;

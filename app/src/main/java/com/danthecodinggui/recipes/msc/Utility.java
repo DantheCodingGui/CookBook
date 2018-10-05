@@ -21,6 +21,10 @@ import android.widget.Button;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.model.ProviderContract;
 
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+
 /**
  * Set of miscellaneous methods without a link to any other class
  */
@@ -68,14 +72,14 @@ public class Utility {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         callback.onFeatureDisabled();
-                        showPermissionDeniedSnackbar(snackbarAnchor);
+                        showPermissionDeniedSnackbar(snackbarAnchor, permission);
                     }
                 })
                 .setPositiveButton(R.string.perm_dialog_butt_permit, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         PermissionsHandler.AskForPermission(context, permission,
-                                permissionRequestCode, true);
+                                permissionRequestCode);
                     }
                 })
                 .create();
@@ -100,10 +104,11 @@ public class Utility {
      * Display snackbar informing users where they can change the application's permission settings
      * @param snackbarAnchor The view that a snackbar can be anchored to, to alert user where
      *                       permission settings can be altered
+     * @param permissionName The name of the permission you are referencing
      */
-    public static void showPermissionDeniedSnackbar(View snackbarAnchor) {
-        Snackbar.make(snackbarAnchor, R.string.perm_snackbar_msg, Snackbar.LENGTH_LONG)
-                .show();
+    public static void showPermissionDeniedSnackbar(View snackbarAnchor, String permissionName) {
+        String text = snackbarAnchor.getContext().getResources().getString(R.string.perm_snackbar_msg, permissionName);
+        Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_LONG).show();
     }
 
     /**

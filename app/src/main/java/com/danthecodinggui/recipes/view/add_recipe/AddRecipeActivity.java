@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view;
+package com.danthecodinggui.recipes.view.add_recipe;
 
 import android.animation.AnimatorInflater;
 import android.animation.LayoutTransition;
@@ -8,7 +8,6 @@ import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.transition.Slide;
 import android.support.v4.view.ViewCompat;
@@ -28,7 +27,6 @@ import android.view.animation.AnimationSet;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
 
-import com.bumptech.glide.util.Util;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityAddRecipeBinding;
 import com.danthecodinggui.recipes.databinding.AddIngredientItemBinding;
@@ -50,7 +48,7 @@ import static com.danthecodinggui.recipes.msc.IntentConstants.METHOD_STEP_OBJECT
  */
 public class AddRecipeActivity extends AppCompatActivity implements
         CaloriesPickerFragment.onCaloriesSetListener,
-        DurationPickerFragment.onDurationSetListener{
+        DurationPickerFragment.onDurationSetListener, AddImageURLFragment.onURLSetListener {
 
     ActivityAddRecipeBinding binding;
 
@@ -60,25 +58,32 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private static final String FRAG_TAG_TIME = "FRAG_TAG_TIME";
     private static final String FRAG_TAG_KCAL = "FRAG_TAG_KCAL";
     private static final String FRAG_TAG_EDIT_INGREDIENT = "FRAG_TAG_EDIT_INGREDIENT";
+    private static final String FRAG_TAG_EDIT_STEP = "FRAG_TAG_EDIT_STEP";
+    private static final String FRAG_TAG_IMAGE_URL = "FRAG_TAG_IMAGE_URL";
 
     //Instance State Tags
     private static final String DURATION = "DURATION";
     private static final String KCAL = "KCAL";
+    private static final String IMAGE_PATH = "IMAGE_PATH";
     private static final String INGREDIENTS_EXPANDED = "INGREDIENTS_EXPANDED";
     private static final String METHOD_EXPANDED = "METHOD_EXPANDED";
     private static final String FAB_MENU_OPEN = "FAB_MENU_OPEN";
     private static final String PHOTO_SHEET_OPEN = "PHOTO_SHEET_OPEN";
     private static final String INGREDIENTS_LIST = "INGREDIENTS_LIST";
     private static final String METHOD_LIST = "METHOD_LIST";
+    private static final String EDITING_POSITION = "EDITING_POSITION";
 
     //Various Flags
     private boolean fabMenuOpen = false;
 
     private int recipeDuration;
     private int recipeKcalPerPerson;
+    private String imagePath;
 
     private boolean ingredientsExpanded = false;
     private boolean methodExpanded = false;
+
+    private int editingPosition = -1;
 
     private BottomSheetBehavior photoSheetBehaviour;
     private boolean photoSheetExpanded = false;
@@ -177,6 +182,9 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         outState.putInt(DURATION, recipeDuration);
         outState.putInt(KCAL, recipeKcalPerPerson);
+        outState.putString(IMAGE_PATH, imagePath);
+
+        outState.putInt(EDITING_POSITION, editingPosition);
 
         //Flags
         outState.putBoolean(INGREDIENTS_EXPANDED, ingredientsExpanded);
@@ -195,6 +203,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         recipeDuration = savedInstanceState.getInt(DURATION);
         recipeKcalPerPerson = savedInstanceState.getInt(KCAL);
+        imagePath = savedInstanceState.getString(IMAGE_PATH);
         ingredientsExpanded = savedInstanceState.getBoolean(INGREDIENTS_EXPANDED);
         methodExpanded = savedInstanceState.getBoolean(METHOD_EXPANDED);
         boolean fabMenuOpen = savedInstanceState.getBoolean(FAB_MENU_OPEN);
@@ -218,6 +227,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
             onDurationSet(recipeDuration);
         if (recipeKcalPerPerson != 0)
             onCaloriesSet(recipeKcalPerPerson);
+        if (imagePath != null)
+            onURLSet(imagePath);
         if (ingredientsExpanded)
             ExpandIngredientsCard();
         else if (methodExpanded)
@@ -225,12 +236,25 @@ public class AddRecipeActivity extends AppCompatActivity implements
         if (fabMenuOpen)
             AnimateFabMenu(binding.fabAddMenu);
 
+        editingPosition = savedInstanceState.getInt(EDITING_POSITION);
+
         DurationPickerFragment timeFrag = (DurationPickerFragment) getFragmentManager().findFragmentByTag(FRAG_TAG_TIME);
         CaloriesPickerFragment kcalFrag = (CaloriesPickerFragment) getFragmentManager().findFragmentByTag(FRAG_TAG_KCAL);
+        EditIngredientFragment editIng = (EditIngredientFragment) getFragmentManager().findFragmentByTag(FRAG_TAG_EDIT_INGREDIENT);
+        EditMethodStepFragment editStep = (EditMethodStepFragment) getFragmentManager().findFragmentByTag(FRAG_TAG_EDIT_STEP);
+        AddImageURLFragment addURL = (AddImageURLFragment) getFragmentManager().findFragmentByTag(FRAG_TAG_IMAGE_URL);
         if (timeFrag != null)
             timeFrag.SetDurationListener(this);
-        if (kcalFrag != null)
+        else if (kcalFrag != null)
             kcalFrag.SetCaloriesListener(this);
+        else if (editIng != null)
+            editIng.SetIngredientsListener(editIngredientListener, editingPosition);
+        else if (editStep != null)
+            editStep.SetStepListener(editMethodListener, editingPosition);
+        else if (addURL != null)
+            addURL.SetURLListener(this);
+
+        editingPosition = -1;
     }
 
     @Override
@@ -362,13 +386,31 @@ public class AddRecipeActivity extends AppCompatActivity implements
     }
 
     public void addImage(View view) {
-//        if (holderBinding.imvImageContainer.getVisibility() == View.GONE) {
-//            holderBinding.imvImageContainer.setVisibility(View.VISIBLE);
-//            holderBinding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
-//            holderBinding.clyAddTbar.setElevation(10);
-//        }
-
         photoSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+    public void RemoveImage(View view) {
+        ToggleImageVisibility();
+        imagePath = null;
+    }
+
+    public void AddImageURL(View view) {
+        AddImageURLFragment addUrlFrag= new AddImageURLFragment();
+        addUrlFrag.SetURLListener(this);
+
+        addUrlFrag.show(getFragmentManager(), FRAG_TAG_IMAGE_URL);
+    }
+
+    private void ToggleImageVisibility() {
+        if (binding.imvImageContainer.getVisibility() == View.GONE) {
+            binding.imvImageContainer.setVisibility(View.VISIBLE);
+            binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
+            binding.clyAddTbar.setElevation(10);
+        }
+        else {
+            binding.imvImageContainer.setVisibility(View.GONE);
+            binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
+            binding.clyAddTbar.setElevation(Utility.dpToPx(this, 10));
+        }
     }
 
     /**
@@ -409,15 +451,38 @@ public class AddRecipeActivity extends AppCompatActivity implements
         recipeDuration = minutes;
     }
 
-    public void RemoveImage(View view) {
-        if (binding.imvImageContainer.getVisibility() == View.VISIBLE) {
-            binding.imvImageContainer.setVisibility(View.GONE);
-            binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
-            binding.clyAddTbar.setElevation(Utility.dpToPx(this, 10));
-
-            //Todo also remove any references to actual image objects
+    @Override
+    public void onURLSet(String url) {
+        if (!Utility.isStringAllWhitespace(url)) {
+            if (imagePath == null)
+                ToggleImageVisibility();
+            imagePath = url;
+            binding.setImagePath(url);
+            photoSheetExpanded = false;
+            photoSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
     }
+
+    private EditIngredientFragment.onIngredientEditedListener editIngredientListener = new EditIngredientFragment.onIngredientEditedListener() {
+        @Override
+        public void onIngredientEdited(String ingredientName, int position) {
+            if (!Utility.isStringAllWhitespace(ingredientName)) {
+                newIngredients.get(position).setIngredientText(ingredientName);
+                ingAdapter.notifyItemChanged(position);
+                editingPosition = -1;
+            }
+        }
+    };
+    private EditMethodStepFragment.onStepEditedListener editMethodListener = new EditMethodStepFragment.onStepEditedListener() {
+        @Override
+        public void onStepEdited(String stepText, int position) {
+            if (!Utility.isStringAllWhitespace(stepText)) {
+                newSteps.get(position).setStepText(stepText);
+                methAdapter.notifyItemChanged(position);
+                editingPosition = -1;
+            }
+        }
+    };
 
     /**
      * Resets duration value and removes view
@@ -695,15 +760,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
                 public void onClick(View view) {
                     if (ingredientsExpanded) {
                         EditIngredientFragment editIngFrag = new EditIngredientFragment();
-                        editIngFrag.SetIngredientsListener(new EditIngredientFragment.onIngredientEditedListener() {
-                            @Override
-                            public void onIngredientEdited(String ingredientName) {
-                                if (!Utility.isStringAllWhitespace(ingredientName)) {
-                                    newIngredients.get(position).setIngredientText(ingredientName);
-                                    ingAdapter.notifyItemChanged(position);
-                                }
-                            }
-                        });
+                        editingPosition = position;
+                        editIngFrag.SetIngredientsListener(editIngredientListener, position);
 
                         Bundle args = new Bundle();
                         args.putParcelable(INGREDIENT_OBJECT, newIngredients.get(position));
@@ -776,21 +834,14 @@ public class AddRecipeActivity extends AppCompatActivity implements
                 public void onClick(View view) {
                     if (methodExpanded) {
                         EditMethodStepFragment editStepFrag = new EditMethodStepFragment();
-                        editStepFrag.SetStepListener(new EditMethodStepFragment.onStepEditedListener() {
-                            @Override
-                            public void onStepEdited(String stepText) {
-                                if (!Utility.isStringAllWhitespace(stepText)) {
-                                    newSteps.get(position).setStepText(stepText);
-                                    methAdapter.notifyItemChanged(position);
-                                }
-                            }
-                        });
+                        editingPosition = position;
+                        editStepFrag.SetStepListener(editMethodListener, position);
 
                         Bundle args = new Bundle();
                         args.putString(METHOD_STEP_OBJECT, newSteps.get(position).getStepText());
                         editStepFrag.setArguments(args);
 
-                        editStepFrag.show(getFragmentManager(), FRAG_TAG_EDIT_INGREDIENT);
+                        editStepFrag.show(getFragmentManager(), FRAG_TAG_EDIT_STEP);
                     }
                     else
                         ExpandMethodCard();

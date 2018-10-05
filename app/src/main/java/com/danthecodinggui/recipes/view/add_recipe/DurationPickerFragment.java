@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view;
+package com.danthecodinggui.recipes.view.add_recipe;
 
 import mobi.upod.timedurationpicker.TimeDurationPicker;
 import mobi.upod.timedurationpicker.TimeDurationPickerDialogFragment;

@@ -13,7 +13,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.util.Pair;
@@ -47,10 +46,10 @@ import com.danthecodinggui.recipes.databinding.RecipeCardPhotoBasicBinding;
 import com.danthecodinggui.recipes.databinding.RecipeCardPhotoComplexBinding;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.AnimUtils;
-import com.danthecodinggui.recipes.msc.IntentConstants;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.msc.Utility;
 import com.danthecodinggui.recipes.view.Loaders.GetRecipesLoader;
+import com.danthecodinggui.recipes.view.add_recipe.AddRecipeActivity;
 import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
 
 import java.util.ArrayList;
@@ -64,7 +63,6 @@ import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_BUND
 import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_OBJECT;
 import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 import static com.danthecodinggui.recipes.msc.LogTags.GLIDE;
-import static com.danthecodinggui.recipes.msc.LogTags.PERMISSIONS;
 
 /**
  * Display all stored recipes
@@ -82,8 +80,6 @@ public class MainActivity extends AppCompatActivity
 
     private boolean transitioningActivity = false;
 
-    private boolean alreadyShownPermDeniedDialog = false;
-
     private String lastSearchFilter;
     private boolean searchOpen = false;
     private boolean restoringState = false;
@@ -97,7 +93,6 @@ public class MainActivity extends AppCompatActivity
     private static final int REQ_CODE_READ_EXTERNAL = 201;
 
     //Instance state IDs
-    private static final String ALREADY_SHOWN_PERM_DIALOG = "ALREADY_SHOWN_PERM_DIALOG";
     private static final String SEARCH_OPEN = "SEARCH_OPEN";
     private static final String SEARCH_FILTER = "SEARCH_FILTER";
 
@@ -149,7 +144,6 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(binding.tbarHome);
 
         if (savedInstanceState != null) {
-            alreadyShownPermDeniedDialog = savedInstanceState.getBoolean(ALREADY_SHOWN_PERM_DIALOG);
             searchOpen = savedInstanceState.getBoolean(SEARCH_OPEN);
             lastSearchFilter = savedInstanceState.getString(SEARCH_FILTER);
         }
@@ -241,7 +235,6 @@ public class MainActivity extends AppCompatActivity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putBoolean(ALREADY_SHOWN_PERM_DIALOG, alreadyShownPermDeniedDialog);
         outState.putBoolean(SEARCH_OPEN, searchOpen);
         outState.putString(SEARCH_FILTER, lastSearchFilter);
     }
@@ -276,19 +269,9 @@ public class MainActivity extends AppCompatActivity
         switch(requestCode) {
             case REQ_CODE_READ_EXTERNAL:
                 if (grantResults.length > 0) {
-                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                        UnblockLoader();
-                    if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                        if (!alreadyShownPermDeniedDialog) {
-                            Utility.showPermissionDeniedDialog(this,
-                                    R.string.perm_dialog_read_external,
-                                    binding.clyMainRoot,
-                                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                                    REQ_CODE_READ_EXTERNAL,
-                                    this);
-                            alreadyShownPermDeniedDialog = true;
-                        }
-                    }
+                    if (grantResults[0] == PackageManager.PERMISSION_DENIED)
+                        noImage = true;
+                    UnblockLoader();
                 }
                 break;
         }
@@ -323,7 +306,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private LoaderManager.LoaderCallbacks<List<Recipe>> loaderCallbacks = new LoaderManager.LoaderCallbacks<List<Recipe>>() {
-        //@SuppressWarnings("unchecked")
         @NonNull
         @Override
         public Loader<List<Recipe>> onCreateLoader(int id, @Nullable Bundle args) {
@@ -333,18 +315,10 @@ public class MainActivity extends AppCompatActivity
                         @Override
                         public void onImagePermRequested() {
                             int response = PermissionsHandler.AskForPermission(MainActivity.this,
-                                    Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL, false);
+                                    Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL);
 
-                            switch(response) {
-                                case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
-                                    Log.v(PERMISSIONS, "Storage permission already granted");
-                                    UnblockLoader();
-                                    break;
-                                case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
-                                    Log.v(PERMISSIONS, "Storage permission denied, app won't load images");
-                                    onFeatureDisabled();
-                                    break;
-                            }
+                            if (response == PermissionsHandler.PERMISSION_GRANTED)
+                                UnblockLoader();
                         }
                     });
         }

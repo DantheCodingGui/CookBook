@@ -74,13 +74,13 @@ public class ViewRecipeActivity extends AppCompatActivity
             imageTransitionName = extras.getString(IMAGE_TRANSITION_NAME);
 
             int response = PermissionsHandler.AskForPermission(this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL, false);
+                    Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL);
 
             switch (response) {
-                case PermissionsHandler.PERMISSION_ALREADY_GRANTED:
+                case PermissionsHandler.PERMISSION_GRANTED:
                     SetupPhotoLayout();
                     break;
-                case PermissionsHandler.PERMISSION_PREVIOUSLY_DENIED:
+                case PermissionsHandler.PERMISSION_DENIED:
                     SetupNoPhotoLayout();
                     break;
             }
