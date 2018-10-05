@@ -644,6 +644,9 @@ public class AddRecipeActivity extends AppCompatActivity implements
     public void AddIngredient(View view) {
         String ingredientName = binding.etxtAddIngredient.getText().toString();
 
+        if (Utility.isStringAllWhitespace(ingredientName))
+            return;
+
         Ingredient temp = new Ingredient(ingredientName);
         newIngredients.add(temp);
         ingAdapter.notifyItemInserted(newIngredients.size() - 1);
@@ -657,6 +660,9 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
     public void AddMethodStep(View view) {
         String stepText = binding.etxtAddStep.getText().toString();
+
+        if (Utility.isStringAllWhitespace(stepText))
+            return;
 
         MethodStep temp = new MethodStep(stepText, newSteps.size() + 1);
         newSteps.add(temp);
@@ -692,8 +698,10 @@ public class AddRecipeActivity extends AppCompatActivity implements
                         editIngFrag.SetIngredientsListener(new EditIngredientFragment.onIngredientEditedListener() {
                             @Override
                             public void onIngredientEdited(String ingredientName) {
-                                newIngredients.get(position).setIngredientText(ingredientName);
-                                ingAdapter.notifyItemChanged(position);
+                                if (!Utility.isStringAllWhitespace(ingredientName)) {
+                                    newIngredients.get(position).setIngredientText(ingredientName);
+                                    ingAdapter.notifyItemChanged(position);
+                                }
                             }
                         });
 
@@ -771,8 +779,10 @@ public class AddRecipeActivity extends AppCompatActivity implements
                         editStepFrag.SetStepListener(new EditMethodStepFragment.onStepEditedListener() {
                             @Override
                             public void onStepEdited(String stepText) {
-                                newSteps.get(position).setStepText(stepText);
-                                methAdapter.notifyItemChanged(position);
+                                if (!Utility.isStringAllWhitespace(stepText)) {
+                                    newSteps.get(position).setStepText(stepText);
+                                    methAdapter.notifyItemChanged(position);
+                                }
                             }
                         });
 

@@ -224,6 +224,10 @@ public class Utility {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
+    public static boolean isStringAllWhitespace(String s) {
+        return s.trim().length() == 0;
+    }
+
     /**
      * Sets a button's enable state based on the state of an associated EditText
      * @param currentText Current EditText value
