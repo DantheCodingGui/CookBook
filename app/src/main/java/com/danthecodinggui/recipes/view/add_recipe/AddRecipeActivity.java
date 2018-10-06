@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
@@ -26,7 +27,10 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
+import android.widget.Toast;
 
+import com.asksira.bsimagepicker.BSImagePicker;
+import com.asksira.bsimagepicker.Utils;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityAddRecipeBinding;
 import com.danthecodinggui.recipes.databinding.AddIngredientItemBinding;
@@ -48,7 +52,8 @@ import static com.danthecodinggui.recipes.msc.IntentConstants.METHOD_STEP_OBJECT
  */
 public class AddRecipeActivity extends AppCompatActivity implements
         CaloriesPickerFragment.onCaloriesSetListener,
-        DurationPickerFragment.onDurationSetListener, AddImageURLFragment.onURLSetListener {
+        DurationPickerFragment.onDurationSetListener, AddImageURLFragment.onURLSetListener,
+        BSImagePicker.OnSingleImageSelectedListener {
 
     ActivityAddRecipeBinding binding;
 
@@ -60,6 +65,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private static final String FRAG_TAG_EDIT_INGREDIENT = "FRAG_TAG_EDIT_INGREDIENT";
     private static final String FRAG_TAG_EDIT_STEP = "FRAG_TAG_EDIT_STEP";
     private static final String FRAG_TAG_IMAGE_URL = "FRAG_TAG_IMAGE_URL";
+    private static final String FRAG_TAG_IMAGE_GALLERY = "FRAG_TAG_IMAGE_GALLERY";
 
     //Instance State Tags
     private static final String DURATION = "DURATION";
@@ -400,6 +406,22 @@ public class AddRecipeActivity extends AppCompatActivity implements
         addUrlFrag.show(getFragmentManager(), FRAG_TAG_IMAGE_URL);
     }
 
+    public void AddImageGallery(View view) {
+        BSImagePicker addGalleryFrag = new BSImagePicker.Builder("com.danthecodinggui.fileprovider")
+                .setSpanCount(3)
+                .setGridSpacing(0)
+                .setPeekHeight(Utility.dpToPx(this, 500))
+                .hideCameraTile()
+                .hideGalleryTile()
+                .build();
+
+        addGalleryFrag.show(getSupportFragmentManager(), FRAG_TAG_IMAGE_GALLERY);
+    }
+    @Override
+    public void onSingleImageSelected(Uri uri) {
+        SetImage(uri.getPath());
+    }
+
     private void ToggleImageVisibility() {
         if (binding.imvImageContainer.getVisibility() == View.GONE) {
             binding.imvImageContainer.setVisibility(View.VISIBLE);
@@ -453,14 +475,17 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
     @Override
     public void onURLSet(String url) {
-        if (!Utility.isStringAllWhitespace(url)) {
-            if (imagePath == null)
-                ToggleImageVisibility();
-            imagePath = url;
-            binding.setImagePath(url);
-            photoSheetExpanded = false;
-            photoSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
+        if (!Utility.isStringAllWhitespace(url))
+            SetImage(url);
+    }
+
+    private void SetImage(String url) {
+        if (imagePath == null)
+            ToggleImageVisibility();
+        imagePath = url;
+        binding.setImagePath(url);
+        photoSheetExpanded = false;
+        photoSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
     private EditIngredientFragment.onIngredientEditedListener editIngredientListener = new EditIngredientFragment.onIngredientEditedListener() {
