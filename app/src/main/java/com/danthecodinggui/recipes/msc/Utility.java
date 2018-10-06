@@ -6,10 +6,12 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.TypedValue;
@@ -108,7 +110,17 @@ public class Utility {
      */
     public static void showPermissionDeniedSnackbar(View snackbarAnchor, String permissionName) {
         String text = snackbarAnchor.getContext().getResources().getString(R.string.perm_snackbar_msg, permissionName);
-        Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_LONG).show();
+        Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_LONG)
+                .setAction(R.string.snackbar_settings, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Context context = view.getContext();
+                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                Uri.fromParts("package", context.getPackageName(), null));
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                    }
+                }).show();
     }
 
     /**

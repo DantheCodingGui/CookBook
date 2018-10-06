@@ -19,6 +19,7 @@
             style="@style/ButtonBottomSheet"
             android:drawableStart="@drawable/ic_photo"
             android:text="@string/btn_add_photo"
+            android:onClick="AddImageCamera"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

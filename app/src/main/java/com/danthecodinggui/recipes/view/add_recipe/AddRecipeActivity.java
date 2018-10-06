@@ -1,8 +1,12 @@
 package com.danthecodinggui.recipes.view.add_recipe;
 
+import android.Manifest;
 import android.animation.AnimatorInflater;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
+import android.app.ActivityOptions;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
@@ -19,10 +23,12 @@ import android.support.v7.widget.RecyclerView;
 import android.support.transition.TransitionManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.OvershootInterpolator;
@@ -31,14 +37,18 @@ import android.widget.Toast;
 
 import com.asksira.bsimagepicker.BSImagePicker;
 import com.asksira.bsimagepicker.Utils;
+import com.bumptech.glide.util.Util;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityAddRecipeBinding;
 import com.danthecodinggui.recipes.databinding.AddIngredientItemBinding;
 import com.danthecodinggui.recipes.databinding.AddMethodItemBinding;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.model.object_models.MethodStep;
+import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.msc.StringUtils;
 import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.view.CameraActivity;
+import com.danthecodinggui.recipes.view.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +76,9 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private static final String FRAG_TAG_EDIT_STEP = "FRAG_TAG_EDIT_STEP";
     private static final String FRAG_TAG_IMAGE_URL = "FRAG_TAG_IMAGE_URL";
     private static final String FRAG_TAG_IMAGE_GALLERY = "FRAG_TAG_IMAGE_GALLERY";
+
+    //Permission Request Codes
+    private static final int REQ_CODE_CAMERA = 201;
 
     //Instance State Tags
     private static final String DURATION = "DURATION";
@@ -180,6 +193,10 @@ public class AddRecipeActivity extends AppCompatActivity implements
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
         });
+
+        //Disable camera option if device doesn't have camera
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
+            binding.includeImageSheet.btnAddPhoto.setVisibility(View.GONE);
     }
 
     @Override
@@ -270,7 +287,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         else if (methodExpanded)
             RetractMethodCard();
         else if (photoSheetExpanded)
-            photoSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            ClosePhotoSheet();
         else if (fabMenuOpen)
             AnimateFabMenu(binding.fabAddMenu);
         else
@@ -285,7 +302,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
                 binding.includeImageSheet.addImage.getGlobalVisibleRect(outRect);
 
                 if(!outRect.contains((int)event.getRawX(), (int)event.getRawY()))
-                    photoSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    ClosePhotoSheet();
             }
         }
 
@@ -422,6 +439,53 @@ public class AddRecipeActivity extends AppCompatActivity implements
         SetImage(uri.getPath());
     }
 
+    public void AddImageCamera(View view) {
+
+        int response = PermissionsHandler.AskForPermission(this, Manifest.permission.CAMERA, REQ_CODE_CAMERA);
+
+        switch (response) {
+            case PermissionsHandler.PERMISSION_GRANTED:
+                OpenCamera();
+                break;
+            case PermissionsHandler.PERMISSION_DENIED:
+                ClosePhotoSheet();
+                //Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot, "Camera");
+                break;
+        }
+    }
+
+    private void ClosePhotoSheet() {
+        photoSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch(requestCode) {
+            case REQ_CODE_CAMERA:
+                if (grantResults.length > 0) {
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                        OpenCamera();
+                    else {
+                        ClosePhotoSheet();
+                        //Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot, "Camera");
+                    }
+                }
+                break;
+        }
+    }
+
+    private void OpenCamera() {
+        Intent openCamera = new Intent(this, CameraActivity.class);
+        if (Utility.atLeastLollipop()) {
+            Pair<View, String> navBar = Pair.create(findViewById(android.R.id.navigationBarBackground),
+                    Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
+
+            startActivity(openCamera, ActivityOptions.makeSceneTransitionAnimation(this, navBar).toBundle());
+        }
+        else
+            startActivity(openCamera);
+    }
+
     private void ToggleImageVisibility() {
         if (binding.imvImageContainer.getVisibility() == View.GONE) {
             binding.imvImageContainer.setVisibility(View.VISIBLE);
@@ -485,7 +549,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         imagePath = url;
         binding.setImagePath(url);
         photoSheetExpanded = false;
-        photoSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        ClosePhotoSheet();
     }
 
     private EditIngredientFragment.onIngredientEditedListener editIngredientListener = new EditIngredientFragment.onIngredientEditedListener() {

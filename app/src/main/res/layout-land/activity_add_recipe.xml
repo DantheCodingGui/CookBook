@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable name="imagePath" type="String"/>
+    </data>
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/cdly_add_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true">
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/lly_add_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true">
+
+            <LinearLayout
+                android:id="@+id/lly_toolbar_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/backToolbar"
+                android:elevation="5dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/tbar_add"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="@color/backToolbar" />
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/imv_image_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <ImageButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:background="@android:color/transparent"
+                        android:elevation="2dp"
+                        android:onClick="RemoveImage"
+                        android:padding="5dp"
+                        android:src="@drawable/ic_close"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="75dp"
+                        android:layout_gravity="top"
+                        android:background="@drawable/top_scrim"
+                        android:elevation="1dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/imv_add_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:imagePath="@{imagePath}"
+                        tools:src="@drawable/sample_image" />
+                </android.support.constraint.ConstraintLayout>
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/cly_add_tbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
+                    android:background="@color/backToolbar"
+                    android:paddingStart="20dp"
+                    android:paddingTop="15dp"
+                    android:paddingEnd="5dp"
+                    android:paddingBottom="15dp">
+
+                    <EditText
+                        android:id="@+id/etxt_recipe_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:hint="@string/etxt_hint_addTitle"
+                        android:inputType="text|textNoSuggestions"
+                        android:singleLine="true"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <LinearLayout
+                        android:id="@+id/but_kcal"
+                        style="@style/AddRecipeClickable"
+                        android:onClick="AddKcal"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/etxt_recipe_name"
+                        app:layout_constraintVertical_bias="0.0">
+
+                        <TextView
+                            android:id="@+id/txt_kcal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            tools:text="340 Kcal" />
+
+                        <ImageView style="@style/EditTextViewIcon" />
+
+                        <ImageButton
+                            style="@style/AddRecipeRemoveButton"
+                            android:onClick="RemoveKcal" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/but_time"
+                        style="@style/AddRecipeClickable"
+                        android:onClick="AddTime"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/etxt_recipe_name">
+
+                        <TextView
+                            android:id="@+id/txt_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            tools:text="20 Minutes" />
+
+                        <ImageView style="@style/EditTextViewIcon" />
+
+                        <ImageButton
+                            style="@style/AddRecipeRemoveButton"
+                            android:onClick="RemoveDuration" />
+                    </LinearLayout>
+                </android.support.constraint.ConstraintLayout>
+            </LinearLayout>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/crdv_ingredients"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="7dp"
+                android:layout_marginBottom="15dp"
+                android:clickable="true"
+                android:elevation="4dp"
+                android:focusable="true"
+                android:onClick="ViewIngredients"
+                app:cardCornerRadius="4dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/crdv_method"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lly_toolbar_container">
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/ctly_ingredients_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:animateLayoutChanges="true"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/txt_ingredients_title"
+                        style="@style/Title"
+                        android:text="@string/ingredients"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="25sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txt_no_ingredients"
+                        style="@style/AddNone"
+                        android:text="@string/txt_no_ingredients"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rvw_new_ingredients"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="70dp"
+                        android:overScrollMode="never"
+                        android:padding="10dp"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toTopOf="@+id/etxt_add_ingredient"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.094" />
+
+                    <ImageView
+                        android:id="@+id/imv_no_ingredients"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:src="@drawable/ic_add_light"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/txt_ingredients_title" />
+
+                    <ImageButton
+                        android:id="@+id/but_add_ingredient"
+                        android:layout_width="47dp"
+                        android:layout_height="47dp"
+                        android:background="@drawable/circular_imagebutton"
+                        android:elevation="1dp"
+                        android:onClick="AddIngredient"
+                        android:src="@drawable/ic_add"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="@+id/etxt_add_ingredient"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/etxt_add_ingredient" />
+
+                    <EditText
+                        android:id="@+id/etxt_add_ingredient"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="5dp"
+                        android:background="@drawable/rounded_corner_edittext"
+                        android:hint="@string/etxt_hint_addIngredient"
+                        android:padding="10dp"
+                        android:paddingStart="15dp"
+                        android:paddingEnd="50dp"
+                        android:singleLine="true"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </android.support.constraint.ConstraintLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/crdv_method"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="7dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="15dp"
+                android:clickable="true"
+                android:elevation="4dp"
+                android:focusable="true"
+                android:onClick="ViewMethod"
+                app:cardCornerRadius="4dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lly_toolbar_container"
+                app:layout_constraintStart_toEndOf="@id/crdv_ingredients"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/ctly_method_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:animateLayoutChanges="true"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/txt_method_title"
+                        style="@style/Title"
+                        android:text="@string/method"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="25sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txt_no_steps"
+                        style="@style/AddNone"
+                        android:text="@string/txt_no_steps"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rvw_new_steps"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="70dp"
+                        android:overScrollMode="never"
+                        android:padding="10dp"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toTopOf="@+id/etxt_add_step"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.094" />
+
+                    <ImageView
+                        android:id="@+id/imv_no_method"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:src="@drawable/ic_add_light"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/txt_method_title" />
+
+                    <ImageButton
+                        android:id="@+id/but_add_step"
+                        android:layout_width="47dp"
+                        android:layout_height="47dp"
+                        android:background="@drawable/circular_imagebutton"
+                        android:elevation="1dp"
+                        android:onClick="AddMethodStep"
+                        android:src="@drawable/ic_add"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="@+id/etxt_add_step"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/etxt_add_step" />
+
+                    <EditText
+                        android:id="@+id/etxt_add_step"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="5dp"
+                        android:background="@drawable/rounded_corner_edittext"
+                        android:hint="@string/etxt_hint_addStep"
+                        android:inputType="textMultiLine"
+                        android:maxLines="3"
+                        android:padding="10dp"
+                        android:paddingStart="15dp"
+                        android:paddingEnd="50dp"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </android.support.constraint.ConstraintLayout>
+            </android.support.v7.widget.CardView>
+
+        </android.support.constraint.ConstraintLayout>
+
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_add_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_add"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:onClick="AnimateFabMenu"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_add_photo"
+            style="@style/FabMenuItem"
+            app:fabSize="mini"
+            android:layout_margin="70dp"
+            android:src="@drawable/ic_image"
+            android:onClick="addImage" />
+        <TextView
+            android:id="@+id/txt_add_photo"
+            style="@style/FabTag"
+            android:layout_marginBottom="77dp"
+            android:layout_marginEnd="119dp"
+            android:text="@string/txt_add_image"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_add_time"
+            style="@style/FabMenuItem"
+            app:fabSize="mini"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="86dp"
+            android:src="@drawable/ic_time"
+            android:onClick="AddTime"/>
+        <TextView
+            android:id="@+id/txt_add_time"
+            style="@style/FabTag"
+            android:layout_marginBottom="17dp"
+            android:layout_marginEnd="135dp"
+            android:text="@string/txt_add_time"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_add_kcal"
+            style="@style/FabMenuItem"
+            app:fabSize="mini"
+            android:layout_marginBottom="86dp"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/ic_kcal"
+            android:onClick="AddKcal"/>
+        <TextView
+            android:id="@+id/txt_add_kcal"
+            style="@style/FabTag"
+            android:layout_marginBottom="135dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/txt_add_kcal"/>
+
+        <include
+            android:id="@+id/includeImageSheet"
+            layout="@layout/add_image_sheet"/>
+
+    </android.support.design.widget.CoordinatorLayout>
+</layout>

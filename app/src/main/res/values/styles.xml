@@ -37,8 +37,16 @@
     </style>
 
     <style name="AddRecipeTheme" parent="HomeTheme">
-
         <item name="android:statusBarColor">@color/backToolbar</item>
+
+        <item name="android:windowExitTransition">@transition/add_activity_exit</item>
+        <item name="android:windowReenterTransition">@transition/add_activity_return</item>
+    </style>
+
+    <style name="CameraTheme" parent="Theme.AppCompat.NoActionBar">
+
+        <item name="android:windowEnterTransition">@transition/camera_activity</item>
+        <item name="android:windowReturnTransition">@transition/camera_activity</item>
     </style>
 
     <style name="SearchView" parent="Widget.AppCompat.SearchView">
