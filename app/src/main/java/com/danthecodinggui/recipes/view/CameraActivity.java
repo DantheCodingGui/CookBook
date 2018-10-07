@@ -7,16 +7,14 @@ import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.OrientationEventListener;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.RotateAnimation;
-import android.widget.Toast;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityCameraBinding;
@@ -50,6 +48,7 @@ public class CameraActivity extends AppCompatActivity {
 
     Fotoapparat fotoapparat;
 
+    private int initOrientation;
     private OrientationListener orientationListener;
 
     public static Bitmap takenImage;
@@ -102,6 +101,26 @@ public class CameraActivity extends AppCompatActivity {
             binding.imbFlash.setVisibility(View.VISIBLE);
         if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT))
             binding.imbSwitchCamera.setVisibility(View.VISIBLE);
+
+        //Lock Orientation
+        int rotation = ((WindowManager)getSystemService(
+                Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                initOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                break;
+            case Surface.ROTATION_90:
+                initOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                break;
+            case Surface.ROTATION_180:
+                initOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+                break;
+            default:
+                initOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+                break;
+        }
+
+        setRequestedOrientation(initOrientation);
 
         orientationListener = new OrientationListener(this);
     }
@@ -185,6 +204,9 @@ public class CameraActivity extends AppCompatActivity {
         isCameraBack = !isCameraBack;
     }
 
+    /**
+     * Enables activity to rotate certain elements on initOrientation change rather than recreate whole layout
+     */
     private class OrientationListener extends OrientationEventListener {
 
         final int ROTATION_O    = 1;
@@ -203,28 +225,35 @@ public class CameraActivity extends AppCompatActivity {
 
             if( (orientation < 35 || orientation > 325) && rotation!= ROTATION_O){ // PORTRAIT
                 rotation = ROTATION_O;
-                //Toast.makeText(CameraActivity.this, "Orientation now portrait", Toast.LENGTH_SHORT).show();
                 rotate = 0.f;
                 shouldAnimate = true;
             }
             else if( orientation > 145 && orientation < 215 && rotation!=ROTATION_180){ // REVERSE PORTRAIT
                 rotation = ROTATION_180;
-                //Toast.makeText(CameraActivity.this, "Orientation now reverse portrait", Toast.LENGTH_SHORT).show();
                 rotate = 180.f;
                 shouldAnimate = true;
             }
             else if(orientation > 55 && orientation < 125 && rotation!=ROTATION_270){ // REVERSE LANDSCAPE
                 rotation = ROTATION_270;
-                //Toast.makeText(CameraActivity.this, "Orientation now reverse landscape", Toast.LENGTH_SHORT).show();
                 rotate = 270.f;
                 shouldAnimate = true;
             }
             else if(orientation > 235 && orientation < 305 && rotation!=ROTATION_90){ //LANDSCAPE
                 rotation = ROTATION_90;
-                //Toast.makeText(CameraActivity.this, "Orientation now landscape", Toast.LENGTH_SHORT).show();
                 rotate = 90.f;
                 shouldAnimate = true;
             }
+
+            //Adjust rotations based on activity entry orientation
+            if (initOrientation ==  ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+                rotate -= 90.f;
+            else if (initOrientation ==  ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE)
+                rotate += 90.f;
+
+            if (rotate < 0)
+                rotate = 270.f;
+            else if (rotate > 270.f)
+                rotate = 0;
 
             if (shouldAnimate) {
                 ObjectAnimator animSwitch = ObjectAnimator.ofFloat(binding.imbSwitchCamera, View.ROTATION, rotate).setDuration(200);

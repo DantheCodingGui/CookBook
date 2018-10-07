@@ -34,7 +34,6 @@
             android:windowSoftInputMode="adjustPan" />
         <activity android:name=".view.CameraActivity"
             android:parentActivityName=".view.add_recipe.AddRecipeActivity"
-            android:screenOrientation="portrait"
             android:theme="@style/CameraTheme"/>
         
         <provider
@@ -55,5 +54,7 @@
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+        <meta-data android:name="android.app.shortcuts"
+            android:resource="@xml/shortcuts"/>
     </application>
 </manifest>
