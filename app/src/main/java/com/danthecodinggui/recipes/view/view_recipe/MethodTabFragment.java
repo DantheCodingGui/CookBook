@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 
-import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_ID;
 
 /**
  * Holds list of steps for a given recipe

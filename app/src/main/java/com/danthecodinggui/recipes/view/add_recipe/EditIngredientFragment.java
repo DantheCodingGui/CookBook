@@ -15,7 +15,7 @@ import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.msc.Utility;
 
-import static com.danthecodinggui.recipes.msc.IntentConstants.INGREDIENT_OBJECT;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.INGREDIENT_OBJECT;
 
 /**
  * Shows simple dialog to edit an ingredient

@@ -4,13 +4,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <data>
+        <import type="android.graphics.drawable.Drawable"/>
         <variable name="imagePath" type="String"/>
+        <variable
+            name="imageLoadedCallback"
+            type="com.bumptech.glide.request.RequestListener&lt;Drawable&gt;"/>
     </data>
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/cdly_add_root"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:animateLayoutChanges="true">
+        android:layout_height="match_parent">
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/lly_add_container"
@@ -73,6 +76,7 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:imagePath="@{imagePath}"
+                        app:onLoadedListener="@{imageLoadedCallback}"
                         tools:src="@drawable/sample_image" />
                 </android.support.constraint.ConstraintLayout>
 

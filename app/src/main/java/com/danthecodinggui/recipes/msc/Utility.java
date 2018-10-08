@@ -109,7 +109,9 @@ public class Utility {
      * @param permissionName The name of the permission you are referencing
      */
     public static void showPermissionDeniedSnackbar(View snackbarAnchor, String permissionName) {
-        String text = snackbarAnchor.getContext().getResources().getString(R.string.perm_snackbar_msg, permissionName);
+        Context context = snackbarAnchor.getContext();
+
+        String text = context.getResources().getString(R.string.perm_snackbar_msg, permissionName);
         Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_LONG)
                 .setAction(R.string.snackbar_settings, new View.OnClickListener() {
                     @Override
@@ -120,7 +122,9 @@ public class Utility {
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
                     }
-                }).show();
+                })
+                .setActionTextColor(context.getResources().getColor(android.R.color.holo_blue_light))
+                .show();
     }
 
     /**

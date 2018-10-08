@@ -2,7 +2,6 @@ package com.danthecodinggui.recipes.view.view_recipe;
 
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_ID;
 
 /**
  * Shows the ingredients associated with a particular recipe

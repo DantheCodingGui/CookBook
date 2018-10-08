@@ -5,28 +5,59 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.OrientationEventListener;
+import android.view.OrientationListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.util.Util;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityCameraBinding;
+import com.danthecodinggui.recipes.msc.Utility;
+
+import java.io.File;
+import java.security.MessageDigest;
+import java.util.UUID;
 
 import io.fotoapparat.Fotoapparat;
 import io.fotoapparat.configuration.CameraConfiguration;
 import io.fotoapparat.configuration.UpdateConfiguration;
 import io.fotoapparat.parameter.ScaleType;
+import io.fotoapparat.result.BitmapPhoto;
 import io.fotoapparat.result.PhotoResult;
+import io.fotoapparat.result.WhenDoneListener;
 import io.fotoapparat.selector.LensPositionSelectorsKt;
 import io.fotoapparat.selector.ResolutionSelectorsKt;
+import kotlin.Unit;
 
+import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_PATH;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_SAVED;
+
+import static com.danthecodinggui.recipes.msc.LogTags.CAMERA;
 import static io.fotoapparat.selector.AspectRatioSelectorsKt.standardRatio;
 import static io.fotoapparat.selector.FlashSelectorsKt.autoFlash;
 import static io.fotoapparat.selector.FlashSelectorsKt.autoRedEye;
@@ -48,14 +79,21 @@ public class CameraActivity extends AppCompatActivity {
 
     Fotoapparat fotoapparat;
 
+    //Instance State Tags
+    private static final String FILE_PATH = "FILE_PATH";
+    private static final String IS_CAMERA_BACK = "IS_CAMERA_BACK";
+    private static final String CAMERA_FLASH = "CAMERA_FLASH";
+
     private int initOrientation;
     private OrientationListener orientationListener;
 
-    public static Bitmap takenImage;
+    private String resultCachePath;
 
     private int CAM_FLASH_AUTO = 1;
     private int CAM_FLASH_ON = 2;
     private int CAM_FLASH_OFF = 3;
+
+    private boolean takenPhoto = false;
 
     private boolean isCameraBack = true;
     private int cameraFlash = CAM_FLASH_AUTO;
@@ -65,17 +103,8 @@ public class CameraActivity extends AppCompatActivity {
             .photoResolution(standardRatio(
                     highestResolution()
             ))
-            .focusMode(firstAvailable(
-                    continuousFocusPicture(),
-                    autoFocus(),
-                    fixed()
-            ))
-            .flash(firstAvailable(
-                    autoRedEye(),
-                    autoFlash(),
-                    torch(),
-                    off()
-            ))
+            .focusMode(continuousFocusPicture())
+            .flash(autoFlash())
             .previewFpsRange(highestFps())
             .sensorSensitivity(highestSensorSensitivity())
             .build();
@@ -94,6 +123,7 @@ public class CameraActivity extends AppCompatActivity {
                 .into(binding.cameraView)
                 .previewScaleType(ScaleType.CenterCrop)
                 .photoResolution(ResolutionSelectorsKt.highestResolution())
+                .flash(autoFlash())
                 .lensPosition(LensPositionSelectorsKt.back())
                 .build();
 
@@ -102,27 +132,77 @@ public class CameraActivity extends AppCompatActivity {
         if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT))
             binding.imbSwitchCamera.setVisibility(View.VISIBLE);
 
+        CoordinatorLayout.LayoutParams params;
+
         //Lock Orientation
         int rotation = ((WindowManager)getSystemService(
                 Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+
         switch (rotation) {
             case Surface.ROTATION_0:
                 initOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
                 break;
             case Surface.ROTATION_90:
                 initOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+
+                params = (CoordinatorLayout.LayoutParams) binding.imbConfirmImage.getLayoutParams();
+                params.setMargins(Utility.dpToPx(this, 16),
+                        Utility.dpToPx(this, 16),
+                        Utility.dpToPx(this, 60),
+                        Utility.dpToPx(this, 16));
+                binding.imbConfirmImage.setLayoutParams(params);
                 break;
             case Surface.ROTATION_180:
                 initOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
                 break;
             default:
                 initOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+
+                params = (CoordinatorLayout.LayoutParams) binding.imbDiscardImage.getLayoutParams();
+                params.setMargins(Utility.dpToPx(this, 50), Utility.dpToPx(this, 30), 0, 0);
+                binding.imbDiscardImage.setLayoutParams(params);
+
+                params = (CoordinatorLayout.LayoutParams) binding.imbConfirmImage.getLayoutParams();
+                params.setMargins(Utility.dpToPx(this, 16),
+                        Utility.dpToPx(this, 16),
+                        Utility.dpToPx(this, 16),
+                        Utility.dpToPx(this, 16));
+                binding.imbConfirmImage.setLayoutParams(params);
                 break;
         }
 
         setRequestedOrientation(initOrientation);
 
         orientationListener = new OrientationListener(this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(FILE_PATH, resultCachePath);
+        outState.putBoolean(IS_CAMERA_BACK, isCameraBack);
+        outState.putInt(CAMERA_FLASH, cameraFlash);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        resultCachePath = savedInstanceState.getString(FILE_PATH);
+        isCameraBack = savedInstanceState.getBoolean(IS_CAMERA_BACK);
+        cameraFlash = savedInstanceState.getInt(CAMERA_FLASH);
+
+        if (!isCameraBack)
+            binding.imbSwitchCamera.setImageResource(R.drawable.ic_camera_back);
+
+        if (resultCachePath != null)
+            ShowConfirmationView(false, null);
+
+        if (cameraFlash == CAM_FLASH_ON)
+            binding.imbFlash.setImageResource(R.drawable.ic_flash_on);
+        else if (cameraFlash == CAM_FLASH_OFF)
+            binding.imbFlash.setImageResource(R.drawable.ic_flash_off);
     }
 
     @Override
@@ -139,8 +219,62 @@ public class CameraActivity extends AppCompatActivity {
         fotoapparat.stop();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (resultCachePath != null)
+            DiscardPhoto(null);
+        else
+            super.onBackPressed();
+    }
+
     public void CapturePhoto(View view) {
+
+        if (takenPhoto)
+            return;
+        takenPhoto = true;
+
+        if (cameraFlash == CAM_FLASH_ON)
+            fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(torch()).build());
         PhotoResult result = fotoapparat.takePicture();
+        if (cameraFlash == CAM_FLASH_ON)
+            new Handler(getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(off()).build());
+                }
+            }, 400);
+
+
+        String filename = UUID.randomUUID().toString() + ".jpg";
+
+        File tempPhoto = new File(getFilesDir(), filename);
+
+        resultCachePath = tempPhoto.getAbsolutePath();
+
+        result.saveToFile(tempPhoto);
+
+        result.toBitmap().whenDone(new WhenDoneListener<BitmapPhoto>() {
+            @Override
+            public void whenDone(BitmapPhoto bitmapPhoto) {
+                ShowConfirmationView(true, bitmapPhoto);
+            }
+        });
+    }
+
+    private void ShowConfirmationView(boolean fromBitmap, @Nullable BitmapPhoto b) {
+
+        TransitionManager.beginDelayedTransition(binding.clyCameraRoot);
+        binding.cdlyImageConfirm.setVisibility(View.VISIBLE);
+
+        RequestOptions options = new RequestOptions()
+                .transform(new RotateTransformation( -b.rotationDegrees));
+
+        Glide.with(CameraActivity.this)
+                .setDefaultRequestOptions(options)
+                .load(fromBitmap ? b.bitmap : resultCachePath)
+                .into(binding.imvImageConfirm);
+
+        takenPhoto = false;
     }
 
     public void ToggleFlash(View view) {
@@ -154,15 +288,13 @@ public class CameraActivity extends AppCompatActivity {
             public void onAnimationEnd(Animator animation) {
                 if (cameraFlash == CAM_FLASH_AUTO) {
                     binding.imbFlash.setImageResource(R.drawable.ic_flash_on);
-                    UpdateConfiguration.builder().flash(torch());
+                    fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(off()).build());
                 }
-                else if (cameraFlash == CAM_FLASH_ON) {
+                else if (cameraFlash == CAM_FLASH_ON)
                     binding.imbFlash.setImageResource(R.drawable.ic_flash_off);
-                    UpdateConfiguration.builder().flash(off());
-                }
                 else if (cameraFlash == CAM_FLASH_OFF) {
                     binding.imbFlash.setImageResource(R.drawable.ic_flash_auto);
-                    UpdateConfiguration.builder().flash(autoFlash());
+                    fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(autoFlash()).build());
                 }
 
                 ++cameraFlash;
@@ -202,6 +334,33 @@ public class CameraActivity extends AppCompatActivity {
         });
         anim.start();
         isCameraBack = !isCameraBack;
+    }
+
+    public void ConfirmPhoto(View view) {
+        new Handler(getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent broadcastPath = new Intent(CAMERA_PHOTO_SAVED);
+                broadcastPath.putExtra(CAMERA_PHOTO_PATH, resultCachePath);
+                sendBroadcast(broadcastPath);
+                Log.v(CAMERA, "Image path broadcast sent");
+            }
+        }, 500);
+
+        finish();
+    }
+
+    public void DiscardPhoto(View view) {
+
+        TransitionManager.beginDelayedTransition(binding.clyCameraRoot);
+        binding.cdlyImageConfirm.setVisibility(View.GONE);
+
+        //Delete photo
+        File imageFile = new File(resultCachePath);
+        if (imageFile.exists())
+            imageFile.delete();
+
+        resultCachePath = null;
     }
 
     /**
@@ -261,6 +420,31 @@ public class CameraActivity extends AppCompatActivity {
                 animSwitch.start();
                 animFlash.start();
             }
+        }
+    }
+
+    private class RotateTransformation extends BitmapTransformation {
+
+        private float rotateRotationAngle;
+
+        RotateTransformation(float rotateRotationAngle) {
+            super();
+
+            this.rotateRotationAngle = rotateRotationAngle;
+        }
+
+        @Override
+        protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+            Matrix matrix = new Matrix();
+
+            matrix.postRotate(rotateRotationAngle);
+
+            return Bitmap.createBitmap(toTransform, 0, 0, toTransform.getWidth(), toTransform.getHeight(), matrix, true);
+        }
+
+        @Override
+        public void updateDiskCacheKey(MessageDigest messageDigest) {
+            messageDigest.update(("rotate" + rotateRotationAngle).getBytes());
         }
     }
 }

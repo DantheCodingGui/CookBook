@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 
 import java.util.List;
 
-import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_ID;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_ID;
 
 /**
  * Manages the transitions between fragment tabs

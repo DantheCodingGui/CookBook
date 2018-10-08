@@ -13,7 +13,7 @@ import android.widget.EditText;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.msc.Utility;
 
-import static com.danthecodinggui.recipes.msc.IntentConstants.METHOD_STEP_OBJECT;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.METHOD_STEP_OBJECT;
 
 /**
  * Shows simple dialog to edit an method step

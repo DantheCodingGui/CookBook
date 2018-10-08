@@ -5,7 +5,10 @@ import android.animation.AnimatorInflater;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.app.ActivityOptions;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
@@ -23,6 +26,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.transition.TransitionManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -33,11 +37,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
-import android.widget.Toast;
 
 import com.asksira.bsimagepicker.BSImagePicker;
-import com.asksira.bsimagepicker.Utils;
-import com.bumptech.glide.util.Util;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityAddRecipeBinding;
 import com.danthecodinggui.recipes.databinding.AddIngredientItemBinding;
@@ -48,13 +49,16 @@ import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.msc.StringUtils;
 import com.danthecodinggui.recipes.msc.Utility;
 import com.danthecodinggui.recipes.view.CameraActivity;
-import com.danthecodinggui.recipes.view.MainActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.danthecodinggui.recipes.msc.IntentConstants.INGREDIENT_OBJECT;
-import static com.danthecodinggui.recipes.msc.IntentConstants.METHOD_STEP_OBJECT;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_PATH;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_SAVED;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.INGREDIENT_OBJECT;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.METHOD_STEP_OBJECT;
+import static com.danthecodinggui.recipes.msc.LogTags.CAMERA;
 
 
 /**
@@ -78,7 +82,10 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private static final String FRAG_TAG_IMAGE_GALLERY = "FRAG_TAG_IMAGE_GALLERY";
 
     //Permission Request Codes
-    private static final int REQ_CODE_CAMERA = 201;
+    private static final int PERM_REQ_CODE_CAMERA = 201;
+
+    //Activity Request Codes
+    private static final int ACT_REQ_CODE_CAMERA = 301;
 
     //Instance State Tags
     private static final String DURATION = "DURATION";
@@ -97,7 +104,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
     private int recipeDuration;
     private int recipeKcalPerPerson;
-    private String imagePath;
+    private String currentImagePath;
 
     private boolean ingredientsExpanded = false;
     private boolean methodExpanded = false;
@@ -197,6 +204,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
         //Disable camera option if device doesn't have camera
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
             binding.includeImageSheet.btnAddPhoto.setVisibility(View.GONE);
+
+        registerReceiver(photoSavedReceiver, new IntentFilter(CAMERA_PHOTO_SAVED));
     }
 
     @Override
@@ -205,7 +214,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         outState.putInt(DURATION, recipeDuration);
         outState.putInt(KCAL, recipeKcalPerPerson);
-        outState.putString(IMAGE_PATH, imagePath);
+        outState.putString(IMAGE_PATH, currentImagePath);
 
         outState.putInt(EDITING_POSITION, editingPosition);
 
@@ -226,7 +235,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         recipeDuration = savedInstanceState.getInt(DURATION);
         recipeKcalPerPerson = savedInstanceState.getInt(KCAL);
-        imagePath = savedInstanceState.getString(IMAGE_PATH);
+        currentImagePath = savedInstanceState.getString(IMAGE_PATH);
         ingredientsExpanded = savedInstanceState.getBoolean(INGREDIENTS_EXPANDED);
         methodExpanded = savedInstanceState.getBoolean(METHOD_EXPANDED);
         boolean fabMenuOpen = savedInstanceState.getBoolean(FAB_MENU_OPEN);
@@ -250,8 +259,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
             onDurationSet(recipeDuration);
         if (recipeKcalPerPerson != 0)
             onCaloriesSet(recipeKcalPerPerson);
-        if (imagePath != null)
-            onURLSet(imagePath);
+        if (currentImagePath != null)
+            SetImage(currentImagePath);
         if (ingredientsExpanded)
             ExpandIngredientsCard();
         else if (methodExpanded)
@@ -292,6 +301,15 @@ public class AddRecipeActivity extends AppCompatActivity implements
             AnimateFabMenu(binding.fabAddMenu);
         else
             super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            unregisterReceiver(photoSavedReceiver);
+        }
+        catch (IllegalArgumentException e) {}
     }
 
     @Override public boolean dispatchTouchEvent(MotionEvent event){
@@ -412,8 +430,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
         photoSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
     public void RemoveImage(View view) {
-        ToggleImageVisibility();
-        imagePath = null;
+        HideImage();
+        currentImagePath = null;
     }
 
     public void AddImageURL(View view) {
@@ -421,6 +439,10 @@ public class AddRecipeActivity extends AppCompatActivity implements
         addUrlFrag.SetURLListener(this);
 
         addUrlFrag.show(getFragmentManager(), FRAG_TAG_IMAGE_URL);
+    }
+    @Override
+    public void onURLSet(String url) {
+        SetImage(url);
     }
 
     public void AddImageGallery(View view) {
@@ -441,7 +463,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
     public void AddImageCamera(View view) {
 
-        int response = PermissionsHandler.AskForPermission(this, Manifest.permission.CAMERA, REQ_CODE_CAMERA);
+        int response = PermissionsHandler.AskForPermission(this, Manifest.permission.CAMERA, PERM_REQ_CODE_CAMERA);
 
         switch (response) {
             case PermissionsHandler.PERMISSION_GRANTED:
@@ -449,75 +471,27 @@ public class AddRecipeActivity extends AppCompatActivity implements
                 break;
             case PermissionsHandler.PERMISSION_DENIED:
                 ClosePhotoSheet();
-                //Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot, "Camera");
+                Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot, "Camera");
                 break;
         }
     }
 
-    private void ClosePhotoSheet() {
-        photoSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    private void SetImage(String path) {
+        if (Utility.isStringAllWhitespace(path))
+            return;
+
+        currentImagePath = path;
+        binding.setImagePath(path);
+        binding.executePendingBindings();
+        photoSheetExpanded = false;
+        ClosePhotoSheet();
+
+        ShowImage();
     }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch(requestCode) {
-            case REQ_CODE_CAMERA:
-                if (grantResults.length > 0) {
-                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                        OpenCamera();
-                    else {
-                        ClosePhotoSheet();
-                        //Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot, "Camera");
-                    }
-                }
-                break;
-        }
-    }
-
-    private void OpenCamera() {
-        Intent openCamera = new Intent(this, CameraActivity.class);
-        if (Utility.atLeastLollipop()) {
-            Pair<View, String> navBar = Pair.create(findViewById(android.R.id.navigationBarBackground),
-                    Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
-
-            startActivity(openCamera, ActivityOptions.makeSceneTransitionAnimation(this, navBar).toBundle());
-        }
-        else
-            startActivity(openCamera);
-    }
-
-    private void ToggleImageVisibility() {
-        if (binding.imvImageContainer.getVisibility() == View.GONE) {
-            binding.imvImageContainer.setVisibility(View.VISIBLE);
-            binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
-            binding.clyAddTbar.setElevation(10);
-        }
-        else {
-            binding.imvImageContainer.setVisibility(View.GONE);
-            binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
-            binding.clyAddTbar.setElevation(Utility.dpToPx(this, 10));
-        }
-    }
-
-    /**
-     * Opens dialog for user to enter number of kcal
-     * @param view
-     */
-    public void AddKcal(View view) {
-        CaloriesPickerFragment kcalFrag = new CaloriesPickerFragment();
-        kcalFrag.SetCaloriesListener(this);
-        kcalFrag.show(getFragmentManager(), FRAG_TAG_KCAL);
-    }
-
-    /**
-     * Opens dialog for user to enter duration to make recipe
-     * @param view
-     */
-    public void AddTime(View view) {
-        DurationPickerFragment timeFrag = new DurationPickerFragment();
-        timeFrag.SetDurationListener(this);
-
-        timeFrag.show(getFragmentManager(), FRAG_TAG_TIME);
+    private void DeleteImage() {
+        File imageFile = new File(currentImagePath);
+        if (imageFile.exists())
+            imageFile.delete();
     }
 
     @Override
@@ -535,21 +509,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
         binding.butTime.setVisibility(View.VISIBLE);
         binding.txtTime.setText(StringUtils.minsToHourMins(minutes));
         recipeDuration = minutes;
-    }
-
-    @Override
-    public void onURLSet(String url) {
-        if (!Utility.isStringAllWhitespace(url))
-            SetImage(url);
-    }
-
-    private void SetImage(String url) {
-        if (imagePath == null)
-            ToggleImageVisibility();
-        imagePath = url;
-        binding.setImagePath(url);
-        photoSheetExpanded = false;
-        ClosePhotoSheet();
     }
 
     private EditIngredientFragment.onIngredientEditedListener editIngredientListener = new EditIngredientFragment.onIngredientEditedListener() {
@@ -572,6 +531,88 @@ public class AddRecipeActivity extends AppCompatActivity implements
             }
         }
     };
+
+    private void ClosePhotoSheet() {
+        photoSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch(requestCode) {
+            case PERM_REQ_CODE_CAMERA:
+                if (grantResults.length > 0) {
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                        OpenCamera();
+                    else {
+                        ClosePhotoSheet();
+                        Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot, "Camera");
+                    }
+                }
+                break;
+        }
+    }
+
+    private void OpenCamera() {
+
+        registerReceiver(photoSavedReceiver, new IntentFilter(CAMERA_PHOTO_SAVED));
+
+        Intent openCamera = new Intent(this, CameraActivity.class);
+        if (Utility.atLeastLollipop()) {
+            Pair<View, String> navBar = Pair.create(findViewById(android.R.id.navigationBarBackground),
+                    Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
+
+            startActivity(openCamera, ActivityOptions.makeSceneTransitionAnimation(this, navBar).toBundle());
+        }
+        else
+            startActivity(openCamera);
+    }
+
+    BroadcastReceiver photoSavedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.v(CAMERA, "Image path broadcast received");
+
+            if (intent == null)
+                return;
+            if (currentImagePath != null)
+                DeleteImage();
+
+            SetImage(intent.getStringExtra(CAMERA_PHOTO_PATH));
+            unregisterReceiver(this);
+        }
+    };
+
+    private void ShowImage() {
+        binding.imvImageContainer.setVisibility(View.VISIBLE);
+        binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
+        binding.clyAddTbar.setElevation(10);
+    }
+    private void HideImage() {
+        binding.imvImageContainer.setVisibility(View.GONE);
+        binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
+        binding.clyAddTbar.setElevation(Utility.dpToPx(this, 10));
+    }
+
+    /**
+     * Opens dialog for user to enter number of kcal
+     * @param view
+     */
+    public void AddKcal(View view) {
+        CaloriesPickerFragment kcalFrag = new CaloriesPickerFragment();
+        kcalFrag.SetCaloriesListener(this);
+        kcalFrag.show(getFragmentManager(), FRAG_TAG_KCAL);
+    }
+
+    /**
+     * Opens dialog for user to enter duration to make recipe
+     * @param view
+     */
+    public void AddTime(View view) {
+        DurationPickerFragment timeFrag = new DurationPickerFragment();
+        timeFrag.SetDurationListener(this);
+
+        timeFrag.show(getFragmentManager(), FRAG_TAG_TIME);
+    }
 
     /**
      * Resets duration value and removes view

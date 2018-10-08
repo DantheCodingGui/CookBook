@@ -58,9 +58,9 @@ import java.util.List;
 
 import jp.wasabeef.recyclerview.animators.ScaleInAnimator;
 
-import static com.danthecodinggui.recipes.msc.IntentConstants.IMAGE_TRANSITION_NAME;
-import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_BUNDLE;
-import static com.danthecodinggui.recipes.msc.IntentConstants.RECIPE_DETAIL_OBJECT;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.IMAGE_TRANSITION_NAME;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_BUNDLE;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_OBJECT;
 import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 import static com.danthecodinggui.recipes.msc.LogTags.GLIDE;
 
