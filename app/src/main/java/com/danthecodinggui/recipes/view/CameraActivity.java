@@ -103,8 +103,17 @@ public class CameraActivity extends AppCompatActivity {
             .photoResolution(standardRatio(
                     highestResolution()
             ))
-            .focusMode(continuousFocusPicture())
-            .flash(autoFlash())
+            .focusMode(firstAvailable(
+                    continuousFocusPicture(),
+                    autoFocus(),
+                    fixed()
+            ))
+            .flash(firstAvailable(
+                    autoRedEye(),
+                    autoFlash(),
+                    torch(),
+                    off()
+            ))
             .previewFpsRange(highestFps())
             .sensorSensitivity(highestSensorSensitivity())
             .build();

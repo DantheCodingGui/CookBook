@@ -271,6 +271,8 @@ public class MainActivity extends AppCompatActivity
                 if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_DENIED)
                         noImage = true;
+                    else
+                        Utility.showPermissionDeniedSnackbar(binding.clyMainRoot);
                     UnblockLoader();
                 }
                 break;
@@ -319,6 +321,8 @@ public class MainActivity extends AppCompatActivity
 
                             if (response == PermissionsHandler.PERMISSION_GRANTED)
                                 UnblockLoader();
+                            else
+                                Utility.showPermissionReenableSnackbar(binding.clyMainRoot, "Storage");
                         }
                     });
         }

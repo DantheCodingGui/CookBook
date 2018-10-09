@@ -16,16 +16,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.model.ProviderContract;
-
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
 
 /**
  * Set of miscellaneous methods without a link to any other class
@@ -74,7 +68,7 @@ public class Utility {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         callback.onFeatureDisabled();
-                        showPermissionDeniedSnackbar(snackbarAnchor, permission);
+                        showPermissionReenableSnackbar(snackbarAnchor, permission);
                     }
                 })
                 .setPositiveButton(R.string.perm_dialog_butt_permit, new DialogInterface.OnClickListener() {
@@ -108,10 +102,10 @@ public class Utility {
      *                       permission settings can be altered
      * @param permissionName The name of the permission you are referencing
      */
-    public static void showPermissionDeniedSnackbar(View snackbarAnchor, String permissionName) {
+    public static void showPermissionReenableSnackbar(View snackbarAnchor, String permissionName) {
         Context context = snackbarAnchor.getContext();
 
-        String text = context.getResources().getString(R.string.perm_snackbar_msg, permissionName);
+        String text = context.getResources().getString(R.string.perm_reenable_snackbar_msg, permissionName);
         Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_LONG)
                 .setAction(R.string.snackbar_settings, new View.OnClickListener() {
                     @Override
@@ -124,6 +118,19 @@ public class Utility {
                     }
                 })
                 .setActionTextColor(context.getResources().getColor(android.R.color.holo_blue_light))
+                .show();
+    }
+
+    /**
+     * Display snackbar informing users they can reenable permissions in settings
+     * @param snackbarAnchor The view that a snackbar can be anchored to, to alert user where
+     *                       permission settings can be altered
+     */
+    public static void showPermissionDeniedSnackbar(View snackbarAnchor) {
+        Context context = snackbarAnchor.getContext();
+
+        String text = context.getResources().getString(R.string.perm_denied_snackbar_msg);
+        Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_SHORT)
                 .show();
     }
 

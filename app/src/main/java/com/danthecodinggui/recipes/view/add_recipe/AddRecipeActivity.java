@@ -60,7 +60,6 @@ import static com.danthecodinggui.recipes.msc.GlobalConstants.INGREDIENT_OBJECT;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.METHOD_STEP_OBJECT;
 import static com.danthecodinggui.recipes.msc.LogTags.CAMERA;
 
-
 /**
  * Provides functionality to add recipes
  */
@@ -453,7 +452,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
                 break;
             case PermissionsHandler.PERMISSION_DENIED:
                 ClosePhotoSheet();
-                Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot, "Storage");
+                Utility.showPermissionReenableSnackbar(binding.cdlyAddRoot, "Storage");
                 break;
         }
     }
@@ -485,7 +484,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
                 break;
             case PermissionsHandler.PERMISSION_DENIED:
                 ClosePhotoSheet();
-                Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot, "Camera");
+                Utility.showPermissionReenableSnackbar(binding.cdlyAddRoot, "Camera");
                 break;
         }
     }
@@ -557,16 +556,20 @@ public class AddRecipeActivity extends AppCompatActivity implements
                 if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
                         OpenCamera();
-                    else
+                    else {
                         ClosePhotoSheet();
+                        Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot);
+                    }
                 }
                 break;
             case PERM_REQ_CODE_READ_EXTERNAL:
                 if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
                         OpenGallery();
-                    else
+                    else {
                         ClosePhotoSheet();
+                        Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot);
+                    }
                 }
         }
     }
