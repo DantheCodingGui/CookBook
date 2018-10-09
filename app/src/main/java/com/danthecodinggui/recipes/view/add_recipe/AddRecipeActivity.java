@@ -83,9 +83,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
     //Permission Request Codes
     private static final int PERM_REQ_CODE_CAMERA = 201;
-
-    //Activity Request Codes
-    private static final int ACT_REQ_CODE_CAMERA = 301;
+    private static final int PERM_REQ_CODE_READ_EXTERNAL = 202;
 
     //Instance State Tags
     private static final String DURATION = "DURATION";
@@ -446,6 +444,21 @@ public class AddRecipeActivity extends AppCompatActivity implements
     }
 
     public void AddImageGallery(View view) {
+
+        int response = PermissionsHandler.AskForPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE, PERM_REQ_CODE_READ_EXTERNAL);
+
+        switch (response) {
+            case PermissionsHandler.PERMISSION_GRANTED:
+                OpenGallery();
+                break;
+            case PermissionsHandler.PERMISSION_DENIED:
+                ClosePhotoSheet();
+                Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot, "Storage");
+                break;
+        }
+    }
+
+    private void OpenGallery() {
         BSImagePicker addGalleryFrag = new BSImagePicker.Builder("com.danthecodinggui.fileprovider")
                 .setSpanCount(3)
                 .setGridSpacing(0)
@@ -456,6 +469,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         addGalleryFrag.show(getSupportFragmentManager(), FRAG_TAG_IMAGE_GALLERY);
     }
+
     @Override
     public void onSingleImageSelected(Uri uri) {
         SetImage(uri.getPath());
@@ -543,12 +557,17 @@ public class AddRecipeActivity extends AppCompatActivity implements
                 if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
                         OpenCamera();
-                    else {
+                    else
                         ClosePhotoSheet();
-                        Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot, "Camera");
-                    }
                 }
                 break;
+            case PERM_REQ_CODE_READ_EXTERNAL:
+                if (grantResults.length > 0) {
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                        OpenGallery();
+                    else
+                        ClosePhotoSheet();
+                }
         }
     }
 
