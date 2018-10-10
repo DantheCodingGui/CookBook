@@ -52,8 +52,11 @@ import io.fotoapparat.result.PhotoResult;
 import io.fotoapparat.result.WhenDoneListener;
 import io.fotoapparat.selector.LensPositionSelectorsKt;
 import io.fotoapparat.selector.ResolutionSelectorsKt;
-import kotlin.Unit;
 
+
+import static android.view.Surface.ROTATION_180;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_PATH;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_SAVED;
 
@@ -151,7 +154,7 @@ public class CameraActivity extends AppCompatActivity {
             case Surface.ROTATION_0:
                 initOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
                 break;
-            case Surface.ROTATION_90:
+            case ROTATION_90:
                 initOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 
                 params = (CoordinatorLayout.LayoutParams) binding.imbConfirmImage.getLayoutParams();
@@ -161,7 +164,7 @@ public class CameraActivity extends AppCompatActivity {
                         Utility.dpToPx(this, 16));
                 binding.imbConfirmImage.setLayoutParams(params);
                 break;
-            case Surface.ROTATION_180:
+            case ROTATION_180:
                 initOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
                 break;
             default:
@@ -275,8 +278,15 @@ public class CameraActivity extends AppCompatActivity {
         TransitionManager.beginDelayedTransition(binding.clyCameraRoot);
         binding.cdlyImageConfirm.setVisibility(View.VISIBLE);
 
+        //Compensate for orientation change
+        float rotateCompensation = b.rotationDegrees;
+        if (orientationListener.rotation == ROTATION_90)
+            rotateCompensation -= 90;
+        else if (orientationListener.rotation == ROTATION_270)
+            rotateCompensation += 90;
+
         RequestOptions options = new RequestOptions()
-                .transform(new RotateTransformation( -b.rotationDegrees));
+                .transform(new RotateTransformation(-rotateCompensation));
 
         Glide.with(CameraActivity.this)
                 .setDefaultRequestOptions(options)
@@ -365,9 +375,7 @@ public class CameraActivity extends AppCompatActivity {
         binding.cdlyImageConfirm.setVisibility(View.GONE);
 
         //Delete photo
-        File imageFile = new File(resultCachePath);
-        if (imageFile.exists())
-            imageFile.delete();
+        Utility.DeleteFile(resultCachePath);
 
         resultCachePath = null;
     }
@@ -377,10 +385,7 @@ public class CameraActivity extends AppCompatActivity {
      */
     private class OrientationListener extends OrientationEventListener {
 
-        final int ROTATION_O    = 1;
-        final int ROTATION_90   = 2;
-        final int ROTATION_180  = 3;
-        final int ROTATION_270  = 4;
+        final int ROTATION_O    = -1;
 
         private int rotation = 0;
         OrientationListener(Context context) { super(context); }
@@ -391,22 +396,22 @@ public class CameraActivity extends AppCompatActivity {
             float rotate = 0.f;
             boolean shouldAnimate = false;
 
-            if( (orientation < 35 || orientation > 325) && rotation!= ROTATION_O){ // PORTRAIT
+            if( (orientation < 35 || orientation > 325) && rotation != ROTATION_O){ // PORTRAIT
                 rotation = ROTATION_O;
                 rotate = 0.f;
                 shouldAnimate = true;
             }
-            else if( orientation > 145 && orientation < 215 && rotation!=ROTATION_180){ // REVERSE PORTRAIT
+            else if( orientation > 145 && orientation < 215 && rotation != ROTATION_180){ // REVERSE PORTRAIT
                 rotation = ROTATION_180;
                 rotate = 180.f;
                 shouldAnimate = true;
             }
-            else if(orientation > 55 && orientation < 125 && rotation!=ROTATION_270){ // REVERSE LANDSCAPE
+            else if(orientation > 55 && orientation < 125 && rotation != ROTATION_270){ // REVERSE LANDSCAPE
                 rotation = ROTATION_270;
-                rotate = 270.f;
+                rotate = -90.f;
                 shouldAnimate = true;
             }
-            else if(orientation > 235 && orientation < 305 && rotation!=ROTATION_90){ //LANDSCAPE
+            else if(orientation > 235 && orientation < 305 && rotation != ROTATION_90){ //LANDSCAPE
                 rotation = ROTATION_90;
                 rotate = 90.f;
                 shouldAnimate = true;

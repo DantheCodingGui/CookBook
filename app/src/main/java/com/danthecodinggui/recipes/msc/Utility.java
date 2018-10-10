@@ -21,6 +21,8 @@ import android.view.inputmethod.InputMethodManager;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.model.ProviderContract;
 
+import java.io.File;
+
 /**
  * Set of miscellaneous methods without a link to any other class
  */
@@ -130,7 +132,7 @@ public class Utility {
         Context context = snackbarAnchor.getContext();
 
         String text = context.getResources().getString(R.string.perm_denied_snackbar_msg);
-        Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_SHORT)
+        Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_LONG)
                 .show();
     }
 
@@ -265,6 +267,13 @@ public class Utility {
             button.setEnabled(false);
         else
             button.setEnabled(true);
+    }
+
+    public static boolean DeleteFile(String path) {
+        File imageFile = new File(path);
+        if (imageFile.exists())
+            return imageFile.delete();
+        return false;
     }
 
     public interface PermissionDialogListener {

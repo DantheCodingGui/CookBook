@@ -501,11 +501,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         ShowImage();
     }
-    private void DeleteImage() {
-        File imageFile = new File(currentImagePath);
-        if (imageFile.exists())
-            imageFile.delete();
-    }
 
     @Override
     public void onCaloriesSet(int kcal) {
@@ -597,7 +592,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
             if (intent == null)
                 return;
             if (currentImagePath != null)
-                DeleteImage();
+                Utility.DeleteFile(currentImagePath);
 
             SetImage(intent.getStringExtra(CAMERA_PHOTO_PATH));
             unregisterReceiver(this);
