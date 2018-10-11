@@ -119,7 +119,7 @@
             android:elevation="1dp"
             android:onClick="ToggleFlash"
             android:padding="10dp"
-            android:src="@drawable/ic_flash_auto"
+            android:src="@drawable/ic_flash_off"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/imb_capture"
             app:layout_constraintEnd_toEndOf="parent"

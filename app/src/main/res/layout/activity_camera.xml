@@ -123,7 +123,7 @@
             android:padding="10dp"
             android:visibility="gone"
             android:onClick="ToggleFlash"
-            android:src="@drawable/ic_flash_auto"
+            android:src="@drawable/ic_flash_off"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imb_capture"

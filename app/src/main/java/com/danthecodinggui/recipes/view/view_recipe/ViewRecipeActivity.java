@@ -8,7 +8,9 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -58,6 +60,8 @@ public class ViewRecipeActivity extends AppCompatActivity
 
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
+
+    private RecipePagerAdapter pagerAdapter;
 
     private Recipe recipe;
 
@@ -161,10 +165,10 @@ public class ViewRecipeActivity extends AppCompatActivity
 
         setSupportActionBar(binding.tbarVwRecipe);
 
-        SetupTabLayout(binding.tlyViewRecipe, binding.vprViewRecipe);
-
         //Set random colour of layout
         SetLayoutColour();
+
+        SetupTabLayout(binding.tlyViewRecipe, binding.vprViewRecipe);
     }
 
     /**
@@ -177,6 +181,7 @@ public class ViewRecipeActivity extends AppCompatActivity
 
         binding.tbarVwRecipe.setBackgroundColor(randMaterialCol);
         binding.tlyViewRecipe.setBackgroundColor(randMaterialCol);
+        binding.vwFragBackground.setBackgroundColor(randMaterialCol);
 
         if (Utility.atLeastLollipop()) {
             Window window = getWindow();
@@ -215,9 +220,9 @@ public class ViewRecipeActivity extends AppCompatActivity
 
         tabLayout.setupWithViewPager(viewPager);
 
-        final RecipePagerAdapter adapter = new RecipePagerAdapter(getSupportFragmentManager(),
+        pagerAdapter = new RecipePagerAdapter(getSupportFragmentManager(),
                 tabLayout.getTabCount(), tabTitles, recipe.getRecipeId());
-        viewPager.setAdapter(adapter);
+        viewPager.setAdapter(pagerAdapter);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {

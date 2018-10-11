@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
@@ -20,21 +19,15 @@ import android.os.Bundle;
 import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.OrientationEventListener;
-import android.view.OrientationListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
-import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.util.Util;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityCameraBinding;
 import com.danthecodinggui.recipes.msc.Utility;
@@ -80,7 +73,7 @@ public class CameraActivity extends AppCompatActivity {
 
     ActivityCameraBinding binding;
 
-    Fotoapparat fotoapparat;
+    private Fotoapparat fotoapparat;
 
     //Instance State Tags
     private static final String FILE_PATH = "FILE_PATH";
@@ -99,7 +92,7 @@ public class CameraActivity extends AppCompatActivity {
     private boolean takenPhoto = false;
 
     private boolean isCameraBack = true;
-    private int cameraFlash = CAM_FLASH_AUTO;
+    private int cameraFlash = CAM_FLASH_OFF;
 
     private CameraConfiguration cameraConfiguration = CameraConfiguration
             .builder()
@@ -135,7 +128,7 @@ public class CameraActivity extends AppCompatActivity {
                 .into(binding.cameraView)
                 .previewScaleType(ScaleType.CenterCrop)
                 .photoResolution(ResolutionSelectorsKt.highestResolution())
-                .flash(autoFlash())
+                .flash(off())
                 .lensPosition(LensPositionSelectorsKt.back())
                 .build();
 
@@ -286,6 +279,8 @@ public class CameraActivity extends AppCompatActivity {
             rotateCompensation += 90;
 
         RequestOptions options = new RequestOptions()
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .transform(new RotateTransformation(-rotateCompensation));
 
         Glide.with(CameraActivity.this)
@@ -305,20 +300,20 @@ public class CameraActivity extends AppCompatActivity {
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (cameraFlash == CAM_FLASH_AUTO) {
-                    binding.imbFlash.setImageResource(R.drawable.ic_flash_on);
-                    fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(off()).build());
-                }
-                else if (cameraFlash == CAM_FLASH_ON)
+//                if (cameraFlash == CAM_FLASH_AUTO) {
+//                    binding.imbFlash.setImageResource(R.drawable.ic_flash_on);
+//                    fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(off()).build());
+//                }
+                if (cameraFlash == CAM_FLASH_ON)
                     binding.imbFlash.setImageResource(R.drawable.ic_flash_off);
                 else if (cameraFlash == CAM_FLASH_OFF) {
-                    binding.imbFlash.setImageResource(R.drawable.ic_flash_auto);
-                    fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(autoFlash()).build());
+                    binding.imbFlash.setImageResource(R.drawable.ic_flash_on);
+                    //fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(autoFlash()).build());
                 }
 
                 ++cameraFlash;
                 if (cameraFlash == 4)
-                    cameraFlash = CAM_FLASH_AUTO;
+                    cameraFlash = CAM_FLASH_ON;
 
                 PropertyValuesHolder translate = PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, -100, 0);
                 PropertyValuesHolder fadein = PropertyValuesHolder.ofFloat(View.ALPHA, 0, 1);

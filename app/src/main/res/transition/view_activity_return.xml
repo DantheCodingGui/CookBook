@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <transitionSet
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:startDelay="60">
     <slide
         android:slideEdge="top">
         <targets>
@@ -16,7 +17,7 @@
         </targets>
     </slide>
     <slide
-        android:slideEdge="left">
+        android:slideEdge="right">
         <targets>
             <target android:targetId="@android:id/statusBarBackground"/>
         </targets>

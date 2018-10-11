@@ -116,10 +116,11 @@ public class MainActivity extends AppCompatActivity
 
         recipesList = new ArrayList<>();
 
-        //setup RecyclerView adapter
+        //Setup RecyclerView Adapter
         recipesAdapter = new RecipesViewAdapter(null);
         binding.rvwRecipes.setAdapter(recipesAdapter);
 
+        //Setup RecyclerView Animations
         ScaleInAnimator animator = new ScaleInAnimator(new OvershootInterpolator(1.f));
         animator.setAddDuration(200);
         animator.setRemoveDuration(200);

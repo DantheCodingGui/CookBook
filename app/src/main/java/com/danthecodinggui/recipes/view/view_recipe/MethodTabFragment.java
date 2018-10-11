@@ -1,6 +1,5 @@
 package com.danthecodinggui.recipes.view.view_recipe;
 
-
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
