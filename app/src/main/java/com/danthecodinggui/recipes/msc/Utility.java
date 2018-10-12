@@ -303,6 +303,10 @@ public class Utility {
         return false;
     }
 
+    public static boolean FileExists(String imageFilePath) {
+        return new File(imageFilePath).exists();
+    }
+
     public interface PermissionDialogListener {
         /**
          * When user has verified that they have denied a permission, this method should handle

@@ -394,8 +394,11 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public int getItemViewType(int position) {
-            boolean isComplex = displayedRecipesList.get(position).hasExtendedInfo();
-            boolean hasPhoto = displayedRecipesList.get(position).hasPhoto() && !noImage;
+
+            Recipe item = displayedRecipesList.get(position);
+
+            boolean isComplex = item.hasExtendedInfo();
+            boolean hasPhoto = item.hasPhoto() && !noImage && Utility.FileExists(item.getImageFilePath());
 
             if (isComplex && hasPhoto)
                 return PHOTO_COMPLEX;
