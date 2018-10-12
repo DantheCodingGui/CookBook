@@ -270,9 +270,36 @@ public class Utility {
     }
 
     public static boolean DeleteFile(String path) {
+
+        if (path == null)
+            return false;
+
         File imageFile = new File(path);
         if (imageFile.exists())
             return imageFile.delete();
+        return false;
+    }
+
+    public static void ClearDir(String dirPath) {
+
+        if (dirPath == null)
+            return;
+
+        File dir = new File(dirPath);
+
+        if (dir.isDirectory())
+            for (File child: dir.listFiles())
+                child.delete();
+    }
+
+    public static boolean CreateDir(String path) {
+
+        if (path == null)
+            return false;
+
+        File dir = new File(path);
+        if (!dir.exists())
+            return dir.mkdir();
         return false;
     }
 

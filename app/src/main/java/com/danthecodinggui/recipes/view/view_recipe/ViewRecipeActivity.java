@@ -8,9 +8,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -56,7 +54,7 @@ public class ViewRecipeActivity extends AppCompatActivity
 
     private String imageTransitionName;
 
-    private int randMaterialCol = -1;
+    private int randIngredientsCol = -1;
 
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
@@ -91,7 +89,7 @@ public class ViewRecipeActivity extends AppCompatActivity
         }
         else {
             if (savedInstanceState != null)
-                randMaterialCol = savedInstanceState.getInt(STATE_MATERIAL_COLOUR);
+                randIngredientsCol = savedInstanceState.getInt(STATE_MATERIAL_COLOUR);
             SetupNoPhotoLayout();
         }
 
@@ -103,7 +101,7 @@ public class ViewRecipeActivity extends AppCompatActivity
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
 
-        savedInstanceState.putInt(STATE_MATERIAL_COLOUR, randMaterialCol);
+        savedInstanceState.putInt(STATE_MATERIAL_COLOUR, randIngredientsCol);
     }
 
     /**
@@ -176,17 +174,17 @@ public class ViewRecipeActivity extends AppCompatActivity
      * apply it to the toolbar
      */
     private void SetLayoutColour() {
-        if (randMaterialCol == -1)
-            randMaterialCol = MaterialColours.nextColour();
+        if (randIngredientsCol == -1)
+            randIngredientsCol = MaterialColours.nextColour();
 
-        binding.tbarVwRecipe.setBackgroundColor(randMaterialCol);
-        binding.tlyViewRecipe.setBackgroundColor(randMaterialCol);
-        binding.vwFragBackground.setBackgroundColor(randMaterialCol);
+        binding.tbarVwRecipe.setBackgroundColor(randIngredientsCol);
+        binding.tlyViewRecipe.setBackgroundColor(randIngredientsCol);
+        binding.vwFragBackground.setBackgroundColor(randIngredientsCol);
 
         if (Utility.atLeastLollipop()) {
             Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(randMaterialCol);
+            window.setStatusBarColor(randIngredientsCol);
         }
     }
 

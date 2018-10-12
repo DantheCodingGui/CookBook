@@ -26,6 +26,7 @@
                 android:elevation="3dp"/>
 
             <ImageButton
+                android:id="@+id/imb_discard_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="20dp"
@@ -54,6 +55,7 @@
                 android:background="@drawable/bottom_scrim" />
 
             <ImageButton
+                android:id="@+id/imb_confirm_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"

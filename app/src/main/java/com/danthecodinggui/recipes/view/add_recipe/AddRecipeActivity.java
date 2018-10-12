@@ -13,11 +13,14 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.transition.Slide;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -39,6 +42,10 @@ import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
 
 import com.asksira.bsimagepicker.BSImagePicker;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityAddRecipeBinding;
 import com.danthecodinggui.recipes.databinding.AddIngredientItemBinding;
@@ -58,6 +65,7 @@ import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_PATH;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_SAVED;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.INGREDIENT_OBJECT;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.METHOD_STEP_OBJECT;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.PHOTOS_DIRECTORY_PATH;
 import static com.danthecodinggui.recipes.msc.LogTags.CAMERA;
 
 /**
@@ -84,10 +92,14 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private static final int PERM_REQ_CODE_CAMERA = 201;
     private static final int PERM_REQ_CODE_READ_EXTERNAL = 202;
 
+    //Activity Request Codes
+    private static final int ACT_REQ_CODE_CAMERA = 301;
+
     //Instance State Tags
     private static final String DURATION = "DURATION";
     private static final String KCAL = "KCAL";
     private static final String IMAGE_PATH = "IMAGE_PATH";
+    private static final String PHOTO_DIR_PATH = "PHOTO_DIR_PATH";
     private static final String INGREDIENTS_EXPANDED = "INGREDIENTS_EXPANDED";
     private static final String METHOD_EXPANDED = "METHOD_EXPANDED";
     private static final String FAB_MENU_OPEN = "FAB_MENU_OPEN";
@@ -99,12 +111,15 @@ public class AddRecipeActivity extends AppCompatActivity implements
     //Various Flags
     private boolean fabMenuOpen = false;
 
+    private boolean ingredientsExpanded = false;
+    private boolean methodExpanded = false;
+
     private int recipeDuration;
     private int recipeKcalPerPerson;
     private String currentImagePath;
 
-    private boolean ingredientsExpanded = false;
-    private boolean methodExpanded = false;
+    //TODO clear dir when its been saved in external storage
+    private String photosDirPath;
 
     private int editingPosition = -1;
 
@@ -201,8 +216,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
         //Disable camera option if device doesn't have camera
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
             binding.includeImageSheet.btnAddPhoto.setVisibility(View.GONE);
-
-        registerReceiver(photoSavedReceiver, new IntentFilter(CAMERA_PHOTO_SAVED));
     }
 
     @Override
@@ -212,6 +225,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         outState.putInt(DURATION, recipeDuration);
         outState.putInt(KCAL, recipeKcalPerPerson);
         outState.putString(IMAGE_PATH, currentImagePath);
+        outState.putString(PHOTO_DIR_PATH, photosDirPath);
 
         outState.putInt(EDITING_POSITION, editingPosition);
 
@@ -233,6 +247,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         recipeDuration = savedInstanceState.getInt(DURATION);
         recipeKcalPerPerson = savedInstanceState.getInt(KCAL);
         currentImagePath = savedInstanceState.getString(IMAGE_PATH);
+        photosDirPath = savedInstanceState.getString(PHOTO_DIR_PATH);
         ingredientsExpanded = savedInstanceState.getBoolean(INGREDIENTS_EXPANDED);
         methodExpanded = savedInstanceState.getBoolean(METHOD_EXPANDED);
         boolean fabMenuOpen = savedInstanceState.getBoolean(FAB_MENU_OPEN);
@@ -296,17 +311,20 @@ public class AddRecipeActivity extends AppCompatActivity implements
             ClosePhotoSheet();
         else if (fabMenuOpen)
             AnimateFabMenu(binding.fabAddMenu);
-        else
+        else {
             super.onBackPressed();
+            //TODO remove later
+            Utility.ClearDir(photosDirPath);
+        }
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            unregisterReceiver(photoSavedReceiver);
-        }
-        catch (IllegalArgumentException e) {}
+    public boolean onSupportNavigateUp() {
+        super.onSupportNavigateUp();
+
+        //TODO remove later
+        Utility.ClearDir(photosDirPath);
+        return true;
     }
 
     @Override public boolean dispatchTouchEvent(MotionEvent event){
@@ -503,6 +521,24 @@ public class AddRecipeActivity extends AppCompatActivity implements
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (data != null)
+            photosDirPath = data.getStringExtra(PHOTOS_DIRECTORY_PATH);
+
+        switch(requestCode) {
+            case ACT_REQ_CODE_CAMERA:
+                if (resultCode == RESULT_OK) {
+                    if (currentImagePath != null)
+                        Utility.DeleteFile(currentImagePath);
+
+                    SetImage(data.getStringExtra(CAMERA_PHOTO_PATH));
+                }
+                break;
+        }
+    }
+
+    @Override
     public void onCaloriesSet(int kcal) {
         binding.butKcal.setVisibility(View.VISIBLE);
 
@@ -571,33 +607,17 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
     private void OpenCamera() {
 
-        registerReceiver(photoSavedReceiver, new IntentFilter(CAMERA_PHOTO_SAVED));
-
         Intent openCamera = new Intent(this, CameraActivity.class);
         if (Utility.atLeastLollipop()) {
             Pair<View, String> navBar = Pair.create(findViewById(android.R.id.navigationBarBackground),
                     Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
 
-            startActivity(openCamera, ActivityOptions.makeSceneTransitionAnimation(this, navBar).toBundle());
+            ActivityCompat.startActivityForResult(this, openCamera, ACT_REQ_CODE_CAMERA,
+                    ActivityOptions.makeSceneTransitionAnimation(this, navBar).toBundle());
         }
         else
-            startActivity(openCamera);
+            startActivityForResult(openCamera, ACT_REQ_CODE_CAMERA);
     }
-
-    BroadcastReceiver photoSavedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.v(CAMERA, "Image path broadcast received");
-
-            if (intent == null)
-                return;
-            if (currentImagePath != null)
-                Utility.DeleteFile(currentImagePath);
-
-            SetImage(intent.getStringExtra(CAMERA_PHOTO_PATH));
-            unregisterReceiver(this);
-        }
-    };
 
     private void ShowImage() {
         binding.imvImageContainer.setVisibility(View.VISIBLE);

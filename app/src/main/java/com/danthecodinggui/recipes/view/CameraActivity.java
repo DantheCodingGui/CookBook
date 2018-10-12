@@ -17,7 +17,6 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.transition.TransitionManager;
-import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
@@ -47,13 +46,13 @@ import io.fotoapparat.selector.LensPositionSelectorsKt;
 import io.fotoapparat.selector.ResolutionSelectorsKt;
 
 
+import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_PATH;
-import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_SAVED;
 
-import static com.danthecodinggui.recipes.msc.LogTags.CAMERA;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.PHOTOS_DIRECTORY_PATH;
 import static io.fotoapparat.selector.AspectRatioSelectorsKt.standardRatio;
 import static io.fotoapparat.selector.FlashSelectorsKt.autoFlash;
 import static io.fotoapparat.selector.FlashSelectorsKt.autoRedEye;
@@ -82,6 +81,8 @@ public class CameraActivity extends AppCompatActivity {
 
     private int initOrientation;
     private OrientationListener orientationListener;
+
+    private String photoFilesDir;
 
     private String resultCachePath;
 
@@ -160,7 +161,7 @@ public class CameraActivity extends AppCompatActivity {
             case ROTATION_180:
                 initOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
                 break;
-            default:
+            case ROTATION_270:
                 initOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 
                 params = (CoordinatorLayout.LayoutParams) binding.imbDiscardImage.getLayoutParams();
@@ -179,6 +180,8 @@ public class CameraActivity extends AppCompatActivity {
         setRequestedOrientation(initOrientation);
 
         orientationListener = new OrientationListener(this);
+
+        photoFilesDir = getFilesDir().getPath().concat("/CameraActivityPhotos/");
     }
 
     @Override
@@ -232,12 +235,17 @@ public class CameraActivity extends AppCompatActivity {
             super.onBackPressed();
     }
 
+    /**
+     * Take the photo, save into a temporary file and show the confirmation view
+     * @param view
+     */
     public void CapturePhoto(View view) {
 
         if (takenPhoto)
             return;
         takenPhoto = true;
 
+        //Manually deal with flash as fotoapparat flash doesn't work properly
         if (cameraFlash == CAM_FLASH_ON)
             fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(torch()).build());
         PhotoResult result = fotoapparat.takePicture();
@@ -250,9 +258,12 @@ public class CameraActivity extends AppCompatActivity {
             }, 400);
 
 
+        String dirPath = getFilesDir().getPath().concat("/CameraActivityPhotos/");
+        Utility.CreateDir(dirPath);
+
         String filename = UUID.randomUUID().toString() + ".jpg";
 
-        File tempPhoto = new File(getFilesDir(), filename);
+        File tempPhoto = new File(dirPath, filename);
 
         resultCachePath = tempPhoto.getAbsolutePath();
 
@@ -266,21 +277,21 @@ public class CameraActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Shows a full screen view presenting the taken photo and providing options on whether to discard
+     * or confirm photo
+     * @param fromBitmap Flag identifying whether bitmap just generated or working from a file path
+     * @param b The optional bitmap if it has just been generated
+     */
     private void ShowConfirmationView(boolean fromBitmap, @Nullable BitmapPhoto b) {
 
         TransitionManager.beginDelayedTransition(binding.clyCameraRoot);
         binding.cdlyImageConfirm.setVisibility(View.VISIBLE);
 
         //Compensate for orientation change
-        float rotateCompensation = b.rotationDegrees;
-        if (orientationListener.rotation == ROTATION_90)
-            rotateCompensation -= 90;
-        else if (orientationListener.rotation == ROTATION_270)
-            rotateCompensation += 90;
+        float rotateCompensation = CompensateForRotation(b.rotationDegrees);
 
         RequestOptions options = new RequestOptions()
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .transform(new RotateTransformation(-rotateCompensation));
 
         Glide.with(CameraActivity.this)
@@ -291,8 +302,57 @@ public class CameraActivity extends AppCompatActivity {
         takenPhoto = false;
     }
 
+    /**
+     * Calculate a rotation transformation to apply to the produced image to comply with the current
+     * orientation
+     * @param rotation The rotation provided by fotoapparat
+     * @return The compensated rotation
+     */
+    private float CompensateForRotation(int rotation) {
+        if (initOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ||
+                initOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT) {
+            if (orientationListener.rotation == ROTATION_90)
+                rotation -= 90;
+            else if (orientationListener.rotation == ROTATION_180)
+                rotation += 180;
+            else if (orientationListener.rotation == ROTATION_270)
+                rotation += 90;
+        }
+        else if (initOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            if (orientationListener.rotation == ROTATION_0)
+                rotation += 90;
+            else if (orientationListener.rotation == ROTATION_180)
+                rotation -= 90;
+            else if (orientationListener.rotation == ROTATION_270)
+                rotation += 180;
+        }
+        else if (initOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE) {
+            if (orientationListener.rotation == ROTATION_0)
+                rotation -= 90;
+            else if (orientationListener.rotation == ROTATION_90)
+                rotation += 180;
+            else if (orientationListener.rotation == ROTATION_180)
+                rotation += 90;
+        }
+        else {
+            if (orientationListener.rotation == ROTATION_0)
+                rotation += 90;
+            else if (orientationListener.rotation == ROTATION_90)
+                rotation += 180;
+            else if (orientationListener.rotation == ROTATION_180)
+                rotation -= 90;
+        }
+
+        return rotation;
+    }
+
+    /**
+     * Toggle what flash mode fotoapparat is currently using
+     * @param view
+     */
     public void ToggleFlash(View view) {
 
+        //Animate old icon out
         PropertyValuesHolder translate = PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, 100);
         PropertyValuesHolder fadeOut = PropertyValuesHolder.ofFloat(View.ALPHA, 0);
         ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(binding.imbFlash, translate, fadeOut);
@@ -300,6 +360,8 @@ public class CameraActivity extends AppCompatActivity {
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                //Actually change flash setting for fotoapparat
+
 //                if (cameraFlash == CAM_FLASH_AUTO) {
 //                    binding.imbFlash.setImageResource(R.drawable.ic_flash_on);
 //                    fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(off()).build());
@@ -315,6 +377,7 @@ public class CameraActivity extends AppCompatActivity {
                 if (cameraFlash == 4)
                     cameraFlash = CAM_FLASH_ON;
 
+                //Animate new icon in
                 PropertyValuesHolder translate = PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, -100, 0);
                 PropertyValuesHolder fadein = PropertyValuesHolder.ofFloat(View.ALPHA, 0, 1);
                 ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(binding.imbFlash, translate, fadein);
@@ -325,10 +388,15 @@ public class CameraActivity extends AppCompatActivity {
         anim.start();
     }
 
+    /**
+     * Toggle which camera (front/rear) the preview should show
+     * @param view
+     */
     public void ToggleCameraDir(View view) {
 
         fotoapparat.switchTo(isCameraBack ? front() : back(), cameraConfiguration);
 
+        //Animate the icon change
         PropertyValuesHolder scaleX = PropertyValuesHolder.ofFloat(View.SCALE_X, 0.0f);
         PropertyValuesHolder scaleY = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1.2f);
         ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(binding.imbSwitchCamera, scaleX, scaleY);
@@ -336,9 +404,11 @@ public class CameraActivity extends AppCompatActivity {
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                //Change icon half way through
                 binding.imbSwitchCamera.setImageResource(
                         isCameraBack ? R.drawable.ic_camera_front : R.drawable.ic_camera_back);
 
+                //Animate second half of animation
                 PropertyValuesHolder scaleX = PropertyValuesHolder.ofFloat(View.SCALE_X, 1.f);
                 PropertyValuesHolder scaleY = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1.f);
                 ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(binding.imbSwitchCamera, scaleX, scaleY);
@@ -350,27 +420,35 @@ public class CameraActivity extends AppCompatActivity {
         isCameraBack = !isCameraBack;
     }
 
+    /**
+     * Confirm photo and return to AddRecipeActivity
+     * @param view
+     */
     public void ConfirmPhoto(View view) {
-        new Handler(getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Intent broadcastPath = new Intent(CAMERA_PHOTO_SAVED);
-                broadcastPath.putExtra(CAMERA_PHOTO_PATH, resultCachePath);
-                sendBroadcast(broadcastPath);
-                Log.v(CAMERA, "Image path broadcast sent");
-            }
-        }, 500);
+
+        Intent finishCamera = new Intent();
+        finishCamera.putExtra(CAMERA_PHOTO_PATH, resultCachePath);
+        finishCamera.putExtra(PHOTOS_DIRECTORY_PATH, photoFilesDir);
+
+        if (resultCachePath != null)
+            setResult(RESULT_OK, finishCamera);
+        else
+            setResult(RESULT_CANCELED, finishCamera);
 
         finish();
     }
 
+    /**
+     * Return to camera view and discard saved photo
+     * @param view
+     */
     public void DiscardPhoto(View view) {
 
         TransitionManager.beginDelayedTransition(binding.clyCameraRoot);
         binding.cdlyImageConfirm.setVisibility(View.GONE);
 
         //Delete photo
-        Utility.DeleteFile(resultCachePath);
+        Utility.ClearDir(photoFilesDir);
 
         resultCachePath = null;
     }
@@ -379,8 +457,6 @@ public class CameraActivity extends AppCompatActivity {
      * Enables activity to rotate certain elements on initOrientation change rather than recreate whole layout
      */
     private class OrientationListener extends OrientationEventListener {
-
-        final int ROTATION_O    = -1;
 
         private int rotation = 0;
         OrientationListener(Context context) { super(context); }
@@ -391,9 +467,8 @@ public class CameraActivity extends AppCompatActivity {
             float rotate = 0.f;
             boolean shouldAnimate = false;
 
-            if( (orientation < 35 || orientation > 325) && rotation != ROTATION_O){ // PORTRAIT
-                rotation = ROTATION_O;
-                rotate = 0.f;
+            if( (orientation < 35 || orientation > 325) && rotation != ROTATION_0){ // PORTRAIT
+                rotation = ROTATION_0;
                 shouldAnimate = true;
             }
             else if( orientation > 145 && orientation < 215 && rotation != ROTATION_180){ // REVERSE PORTRAIT
@@ -403,7 +478,7 @@ public class CameraActivity extends AppCompatActivity {
             }
             else if(orientation > 55 && orientation < 125 && rotation != ROTATION_270){ // REVERSE LANDSCAPE
                 rotation = ROTATION_270;
-                rotate = -90.f;
+                rotate = 270.f;
                 shouldAnimate = true;
             }
             else if(orientation > 235 && orientation < 305 && rotation != ROTATION_90){ //LANDSCAPE
@@ -418,6 +493,7 @@ public class CameraActivity extends AppCompatActivity {
             else if (initOrientation ==  ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE)
                 rotate += 90.f;
 
+            //Deal with under/overflow
             if (rotate < 0)
                 rotate = 270.f;
             else if (rotate > 270.f)
@@ -428,10 +504,19 @@ public class CameraActivity extends AppCompatActivity {
                 ObjectAnimator animFlash = ObjectAnimator.ofFloat(binding.imbFlash, View.ROTATION, rotate).setDuration(200);
                 animSwitch.start();
                 animFlash.start();
+
+                //Views in confirm view (must update regardless if visible or not)
+                ObjectAnimator animDiscard = ObjectAnimator.ofFloat(binding.imbDiscardImage, View.ROTATION, rotate).setDuration(200);
+                ObjectAnimator animConfirm = ObjectAnimator.ofFloat(binding.imbConfirmImage, View.ROTATION, rotate).setDuration(200);
+                animDiscard.start();
+                animConfirm.start();
             }
         }
     }
 
+    /**
+     * Rotation Transformation for Bitmap
+     */
     private class RotateTransformation extends BitmapTransformation {
 
         private float rotateRotationAngle;

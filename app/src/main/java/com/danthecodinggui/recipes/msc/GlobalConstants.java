@@ -11,7 +11,7 @@ public class GlobalConstants {
     public static final String RECIPE_DETAIL_BUNDLE = "RECIPE_DETAIL_BUNDLE";
     public static final String IMAGE_TRANSITION_NAME = "IMAGE_TRANSITION";
 
-    public static final String BROADCAST_PHOTO_PATH = "BROADCAST_PHOTO_PATH";
+    public static final String PHOTOS_DIRECTORY_PATH = "PHOTOS_DIRECTORY_PATH";
     public static final String CAMERA_PHOTO_SAVED = "CAMERA_PHOTO_SAVED";
     public static final String CAMERA_PHOTO_PATH = "CAMERA_PHOTO_PATH";
 }
