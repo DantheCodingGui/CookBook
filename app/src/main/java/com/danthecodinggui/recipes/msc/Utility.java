@@ -14,6 +14,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.util.Patterns;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -211,7 +212,7 @@ public class Utility {
         values = new ContentValues();
         values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
         values.put(ProviderContract.MethodStepEntry.STEP_NO, 1);
-        values.put(ProviderContract.MethodStepEntry.TEXT, "Gradually heat up oil in pan and saute garlic until golden");
+        values.put(ProviderContract.MethodStepEntry.STEP_TEXT, "Gradually heat up oil in pan and saute garlic until golden");
         resolver.insert(
                 ProviderContract.METHOD_URI,
                 values);
@@ -219,7 +220,7 @@ public class Utility {
         values = new ContentValues();
         values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
         values.put(ProviderContract.MethodStepEntry.STEP_NO, 2);
-        values.put(ProviderContract.MethodStepEntry.TEXT, "Add Red Pepper Flake and chopped Parsley");
+        values.put(ProviderContract.MethodStepEntry.STEP_TEXT, "Add Red Pepper Flake and chopped Parsley");
         resolver.insert(
                 ProviderContract.METHOD_URI,
                 values);
@@ -228,7 +229,7 @@ public class Utility {
         values = new ContentValues();
         values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
         values.put(ProviderContract.MethodStepEntry.STEP_NO, 3);
-        values.put(ProviderContract.MethodStepEntry.TEXT, "Toss with cooked spaghetti and add cooked chicken if desired");
+        values.put(ProviderContract.MethodStepEntry.STEP_TEXT, "Toss with cooked spaghetti and add cooked chicken if desired");
         resolver.insert(
                 ProviderContract.METHOD_URI,
                 values);
@@ -303,8 +304,10 @@ public class Utility {
         return false;
     }
 
-    public static boolean FileExists(String imageFilePath) {
-        return new File(imageFilePath).exists();
+    public static boolean imageExists(String imagePath) {
+        if (Patterns.WEB_URL.matcher(imagePath).matches())
+            return true;
+        return new File(imagePath).exists();
     }
 
     public interface PermissionDialogListener {

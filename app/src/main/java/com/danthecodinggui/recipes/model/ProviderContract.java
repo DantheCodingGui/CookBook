@@ -76,6 +76,6 @@ public final class ProviderContract {
 
         public static final String RECIPE_ID = "Recipe";
         public static final String STEP_NO = "StepNo";
-        public static final String TEXT = "Text";
+        public static final String STEP_TEXT = "Text";
     }
 }

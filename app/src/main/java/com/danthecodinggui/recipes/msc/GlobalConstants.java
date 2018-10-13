@@ -14,4 +14,10 @@ public class GlobalConstants {
     public static final String PHOTOS_DIRECTORY_PATH = "PHOTOS_DIRECTORY_PATH";
     public static final String CAMERA_PHOTO_SAVED = "CAMERA_PHOTO_SAVED";
     public static final String CAMERA_PHOTO_PATH = "CAMERA_PHOTO_PATH";
+
+    public static final String SAVE_TASK_RECIPE = "SAVE_TASK_RECIPE";
+    public static final String SAVE_TASK_INGREDIENTS = "SAVE_TASK_INGREDIENTS";
+    public static final String SAVE_TASK_METHOD = "SAVE_TASK_METHOD";
+    public static final String SAVE_TASK_IS_IMAGE_CAMERA = "SAVE_TASK_IS_IMAGE_CAMERA";
+    public static final String SAVE_TASK_CAMERA_DIR_PATH = "SAVE_TASK_CAMERA_DIR_PATH";
 }

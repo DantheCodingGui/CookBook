@@ -398,10 +398,10 @@ public class MainActivity extends AppCompatActivity
             Recipe item = displayedRecipesList.get(position);
 
             boolean isComplex = item.hasExtendedInfo();
-            boolean hasPhoto = item.hasPhoto() && !noImage && Utility.FileExists(item.getImageFilePath());
+            boolean hasPhoto = item.hasPhoto() && !noImage && Utility.imageExists(item.getImagePath());
 
             if (!hasPhoto)
-                item.setImageFilePath(null);
+                item.setImagePath(null);
 
             if (isComplex && hasPhoto)
                 return PHOTO_COMPLEX;

@@ -50,7 +50,7 @@ public class GetMethodStepsLoader extends AsyncTaskLoader<List<MethodStep>> {
         List<MethodStep> methodSteps = new ArrayList<>();
 
         String[] projection = {
-                ProviderContract.MethodStepEntry.TEXT,
+                ProviderContract.MethodStepEntry.STEP_TEXT,
                 ProviderContract.MethodStepEntry.STEP_NO
         };
 
@@ -72,7 +72,7 @@ public class GetMethodStepsLoader extends AsyncTaskLoader<List<MethodStep>> {
 
             temp = new MethodStep(
                     cursor.getString(cursor.getColumnIndexOrThrow(
-                        ProviderContract.MethodStepEntry.TEXT)),
+                        ProviderContract.MethodStepEntry.STEP_TEXT)),
                     cursor.getInt(cursor.getColumnIndexOrThrow(
                         ProviderContract.MethodStepEntry.STEP_NO)));
 

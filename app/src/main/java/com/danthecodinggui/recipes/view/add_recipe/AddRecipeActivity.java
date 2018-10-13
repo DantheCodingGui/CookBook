@@ -618,8 +618,12 @@ public class AddRecipeActivity extends AppCompatActivity implements
             Pair<View, String> navBar = Pair.create(findViewById(android.R.id.navigationBarBackground),
                     Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
 
-            ActivityCompat.startActivityForResult(this, openCamera, ACT_REQ_CODE_CAMERA,
-                    ActivityOptions.makeSceneTransitionAnimation(this, navBar).toBundle());
+            if (navBar.first != null)
+                ActivityCompat.startActivityForResult(this, openCamera, ACT_REQ_CODE_CAMERA,
+                        ActivityOptions.makeSceneTransitionAnimation(this, navBar).toBundle());
+            else
+                ActivityCompat.startActivityForResult(this, openCamera, ACT_REQ_CODE_CAMERA,
+                        ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
         }
         else
             startActivityForResult(openCamera, ACT_REQ_CODE_CAMERA);
