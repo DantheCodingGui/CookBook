@@ -113,7 +113,7 @@ public class RecipeProvider extends ContentProvider {
                 null
                 );
 
-        //Ingredient is not already in table, must add it
+        //Ingredient is not already in table, must add_activity_toolbar it
         if (ingredients.getCount() <= 0) {
             ContentValues newIngredient = new ContentValues();
             newIngredient.put(DBSchema.IngredientEntry.NAME, ingredientName);

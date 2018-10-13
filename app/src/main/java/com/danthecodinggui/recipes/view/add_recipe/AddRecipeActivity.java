@@ -12,16 +12,20 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.Snackbar;
 import android.support.transition.Slide;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,6 +37,8 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +59,7 @@ import com.danthecodinggui.recipes.databinding.AddIngredientItemBinding;
 import com.danthecodinggui.recipes.databinding.AddMethodItemBinding;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.model.object_models.MethodStep;
+import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.msc.StringUtils;
 import com.danthecodinggui.recipes.msc.Utility;
@@ -67,10 +74,15 @@ import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_SAVED
 import static com.danthecodinggui.recipes.msc.GlobalConstants.INGREDIENT_OBJECT;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.METHOD_STEP_OBJECT;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.PHOTOS_DIRECTORY_PATH;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_CAMERA_DIR_PATH;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_INGREDIENTS;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_IS_IMAGE_CAMERA;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_METHOD;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_RECIPE;
 import static com.danthecodinggui.recipes.msc.LogTags.CAMERA;
 
 /**
- * Provides functionality to add recipes
+ * Provides functionality to add_activity_toolbar recipes
  */
 public class AddRecipeActivity extends AppCompatActivity implements
         CaloriesPickerFragment.onCaloriesSetListener,
@@ -101,6 +113,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private static final String KCAL = "KCAL";
     private static final String IMAGE_PATH = "IMAGE_PATH";
     private static final String PHOTO_DIR_PATH = "PHOTO_DIR_PATH";
+    private static final String IS_IMAGE_CAM = "IS_IMAGE_CAM";
     private static final String INGREDIENTS_EXPANDED = "INGREDIENTS_EXPANDED";
     private static final String METHOD_EXPANDED = "METHOD_EXPANDED";
     private static final String FAB_MENU_OPEN = "FAB_MENU_OPEN";
@@ -119,8 +132,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private int recipeKcalPerPerson;
     private String currentImagePath;
 
-    //TODO clear dir when its been saved in external storage
     private String photosDirPath;
+    private boolean isImageFromCam = false;
 
     private int editingPosition = -1;
 
@@ -199,7 +212,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
             public void afterTextChanged(Editable editable) {}
         });
 
-        //Setup add image photo sheet
+        //Setup add_activity_toolbar image photo sheet
         photoSheetBehaviour = BottomSheetBehavior.from(binding.includeImageSheet.addImage);
         photoSheetBehaviour.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -227,6 +240,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         outState.putInt(KCAL, recipeKcalPerPerson);
         outState.putString(IMAGE_PATH, currentImagePath);
         outState.putString(PHOTO_DIR_PATH, photosDirPath);
+        outState.putBoolean(IS_IMAGE_CAM, isImageFromCam);
 
         outState.putInt(EDITING_POSITION, editingPosition);
 
@@ -249,6 +263,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         recipeKcalPerPerson = savedInstanceState.getInt(KCAL);
         currentImagePath = savedInstanceState.getString(IMAGE_PATH);
         photosDirPath = savedInstanceState.getString(PHOTO_DIR_PATH);
+        isImageFromCam = savedInstanceState.getBoolean(IS_IMAGE_CAM);
         ingredientsExpanded = savedInstanceState.getBoolean(INGREDIENTS_EXPANDED);
         methodExpanded = savedInstanceState.getBoolean(METHOD_EXPANDED);
         boolean fabMenuOpen = savedInstanceState.getBoolean(FAB_MENU_OPEN);
@@ -320,6 +335,76 @@ public class AddRecipeActivity extends AppCompatActivity implements
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.add_activity_toolbar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.menu_add_recipe:
+                SaveRecipe();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Packages up all relevant data, starts AsyncTask to save recipe and ends activity
+     */
+    private void SaveRecipe() {
+
+        //Hide keyboard
+
+        String title = binding.etxtRecipeName.getText().toString();
+
+        if (title.isEmpty()) {
+            Snackbar.make(binding.cdlyAddRoot, R.string.snackbar_no_title, Snackbar.LENGTH_SHORT)
+                    .show();
+            return;
+        }
+        else if (Utility.isStringAllWhitespace(title)) {
+            Snackbar.make(binding.cdlyAddRoot, R.string.snackbar_title_invalid, Snackbar.LENGTH_SHORT)
+                    .show();
+            return;
+        }
+        if (newIngredients.isEmpty()) {
+            Snackbar.make(binding.cdlyAddRoot, R.string.snackbar_no_ingredients, Snackbar.LENGTH_SHORT)
+                    .show();
+            return;
+        }
+        if (newSteps.isEmpty()) {
+            Snackbar.make(binding.cdlyAddRoot, R.string.snackbar_no_steps, Snackbar.LENGTH_SHORT)
+                    .show();
+            return;
+        }
+
+        //Prepare data for saving
+        Recipe recipe = new Recipe.RecipeBuilder(-1, title)
+                .imageFilePath(currentImagePath)
+                .timeInMins(recipeDuration)
+                .calories(recipeKcalPerPerson)
+                .build();
+
+        Bundle saveData = new Bundle();
+        saveData.putParcelable(SAVE_TASK_RECIPE, recipe);
+        saveData.putParcelableArrayList(SAVE_TASK_INGREDIENTS, new ArrayList<>(newIngredients));
+        saveData.putParcelableArrayList(SAVE_TASK_METHOD, new ArrayList<>(newSteps));
+
+        saveData.putBoolean(SAVE_TASK_IS_IMAGE_CAMERA, isImageFromCam);
+        saveData.putString(SAVE_TASK_CAMERA_DIR_PATH, photosDirPath);
+
+        //Start saving recipe
+        new SaveRecipeTask(getApplicationContext()).execute(saveData);
+
+        finish();
+    }
+
+    @Override
     public boolean onSupportNavigateUp() {
         super.onSupportNavigateUp();
 
@@ -356,7 +441,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         binding.llyToolbarContainer.setLayoutTransition(imageSlider);
 
-        binding.llyAddContainer.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+        binding.clyAddContainer.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
         binding.ctlyIngredientsContainer.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
         binding.ctlyMethodContainer.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
     }
@@ -448,6 +533,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
     public void RemoveImage(View view) {
         HideImage();
         currentImagePath = null;
+        isImageFromCam = false;
     }
 
     public void AddImageURL(View view) {
@@ -512,6 +598,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
         if (Utility.isStringAllWhitespace(path))
             return;
 
+        isImageFromCam = false;
+
         currentImagePath = path;
         binding.setImagePath(path);
         binding.executePendingBindings();
@@ -534,6 +622,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
                         Utility.DeleteFile(currentImagePath);
 
                     SetImage(data.getStringExtra(CAMERA_PHOTO_PATH));
+                    isImageFromCam = true;
                 }
                 break;
         }

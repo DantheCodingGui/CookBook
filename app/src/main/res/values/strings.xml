@@ -6,7 +6,7 @@
     <string name="method">Method</string>
 
     <string name="txt_time_to_make"></string>
-    <string name="search_title">Search Recipes</string>
+    <string name="menu_search_title">Search Recipes</string>
     <string name="main_card_transition_name">transition_card</string>
     <string name="txt_add_image">Add Photo</string>
     <string name="txt_add_time">Add Time</string>
@@ -46,4 +46,9 @@
     <string name="url_not_image">URL isn\'t an image</string>
     <string name="snackbar_settings">Settings</string>
     <string name="perm_denied_snackbar_msg">You can Re-Enable permissions at any time in \'App Info\'</string>
+    <string name="menu_add_recipe_title">Add Recipe</string>
+    <string name="snackbar_no_title">Please Enter a Recipe Name</string>
+    <string name="snackbar_title_invalid">Please enter a valid name</string>
+    <string name="snackbar_no_ingredients">Please enter at least one ingredient</string>
+    <string name="snackbar_no_steps">Please enter at least one step for the method</string>
 </resources>

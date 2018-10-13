@@ -229,7 +229,7 @@ public class Utility {
         values = new ContentValues();
         values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
         values.put(ProviderContract.MethodStepEntry.STEP_NO, 3);
-        values.put(ProviderContract.MethodStepEntry.STEP_TEXT, "Toss with cooked spaghetti and add cooked chicken if desired");
+        values.put(ProviderContract.MethodStepEntry.STEP_TEXT, "Toss with cooked spaghetti and add_activity_toolbar cooked chicken if desired");
         resolver.insert(
                 ProviderContract.METHOD_URI,
                 values);

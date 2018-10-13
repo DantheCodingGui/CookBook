@@ -27,7 +27,7 @@
                 style="@style/CardImagePreview"
                 app:riv_corner_radius_top_left="10dp"
                 app:riv_corner_radius_top_right="10dp"
-                app:imagePath="@{recipe.getImageFilePath()}"
+                app:imagePath="@{recipe.getImagePath()}"
                 app:onLoadedListener="@{imageLoadedCallback}"
                 tools:src="@drawable/sample_image"/>
 
