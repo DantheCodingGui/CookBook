@@ -400,6 +400,9 @@ public class MainActivity extends AppCompatActivity
             boolean isComplex = item.hasExtendedInfo();
             boolean hasPhoto = item.hasPhoto() && !noImage && Utility.FileExists(item.getImageFilePath());
 
+            if (!hasPhoto)
+                item.setImageFilePath(null);
+
             if (isComplex && hasPhoto)
                 return PHOTO_COMPLEX;
             else if (hasPhoto)

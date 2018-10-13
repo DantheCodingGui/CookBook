@@ -72,6 +72,9 @@ public class Recipe implements Parcelable {
     public String getImageFilePath() {
         return imageFilePath;
     }
+    public void setImageFilePath(String newPath) {
+        imageFilePath = newPath;
+    }
 
     public int getCalories() {
         return calories;
