@@ -83,6 +83,9 @@ public class RecipeProvider extends ContentProvider {
 
         db = dbHelper.getWritableDatabase();
         long id = db.insert(tableName, null, values);
+
+        getContext().getContentResolver().notifyChange(uri, null);
+
         return ContentUris.withAppendedId(uri, id);
     }
 
@@ -257,6 +260,8 @@ public class RecipeProvider extends ContentProvider {
                 throw new IllegalArgumentException("Invalid URI for updating: " + uri);
         }
 
+        getContext().getContentResolver().notifyChange(uri, null);
+
         return rowNumUpdated;
     }
 
@@ -333,6 +338,8 @@ public class RecipeProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Invalid URI for deletion: " + uri);
         }
+
+        getContext().getContentResolver().notifyChange(uri, null);
 
         return rowNumDeleted;
 

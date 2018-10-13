@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * MainActivity RecyclerView model
+ * HomeActivity RecyclerView model
  */
 public class Recipe implements Parcelable {
 

@@ -67,7 +67,7 @@ import static com.danthecodinggui.recipes.msc.LogTags.GLIDE;
 /**
  * Display all stored recipes
  */
-public class MainActivity extends AppCompatActivity
+public class HomeActivity extends AppCompatActivity
         implements Utility.PermissionDialogListener {
 
     ActivityMainBinding binding;
@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 // Called when SearchView is collapsing
                 if (searchItem.isActionViewExpanded()) {
-                    AnimUtils.animateSearchToolbar(MainActivity.this, binding.tbarHome, 1, false, false);
+                    AnimUtils.animateSearchToolbar(HomeActivity.this, binding.tbarHome, 1, false, false);
                     binding.txtSearchNoItems.setVisibility(View.INVISIBLE);
                     searchOpen = false;
                 }
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 // Called when SearchView is expanding
-                AnimUtils.animateSearchToolbar(MainActivity.this, binding.tbarHome, 1, true, true);
+                AnimUtils.animateSearchToolbar(HomeActivity.this, binding.tbarHome, 1, true, true);
                 searchOpen = true;
                 return true;
             }
@@ -313,11 +313,11 @@ public class MainActivity extends AppCompatActivity
         @Override
         public Loader<List<Recipe>> onCreateLoader(int id, @Nullable Bundle args) {
             Handler uiThread = new Handler(getMainLooper());
-            return recipesLoader = new GetRecipesLoader(MainActivity.this, uiThread,
+            return recipesLoader = new GetRecipesLoader(HomeActivity.this, uiThread,
                     new GetRecipesLoader.ImagePermissionsListener() {
                         @Override
                         public void onImagePermRequested() {
-                            int response = PermissionsHandler.AskForPermission(MainActivity.this,
+                            int response = PermissionsHandler.AskForPermission(HomeActivity.this,
                                     Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL);
 
                             if (response == PermissionsHandler.PERMISSION_GRANTED)

@@ -1,6 +1,5 @@
 package com.danthecodinggui.recipes.view.Loaders;
 
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -8,7 +7,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.BaseColumns;
-import android.support.annotation.Nullable;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
@@ -21,6 +19,9 @@ import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 
+/**
+ * Loads recipes from database into HomeActivity view
+ */
 public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
 
     private ContentResolver contentResolver;
@@ -30,9 +31,9 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
     private ImagePermissionsListener permissionsCallback;
 
     private boolean waitingForPermissionResponse = false;
-//
-//    private ForceLoadContentObserver contentObserver;
-//
+
+    private ContentObserver contentObserver;
+
     private Handler uiThread;
 
     public GetRecipesLoader(Context context, Handler uiThread,
@@ -55,10 +56,15 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
             forceLoad();
         }
 
-//        if (contentObserver == null) {
-//            contentObserver = new ForceLoadContentObserver();
-//            contentResolver.registerContentObserver(ProviderContract.METHOD_URI, false, contentObserver);
-//        }
+        if (contentObserver == null) {
+            contentObserver = new ContentObserver(uiThread) {
+                @Override
+                public void onChange(boolean selfChange, Uri uri) {
+                    onContentChanged();
+                }
+            };
+            contentResolver.registerContentObserver(ProviderContract.METHOD_URI, false, contentObserver);
+        }
     }
 
 
@@ -152,10 +158,10 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
         if (cachedRecords != null)
             cachedRecords = null;
 
-//        if (contentObserver != null) {
-//            contentResolver.unregisterContentObserver(contentObserver);
-//            contentObserver = null;
-//        }
+        if (contentObserver != null) {
+            contentResolver.unregisterContentObserver(contentObserver);
+            contentObserver = null;
+        }
     }
 
     @Override
