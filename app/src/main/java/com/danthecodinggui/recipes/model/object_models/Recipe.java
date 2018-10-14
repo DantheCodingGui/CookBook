@@ -126,6 +126,15 @@ public class Recipe implements Parcelable {
         }
     };
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Recipe))
+            return false;
+
+        Recipe ob = (Recipe) obj;
+        return ob.recipePk == recipePk;
+    }
+
     /**
      * Builds recipe objects, required due to large amount of constructor params and the fact that
      * some are optional
