@@ -104,6 +104,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
     //Permission Request Codes
     private static final int PERM_REQ_CODE_CAMERA = 201;
     private static final int PERM_REQ_CODE_READ_EXTERNAL = 202;
+    private static final int PERM_REQ_CODE_WRITE_EXTERNAL = 203;
 
     //Activity Request Codes
     private static final int ACT_REQ_CODE_CAMERA = 301;
@@ -346,7 +347,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         switch (id) {
             case R.id.menu_add_recipe:
-                SaveRecipe();
+                VerifyRecipe();
                 return true;
         }
 
@@ -354,10 +355,9 @@ public class AddRecipeActivity extends AppCompatActivity implements
     }
 
     /**
-     * Packages up all relevant data, starts AsyncTask to save recipe and ends activity
+     * Verifies that inserted recipe is valid before proceeding to save
      */
-    private void SaveRecipe() {
-
+    private void VerifyRecipe() {
         //Hide keyboard
 
         String title = binding.etxtRecipeName.getText().toString();
@@ -382,6 +382,26 @@ public class AddRecipeActivity extends AppCompatActivity implements
                     .show();
             return;
         }
+
+        if (isImageFromCam) {
+            int response = PermissionsHandler.AskForPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    PERM_REQ_CODE_WRITE_EXTERNAL);
+
+            if (response == PermissionsHandler.PERMISSION_GRANTED)
+                SaveRecipe();
+            else
+                ;//HANDLE SOMEHOW
+        }
+        else
+            SaveRecipe();
+    }
+
+    /**
+     * Packages up all relevant data, starts AsyncTask to save recipe and ends activity
+     */
+    private void SaveRecipe() {
+
+        String title = binding.etxtRecipeName.getText().toString();
 
         //Prepare data for saving
         Recipe recipe = new Recipe.RecipeBuilder(-1, title)
@@ -697,6 +717,16 @@ public class AddRecipeActivity extends AppCompatActivity implements
                         Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot);
                     }
                 }
+                break;
+            case PERM_REQ_CODE_WRITE_EXTERNAL:
+                if (grantResults.length > 0) {
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                        SaveRecipe();
+                    else {
+                        //Handle somehow
+                    }
+                }
+                break;
         }
     }
 

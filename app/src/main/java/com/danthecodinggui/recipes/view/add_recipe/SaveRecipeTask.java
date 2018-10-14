@@ -38,8 +38,6 @@ import static com.danthecodinggui.recipes.msc.LogTags.SAVE_RECIPE;
  */
 public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
 
-    //TODO REQUEST WRITE EXTERNAL STORAGE IF PHOTO FROM CAMERA
-
     private static final String RECIPES_CAM_DIR_NAME = "/Recipes/";
 
     @SuppressLint("StaticFieldLeak")
@@ -72,7 +70,8 @@ public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
                 Bitmap camImage = BitmapFactory.decodeFile(item.getImagePath());
 
                 //Then save the image into external storage (recipes folder)
-                String dirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString().concat(RECIPES_CAM_DIR_NAME);
+                File dirFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), RECIPES_CAM_DIR_NAME);
+                String dirPath = dirFile.getPath();
                 Utility.CreateDir(dirPath);
 
                 File imageFile = new File(new File(dirPath), CreateFileName(dirPath, item.getTitle(),0));
