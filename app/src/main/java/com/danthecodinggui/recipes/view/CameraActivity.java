@@ -125,6 +125,7 @@ public class CameraActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         );
 
+        //Setup fotoapparat instance
         fotoapparat = Fotoapparat.with(this)
                 .into(binding.cameraView)
                 .previewScaleType(ScaleType.CenterCrop)
@@ -133,6 +134,7 @@ public class CameraActivity extends AppCompatActivity {
                 .lensPosition(LensPositionSelectorsKt.back())
                 .build();
 
+        //Only show flash/front camera buttons if the device has that feature
         if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
             binding.imbFlash.setVisibility(View.VISIBLE);
         if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT))
@@ -144,6 +146,7 @@ public class CameraActivity extends AppCompatActivity {
         int rotation = ((WindowManager)getSystemService(
                 Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
 
+        //Need init orientation data to rotate icons to match orientation
         switch (rotation) {
             case Surface.ROTATION_0:
                 initOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -177,6 +180,7 @@ public class CameraActivity extends AppCompatActivity {
                 break;
         }
 
+        //Lock orientation
         setRequestedOrientation(initOrientation);
 
         orientationListener = new OrientationListener(this);
@@ -201,9 +205,6 @@ public class CameraActivity extends AppCompatActivity {
         isCameraBack = savedInstanceState.getBoolean(IS_CAMERA_BACK);
         cameraFlash = savedInstanceState.getInt(CAMERA_FLASH);
 
-        if (!isCameraBack)
-            binding.imbSwitchCamera.setImageResource(R.drawable.ic_camera_back);
-
         if (resultCachePath != null)
             ShowConfirmationView(false, null);
 
@@ -211,6 +212,9 @@ public class CameraActivity extends AppCompatActivity {
             binding.imbFlash.setImageResource(R.drawable.ic_flash_on);
         else if (cameraFlash == CAM_FLASH_OFF)
             binding.imbFlash.setImageResource(R.drawable.ic_flash_off);
+
+        if (!isCameraBack)
+            binding.imbSwitchCamera.setImageResource(R.drawable.ic_camera_back);
     }
 
     @Override
@@ -241,6 +245,7 @@ public class CameraActivity extends AppCompatActivity {
      */
     public void CapturePhoto(View view) {
 
+        //Don't allow multiple photos being taken in quick succession
         if (takenPhoto)
             return;
         takenPhoto = true;
@@ -258,12 +263,11 @@ public class CameraActivity extends AppCompatActivity {
             }, 400);
 
 
-        String dirPath = getFilesDir().getPath().concat("/CameraActivityPhotos/");
-        Utility.CreateDir(dirPath);
+        Utility.CreateDir(photoFilesDir);
 
         String filename = UUID.randomUUID().toString() + ".jpg";
 
-        File tempPhoto = new File(dirPath, filename);
+        File tempPhoto = new File(photoFilesDir, filename);
 
         resultCachePath = tempPhoto.getAbsolutePath();
 
@@ -447,7 +451,7 @@ public class CameraActivity extends AppCompatActivity {
         TransitionManager.beginDelayedTransition(binding.clyCameraRoot);
         binding.cdlyImageConfirm.setVisibility(View.GONE);
 
-        //Delete photo
+        //Delete photo(s)
         Utility.ClearDir(photoFilesDir);
 
         resultCachePath = null;

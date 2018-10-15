@@ -242,7 +242,6 @@ public class Utility {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && activity.isInMultiWindowMode();
     }
 
-
     public static int dpToPx(Context context, int dp) {
         Resources res = context.getResources();
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, res.getDisplayMetrics());

@@ -75,14 +75,15 @@ public class HomeActivity extends AppCompatActivity
     List<Recipe> recipesList;
     RecipesViewAdapter recipesAdapter;
 
-    //Flag determines if
-    private boolean noImage = false;
+    //Flag determines if app can show local images (does the app have read external permission)
+    private boolean noLocalImage = false;
 
+    //Other flags
+    private boolean searchOpen = false;
+    private boolean restoringState = false;
     private boolean transitioningActivity = false;
 
     private String lastSearchFilter;
-    private boolean searchOpen = false;
-    private boolean restoringState = false;
 
     private GetRecipesLoader recipesLoader;
 
@@ -189,6 +190,7 @@ public class HomeActivity extends AppCompatActivity
             }
         });
 
+        //Restore searchview state
         if (lastSearchFilter != null && !lastSearchFilter.isEmpty()) {
             restoringState = true;
             searchItem.expandActionView();
@@ -271,7 +273,7 @@ public class HomeActivity extends AppCompatActivity
             case REQ_CODE_READ_EXTERNAL:
                 if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                        noImage = true;
+                        noLocalImage = true;
                         Utility.showPermissionDeniedSnackbar(binding.clyMainRoot);
                     }
                     UnblockLoader();
@@ -281,12 +283,12 @@ public class HomeActivity extends AppCompatActivity
     }
     @Override
     public void onFeatureDisabled() {
-        noImage = true;
+        noLocalImage = true;
         UnblockLoader();
     }
 
     /**
-     * Allow the loader to continue loading recipes now that noImage state has been determined
+     * Allow the loader to continue loading recipes now that noLocalImage state has been determined
      */
     private void UnblockLoader() {
         recipesLoader.onPermissionResponse();
@@ -303,6 +305,10 @@ public class HomeActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Open Add recipe activity
+     * @param view
+     */
     public void AddRecipe(View view) {
         Intent addRecipe = new Intent(getApplicationContext(), AddRecipeActivity.class);
         startActivity(addRecipe);
@@ -398,8 +404,9 @@ public class HomeActivity extends AppCompatActivity
             Recipe item = displayedRecipesList.get(position);
 
             boolean isComplex = item.hasExtendedInfo();
-            boolean hasPhoto = item.hasPhoto() && !noImage && Utility.imageExists(item.getImagePath());
+            boolean hasPhoto = item.hasPhoto() && !noLocalImage && Utility.imageExists(item.getImagePath());
 
+            //Nullify path to ensure android doesn't try and animate image in shared transition
             if (!hasPhoto)
                 item.setImagePath(null);
 
@@ -420,6 +427,10 @@ public class HomeActivity extends AppCompatActivity
             return displayedRecipesList.size();
         }
 
+        /**
+         * Update adapter's own list of shown recipe records and animate to new list
+         * @param updatedRecords
+         */
         void UpdateRecords(List<Recipe> updatedRecords) {
             if (updatedRecords != null) {
                 if (displayedRecipesList == null || displayedRecipesList.isEmpty()) {
@@ -431,7 +442,7 @@ public class HomeActivity extends AppCompatActivity
             }
         }
 
-        //Methods required for animated RecyclerView filtering
+        //Methods allowing animation between two lists of recipes
         void animateTo(List<Recipe> items) {
             applyAndAnimateRemovals(items);
             applyAndAnimateAdditions(items);
@@ -474,6 +485,9 @@ public class HomeActivity extends AppCompatActivity
             notifyItemMoved(fromPos, toPos);
         }
 
+        /**
+         * Base class for all 4 types of recipe cards
+         */
         class RecipeViewHolder extends RecyclerView.ViewHolder
                 implements View.OnClickListener, View.OnLongClickListener {
 
@@ -503,6 +517,9 @@ public class HomeActivity extends AppCompatActivity
             }
         }
 
+        /**
+         * Recipe with no optional extra information
+         */
         class BasicViewHolder extends RecipeViewHolder {
 
             BasicViewHolder(RecipeCardBasicBinding itemBinding) {
@@ -510,6 +527,9 @@ public class HomeActivity extends AppCompatActivity
                 binding = itemBinding;
             }
         }
+        /**
+         * Recipe with no photo but with kcal and/or time data
+         */
         class ComplexViewHolder extends RecipeViewHolder {
 
             ComplexViewHolder(RecipeCardComplexBinding itemBinding) {
@@ -517,6 +537,10 @@ public class HomeActivity extends AppCompatActivity
                 binding = itemBinding;
             }
         }
+
+        /**
+         * Recipe with photo but no other optional info
+         */
         class BasicPhotoViewHolder extends RecipeViewHolder {
 
             RecipeCardPhotoBasicBinding photoBinding;
@@ -530,7 +554,7 @@ public class HomeActivity extends AppCompatActivity
             public void bind(Recipe item) {
                 super.bind(item);
 
-                //Set unique transition name for this specific
+                //Set unique transition name for this specific card
                 ViewCompat.setTransitionName(photoBinding.ivwCrdPreview,
                         getString(R.string.main_card_transition_name) + "_" +
                                 item.getTitle() + "_" + Integer.toString(getAdapterPosition()));
@@ -555,6 +579,9 @@ public class HomeActivity extends AppCompatActivity
                 ViewRecipe(displayedRecipesList.get(getAdapterPosition()), photoBinding.ivwCrdPreview);
             }
         }
+        /**
+         * Recipe with photo and kcal and/or time data
+         */
         class ComplexPhotoViewHolder extends RecipeViewHolder {
 
             RecipeCardPhotoComplexBinding photoBinding;
@@ -568,21 +595,21 @@ public class HomeActivity extends AppCompatActivity
             public void bind(Recipe item) {
                 super.bind(item);
 
-                //Set unique transition name for this specific
+                //Set unique transition name for this specific card
                 ViewCompat.setTransitionName(photoBinding.ivwCrdPreview,
                         getString(R.string.main_card_transition_name) + "_" +
                                 item.getTitle() + "_" + Integer.toString(getAdapterPosition()));
 
-                photoBinding.setVariable(BR.imageLoadedCallback, new RequestListener() {
+                photoBinding.setVariable(BR.imageLoadedCallback, new RequestListener<Drawable>() {
 
                     @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
-                        Log.e(GLIDE, "Data Binding image loading failed (from filepath)", e);
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                         return false;
                     }
 
                     @Override
-                    public boolean onResourceReady(Object resource, Object model, Target target, DataSource dataSource, boolean isFirstResource) {
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
+                        Log.e(GLIDE, "Data Binding image loading failed (from filepath)", e);
                         return false;
                     }
                 });
@@ -640,6 +667,7 @@ public class HomeActivity extends AppCompatActivity
             startActivity(viewRecipe, options.toBundle());
             return;
         }
+
         //Should just start activity normally
         startActivity(viewRecipe);
     }
