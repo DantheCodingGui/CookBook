@@ -75,7 +75,7 @@ public class HomeActivity extends AppCompatActivity
     List<Recipe> recipesList;
     RecipesViewAdapter recipesAdapter;
 
-    //If read external files permission denied, must avoid loading images from recipes
+    //Flag determines if
     private boolean noImage = false;
 
     private boolean transitioningActivity = false;

@@ -242,6 +242,7 @@ public class Utility {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && activity.isInMultiWindowMode();
     }
 
+
     public static int dpToPx(Context context, int dp) {
         Resources res = context.getResources();
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, res.getDisplayMetrics());
@@ -307,7 +308,11 @@ public class Utility {
     public static boolean imageExists(String imagePath) {
         if (Patterns.WEB_URL.matcher(imagePath).matches())
             return true;
-        return new File(imagePath).exists();
+        return isImageLocal(imagePath);
+    }
+
+    public static boolean isImageLocal(String filepath) {
+        return new File(filepath).exists();
     }
 
     public interface PermissionDialogListener {

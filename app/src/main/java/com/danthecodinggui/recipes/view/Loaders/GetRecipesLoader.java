@@ -13,6 +13,7 @@ import android.util.Log;
 import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.LogTags;
+import com.danthecodinggui.recipes.msc.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,8 +123,8 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
                 temp = AddStepsCount(countCursor, temp);
 
 
-            //Need to ask for permission if a recipe includes a photo
-            if (temp.hasPhoto() && permissionsCallback != null) {
+            //Need to ask for permission if a recipe includes a local photo
+            if (temp.hasPhoto() && Utility.isImageLocal(temp.getImagePath()) && permissionsCallback != null) {
                 AskForReadPermission();
 
                 while (waitingForPermissionResponse) {
