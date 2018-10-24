@@ -565,7 +565,13 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onItemSwipe(float percentSwiped) {
                 CardView card = binding.getRoot().findViewById(R.id.crd_root);
-                card.setCardBackgroundColor(interpolateRGB(0xffffff, 0xff0000, percentSwiped));
+
+                float alteredPercentSwiped = percentSwiped * 1.1f;
+                if (alteredPercentSwiped > 1)
+                    alteredPercentSwiped = 1;
+
+
+                card.setCardBackgroundColor(interpolateRGB(0xffffff, 0xff0000, alteredPercentSwiped));
                 if (percentSwiped == 0 || percentSwiped == 1)
                     card.setCardBackgroundColor(Color.WHITE);
             }
