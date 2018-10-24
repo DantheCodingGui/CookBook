@@ -72,7 +72,7 @@ import static com.danthecodinggui.recipes.msc.LogTags.CAMERA;
 public class AddRecipeActivity extends AppCompatActivity implements
         CaloriesPickerFragment.onCaloriesSetListener,
         DurationPickerFragment.onDurationSetListener, AddImageURLFragment.onURLSetListener,
-        BSImagePicker.OnSingleImageSelectedListener {
+        BSImagePicker.OnSingleImageSelectedListener, Utility.PermissionDialogListener {
 
     ActivityAddRecipeBinding binding;
 
@@ -107,42 +107,35 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private static final String INGREDIENTS_LIST = "INGREDIENTS_LIST";
     private static final String METHOD_LIST = "METHOD_LIST";
     private static final String EDITING_POSITION = "EDITING_POSITION";
+    private static final String HAS_ASKED_WRITE_PERM = "HAS_ASKED_WRITE_PERM";
 
     //Various Flags
     private boolean fabMenuOpen = false;
-
+    private boolean photoSheetExpanded = false;
     private boolean ingredientsExpanded = false;
     private boolean methodExpanded = false;
+    private boolean isImageFromCam = false;
+    private boolean hasAskedWritePerm = false;
 
+    //Recipe Data
     private int recipeDuration;
     private int recipeKcalPerPerson;
     private String currentImagePath;
-
     private String photosDirPath;
-    private boolean isImageFromCam = false;
+    private List<Ingredient> newIngredients;
+    private List<MethodStep> newSteps;
+
+    private IngredientsAddAdapter ingAdapter;
+    private MethodStepAddAdapter methAdapter;
 
     private int editingPosition = -1;
 
     private BottomSheetBehavior photoSheetBehaviour;
-    private boolean photoSheetExpanded = false;
-
-    private List<Ingredient> newIngredients;
-    private IngredientsAddAdapter ingAdapter;
-
-    private List<MethodStep> newSteps;
-    private MethodStepAddAdapter methAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_add_recipe);
-
-        //Setup toolbar
-        setSupportActionBar(binding.tbarAdd);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
 
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE)
@@ -157,8 +150,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         }
 
-        SetupLayoutAnimator();
-
         newIngredients = new ArrayList<>();
         newSteps = new ArrayList<>();
 
@@ -169,6 +160,15 @@ public class AddRecipeActivity extends AppCompatActivity implements
         binding.rvwNewSteps.setLayoutManager((new LinearLayoutManager(this)));
         methAdapter = new MethodStepAddAdapter();
         binding.rvwNewSteps.setAdapter(methAdapter);
+
+        //Setup toolbar
+        setSupportActionBar(binding.tbarAdd);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        SetupLayoutAnimator();
 
         //Setup button enable/disable based on edittext contents
         binding.butAddIngredient.setEnabled(false);
@@ -198,7 +198,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
             public void afterTextChanged(Editable editable) {}
         });
 
-        //Setup add_activity_toolbar image photo sheet
+        //Setup add image photo sheet
         photoSheetBehaviour = BottomSheetBehavior.from(binding.includeImageSheet.addImage);
         photoSheetBehaviour.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -222,11 +222,13 @@ public class AddRecipeActivity extends AppCompatActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
+        //Recipe data
         outState.putInt(DURATION, recipeDuration);
         outState.putInt(KCAL, recipeKcalPerPerson);
         outState.putString(IMAGE_PATH, currentImagePath);
         outState.putString(PHOTO_DIR_PATH, photosDirPath);
         outState.putBoolean(IS_IMAGE_CAM, isImageFromCam);
+        outState.putBoolean(HAS_ASKED_WRITE_PERM, hasAskedWritePerm);
 
         outState.putInt(EDITING_POSITION, editingPosition);
 
@@ -254,6 +256,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         methodExpanded = savedInstanceState.getBoolean(METHOD_EXPANDED);
         boolean fabMenuOpen = savedInstanceState.getBoolean(FAB_MENU_OPEN);
         photoSheetExpanded = savedInstanceState.getBoolean(PHOTO_SHEET_OPEN);
+        hasAskedWritePerm = savedInstanceState.getBoolean(HAS_ASKED_WRITE_PERM);
 
         //Restore ingredient and method steps
         newIngredients = savedInstanceState.getParcelableArrayList(INGREDIENTS_LIST);
@@ -269,6 +272,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
             binding.rvwNewSteps.setLayoutFrozen(true);
         }
 
+        //Restore views
         if (recipeDuration != 0)
             onDurationSet(recipeDuration);
         if (recipeKcalPerPerson != 0)
@@ -284,6 +288,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         editingPosition = savedInstanceState.getInt(EDITING_POSITION);
 
+        //Restore fragments
         DurationPickerFragment timeFrag = (DurationPickerFragment) getFragmentManager().findFragmentByTag(FRAG_TAG_TIME);
         CaloriesPickerFragment kcalFrag = (CaloriesPickerFragment) getFragmentManager().findFragmentByTag(FRAG_TAG_KCAL);
         EditIngredientFragment editIng = (EditIngredientFragment) getFragmentManager().findFragmentByTag(FRAG_TAG_EDIT_INGREDIENT);
@@ -315,7 +320,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
             AnimateFabMenu(binding.fabAddMenu);
         else {
             super.onBackPressed();
-            //TODO remove later
             Utility.ClearDir(photosDirPath);
         }
     }
@@ -374,11 +378,19 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
             if (response == PermissionsHandler.PERMISSION_GRANTED)
                 SaveRecipe();
-            else
-                ;//HANDLE SOMEHOW
+            else if (response == PermissionsHandler.PERMISSION_DENIED) {
+                onFeatureDisabled();
+            }
         }
         else
             SaveRecipe();
+    }
+
+    @Override
+    public void onFeatureDisabled() {
+        currentImagePath = null;
+        isImageFromCam = false;
+        SaveRecipe();
     }
 
     /**
@@ -406,14 +418,15 @@ public class AddRecipeActivity extends AppCompatActivity implements
         //Start saving recipe
         new SaveRecipeTask(getApplicationContext()).execute(saveData);
 
-        finish();
+        supportFinishAfterTransition();
     }
+
+
 
     @Override
     public boolean onSupportNavigateUp() {
-        super.onSupportNavigateUp();
+        super.onBackPressed();
 
-        //TODO remove later
         Utility.ClearDir(photosDirPath);
         return true;
     }
@@ -708,7 +721,18 @@ public class AddRecipeActivity extends AppCompatActivity implements
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
                         SaveRecipe();
                     else {
-                        //Handle somehow
+                        if (!hasAskedWritePerm &&
+                                ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
+                            Utility.showPermissionDeniedDialog(this,
+                                    R.string.perm_camera_denied,
+                                    binding.cdlyAddRoot,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                    PERM_REQ_CODE_WRITE_EXTERNAL,
+                                    this);
+                        }
+                        else
+                            onFeatureDisabled();
+                        hasAskedWritePerm = true;
                     }
                 }
                 break;

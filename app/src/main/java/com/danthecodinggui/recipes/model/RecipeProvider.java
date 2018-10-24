@@ -317,6 +317,7 @@ public class RecipeProvider extends ContentProvider {
             case RECIPE_INGREDIENTS_TABLE:
                 //TODO Maybe in future look for references to a specific ingredient in recipeIngredients,
                 //and delete in ingredients if no refs to it (not a big deal for now)
+
                 rowNumDeleted = db.delete(
                         DBSchema.RecipeIngredientEntry.TABLE_NAME,
                         selection,

@@ -7,14 +7,20 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.graphics.ColorUtils;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.transition.TransitionInflater;
 import android.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -48,6 +54,8 @@ import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.AnimUtils;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperAdapter;
+import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchSwipeHelper;
 import com.danthecodinggui.recipes.view.Loaders.GetRecipesLoader;
 import com.danthecodinggui.recipes.view.add_recipe.AddRecipeActivity;
 import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
@@ -120,6 +128,11 @@ public class HomeActivity extends AppCompatActivity
         //Setup RecyclerView Adapter
         recipesAdapter = new RecipesViewAdapter(null);
         binding.rvwRecipes.setAdapter(recipesAdapter);
+
+        //Setup ItemTouchHelper
+        ItemTouchHelper.Callback itemTouchCallback = new HomeItemTouchHelperCallback(recipesAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(itemTouchCallback);
+        touchHelper.attachToRecyclerView(binding.rvwRecipes);
 
         //Setup RecyclerView Animations
         ScaleInAnimator animator = new ScaleInAnimator(new OvershootInterpolator(1.f));
@@ -260,6 +273,17 @@ public class HomeActivity extends AppCompatActivity
         return filteredRecipes;
     }
 
+    /**
+     * Returns position of recipe in unfiltered list (needed for swipe-to-delete)
+     */
+    private int getRecipePos(Recipe r) {
+        for (int i = 0; i < recipesList.size(); ++i) {
+            if (recipesList.get(i).equals(r))
+                return i;
+        }
+        return -1;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -303,15 +327,6 @@ public class HomeActivity extends AppCompatActivity
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Open Add recipe activity
-     * @param view
-     */
-    public void AddRecipe(View view) {
-        Intent addRecipe = new Intent(getApplicationContext(), AddRecipeActivity.class);
-        startActivity(addRecipe);
     }
 
     private LoaderManager.LoaderCallbacks<List<Recipe>> loaderCallbacks = new LoaderManager.LoaderCallbacks<List<Recipe>>() {
@@ -361,7 +376,8 @@ public class HomeActivity extends AppCompatActivity
      * Allows integration between the list of recipe objects and the recyclerview
      */
     class RecipesViewAdapter
-            extends RecyclerView.Adapter<RecipesViewAdapter.RecipeViewHolder> {
+            extends RecyclerView.Adapter<RecipesViewAdapter.RecipeViewHolder>
+            implements ItemTouchHelperAdapter {
 
         List<Recipe> displayedRecipesList;
 
@@ -485,11 +501,41 @@ public class HomeActivity extends AppCompatActivity
             notifyItemMoved(fromPos, toPos);
         }
 
+        @Override
+        public void onItemDismiss(final int position) {
+
+            //Need to delete recipe from both filtered/unfiltered list
+            final int unfilteredPos = getRecipePos(displayedRecipesList.get(position));
+
+            //Now we have positions, can delete from both lists
+            final Recipe recipeToDelete = removeItem(position);
+            recipesList.remove(unfilteredPos);
+
+            Snackbar.make(binding.clyMainRoot, R.string.recipe_removed, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.snackbar_undo, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            recipesList.add(recipeToDelete);
+                            addItem(position, recipeToDelete);
+                        }
+                    })
+                    .addCallback(new Snackbar.Callback() {
+                        @Override
+                        public void onDismissed(Snackbar snackbar, int event) {
+                            //Start AsyncTask to delete recipe
+                            if (event != DISMISS_EVENT_ACTION)
+                                new DeleteRecipeTask(getApplicationContext()).execute(recipeToDelete.getRecipeId());
+                        }
+                    })
+                    .setActionTextColor(getResources().getColor(R.color.snackbar_action_default))
+                    .show();
+        }
+
         /**
          * Base class for all 4 types of recipe cards
          */
         class RecipeViewHolder extends RecyclerView.ViewHolder
-                implements View.OnClickListener, View.OnLongClickListener {
+                implements View.OnClickListener, View.OnLongClickListener, ItemTouchSwipeHelper {
 
             ViewDataBinding binding;
 
@@ -512,8 +558,29 @@ public class HomeActivity extends AppCompatActivity
 
             @Override
             public boolean onLongClick(View view) {
-                //TODO implement drag/drop initiation
+                //TODO implement toolbar with delete option
                 return true;
+            }
+
+            @Override
+            public void onItemSwipe(float percentSwiped) {
+                CardView card = binding.getRoot().findViewById(R.id.crd_root);
+                card.setCardBackgroundColor(interpolateRGB(0xffffff, 0xff0000, percentSwiped));
+                if (percentSwiped == 0 || percentSwiped == 1)
+                    card.setCardBackgroundColor(Color.WHITE);
+            }
+
+            /**
+             * Interpolate between two colours
+             * @param bAmount Percentage between the two to go
+             * @return Interpolated colour
+             */
+            private int interpolateRGB(final int colorA, final int colorB, final float bAmount) {
+                final float aAmount = 1.0f - bAmount;
+                final int red = (int) (Color.red(colorA) * aAmount + Color.red(colorB) * bAmount);
+                final int green = (int) (Color.green(colorA) * aAmount + Color.green(colorB) * bAmount);
+                final int blue = (int) (Color.blue(colorA) * aAmount + Color.blue(colorB) * bAmount);
+                return Color.rgb(red, green, blue);
             }
         }
 
@@ -628,6 +695,9 @@ public class HomeActivity extends AppCompatActivity
         if (transitioningActivity)
             return;
 
+        getWindow().setExitTransition(TransitionInflater.from(this).inflateTransition(R.transition.main_activity_view_exit));
+        getWindow().setReenterTransition(TransitionInflater.from(this).inflateTransition(R.transition.main_activity_view_reenter));
+
         Intent viewRecipe = new Intent(this, ViewRecipeActivity.class);
 
         Bundle recipeBundle = new Bundle();
@@ -670,5 +740,21 @@ public class HomeActivity extends AppCompatActivity
 
         //Should just start activity normally
         startActivity(viewRecipe);
+    }
+
+    public void AddRecipe(View view) {
+        Intent addRecipe = new Intent(getApplicationContext(), AddRecipeActivity.class);
+
+        if (Utility.atLeastLollipop()) {
+
+            getWindow().setExitTransition(null);
+            getWindow().setReenterTransition(null);
+
+            //ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
+            //startActivity(addRecipe, options.toBundle());
+            startActivity(addRecipe);
+        }
+        else
+            startActivity(addRecipe);
     }
 }

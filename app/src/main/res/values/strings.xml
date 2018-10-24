@@ -20,8 +20,8 @@
     <string name="add_transition">add_recipe_transition</string>
     <string name="txt_search_no_recipes">Uh oh, can\'t seem to find that one...</string>
     <string name="search_hint">Search...</string>
-    <string name="perm_dialog_butt_deny">Yes</string>
-    <string name="perm_dialog_butt_permit">No</string>
+    <string name="perm_dialog_butt_deny">Deny</string>
+    <string name="perm_dialog_butt_permit">Enable</string>
     <string name="perm_reenable_snackbar_msg">Enable the %s permission here</string>
     <string name="txt_no_recipes">You haven\'t got any recipes yet,\n Lets Get Started!</string>
 
@@ -51,4 +51,7 @@
     <string name="snackbar_title_invalid">Please enter a valid name</string>
     <string name="snackbar_no_ingredients">Please enter at least one ingredient</string>
     <string name="snackbar_no_steps">Please enter at least one step for the method</string>
+    <string name="perm_camera_denied">Without this permission, the photo cannot be saved</string>
+    <string name="recipe_removed">Recipe Deleted</string>
+    <string name="snackbar_undo">UNDO</string>
 </resources>

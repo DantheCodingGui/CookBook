@@ -70,15 +70,17 @@ public class Utility {
                 .setNegativeButton(R.string.perm_dialog_butt_deny, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        callback.onFeatureDisabled();
+                        if (callback != null)
+                            callback.onFeatureDisabled();
                         showPermissionReenableSnackbar(snackbarAnchor, permission);
                     }
                 })
                 .setPositiveButton(R.string.perm_dialog_butt_permit, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+
                         PermissionsHandler.AskForPermission(context, permission,
-                                permissionRequestCode);
+                                permissionRequestCode, true);
                     }
                 })
                 .create();

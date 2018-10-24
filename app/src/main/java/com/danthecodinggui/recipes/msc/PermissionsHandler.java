@@ -37,7 +37,8 @@ public class PermissionsHandler{
     /**
      *
      * @param permission The permission being requested
-     * @param requestId A unique id for the request to be used in identifying the request later.
+     * @param requestId A unique id for the request to be used in identifying the request later
+     * @param overrideRational Force permission to be asked, even if user has denied previously
      * @return The response code, being one of: <br/>
      * <ul>
      *     <li><code>PERMISSION_REQUESTING</code> - The permission has not been granted yet, but now
@@ -50,7 +51,7 @@ public class PermissionsHandler{
      * </ul>
      *
      */
-    public static int AskForPermission(Context context, String permission, int requestId) {
+    public static int AskForPermission(Context context, String permission, int requestId, boolean overrideRational) {
 
         Activity srcActivity = (Activity) context;
 
@@ -73,7 +74,7 @@ public class PermissionsHandler{
         if (ContextCompat.checkSelfPermission(context, permission)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(srcActivity, permission)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(srcActivity, permission) && !overrideRational) {
                 Log.i(PERMISSIONS, "Permission " + permission + " previously been denied");
                 return PERMISSION_DENIED;
             }
@@ -87,6 +88,26 @@ public class PermissionsHandler{
             Log.i(PERMISSIONS, "Permission " + permission + " already granted");
             return PERMISSION_GRANTED;
         }
+    }
+
+    /**
+     *
+     * @param permission The permission being requested
+     * @param requestId A unique id for the request to be used in identifying the request later
+     * @return The response code, being one of: <br/>
+     * <ul>
+     *     <li><code>PERMISSION_REQUESTING</code> - The permission has not been granted yet, but now
+     *         a permission request bas been filed. Override the Activities <code>onRequestPermissionsResult()</code>
+     *         method to see the asynchronous result.</li>
+     *     <li><code>PERMISSION_GRANTED</code> - The permission has already been granted.
+     *     The caller is allowed to run the code requiring this permission.</li>
+     *     <li><code>PERMISSION_DENIED</code> - The user has previously denied the permission.
+     *     If intent not obvious then present some kind of explanation dialogue (async) before asking again.</li>
+     * </ul>
+     *
+     */
+    public static int AskForPermission(Context context, String permission, int requestId) {
+        return AskForPermission(context, permission, requestId, false);
     }
 
     private static class InvalidPermissionException extends RuntimeException {
