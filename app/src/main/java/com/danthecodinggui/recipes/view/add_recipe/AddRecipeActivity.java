@@ -54,6 +54,7 @@ import com.danthecodinggui.recipes.msc.StringUtils;
 import com.danthecodinggui.recipes.msc.Utility;
 import com.danthecodinggui.recipes.view.CameraActivity;
 import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperAdapter;
+import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperViewHolder;
 import com.danthecodinggui.recipes.view.ItemTouchHelper.OnStartDragListener;
 
 import java.util.ArrayList;
@@ -1251,13 +1252,9 @@ public class AddRecipeActivity extends AppCompatActivity implements
         }
 
         @Override
-        public void onItemMove(int fromPosition, int toPosition) {
-            Utility.onRecyclerViewItemMoved(newSteps, fromPosition, toPosition);
-            newSteps.get(toPosition).setStepNumber(toPosition + 1);
-            newSteps.get(fromPosition).setStepNumber(fromPosition + 1);
-            notifyItemChanged(fromPosition);
-            notifyItemChanged(toPosition);
+        public void onItemMove(final int fromPosition, final int toPosition) {
 
+            Utility.onRecyclerViewItemMoved(newSteps, fromPosition, toPosition);
             notifyItemMoved(fromPosition, toPosition);
         }
 
@@ -1273,7 +1270,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
             notifyItemRangeChanged(position, newSteps.size());
         }
 
-        class StepViewHolder extends RecyclerView.ViewHolder {
+        class StepViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
 
             AddMethodItemBinding holderBinding;
 
@@ -1286,6 +1283,25 @@ public class AddRecipeActivity extends AppCompatActivity implements
                 holderBinding.setMethodStep(item);
                 holderBinding.executePendingBindings();
             }
+
+            @Override
+            public void onItemClear() {
+                //Update view numbers
+                MethodStep step;
+                for (int i = 0; i < newSteps.size(); ++i) {
+                    step = newSteps.get(i);
+                    if (step.getStepNumber() != i + 1) {
+                        step.setStepNumber(i + 1);
+                        notifyItemChanged(i);
+                    }
+                }
+            }
+
+            @Override
+            public void onItemSelected(int actionState) {
+                //Not Required
+            }
+
         }
     }
 }

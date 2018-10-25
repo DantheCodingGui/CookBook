@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
 import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperAdapter;
+import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperViewHolder;
 
 /**
  * Group of utility callback methods to enable swipe and drag & drop features to RecyclerView
@@ -42,5 +43,15 @@ public class AddItemTouchHelperCallback extends ItemTouchHelper.Callback {
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
         touchHelperAdapter.onItemDismiss(viewHolder.getAdapterPosition());
+    }
+
+    @Override
+    public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        super.clearView(recyclerView, viewHolder);
+
+        if (viewHolder instanceof ItemTouchHelperViewHolder) {
+            ItemTouchHelperViewHolder helper = (ItemTouchHelperViewHolder) viewHolder;
+            helper.onItemClear();
+        }
     }
 }
