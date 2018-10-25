@@ -1,9 +1,9 @@
 package com.danthecodinggui.recipes.view.ItemTouchHelper;
 
 /**
- * Defines methods that the ItemTouchHelper callback subclass will redirect to the
- * RecyclerViewAdapter
+ * Allows ViewHolders to respond to swipe-to-dismiss events
  */
 public interface ItemTouchHelperAdapter {
+    void onItemMove(int fromPosition, int toPosition);
     void onItemDismiss(int position);
 }

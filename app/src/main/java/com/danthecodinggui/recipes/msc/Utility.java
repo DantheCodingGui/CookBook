@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
@@ -21,8 +22,11 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.model.ProviderContract;
+import com.danthecodinggui.recipes.model.object_models.Ingredient;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Set of miscellaneous methods without a link to any other class
@@ -314,6 +318,39 @@ public class Utility {
 
     public static boolean isImageLocal(String filepath) {
         return new File(filepath).exists();
+    }
+
+    /**
+     * Interpolate between two colours
+     * @param bAmount Percentage between the two to go
+     * @return Interpolated colour
+     */
+    public static int interpolateRGB(final int colorA, final int colorB, final float bAmount) {
+        final float aAmount = 1.0f - bAmount;
+        final int red = (int) (Color.red(colorA) * aAmount + Color.red(colorB) * bAmount);
+        final int green = (int) (Color.green(colorA) * aAmount + Color.green(colorB) * bAmount);
+        final int blue = (int) (Color.blue(colorA) * aAmount + Color.blue(colorB) * bAmount);
+        return Color.rgb(red, green, blue);
+    }
+
+    /**
+     * Update RecyclerView item positions when dragged
+     * @param list
+     * @param fromPosition
+     * @param toPosition
+     * @param <T>
+     * @return Has the item moved down the list
+     */
+    public static <T> boolean onRecyclerViewItemMoved(List<T> list, int fromPosition, int toPosition) {
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++)
+                Collections.swap(list, i, i + 1);
+            return true;
+        } else {
+            for (int i = fromPosition; i > toPosition; i--)
+                Collections.swap(list, i, i - 1);
+            return false;
+        }
     }
 
     public interface PermissionDialogListener {

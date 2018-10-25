@@ -37,6 +37,7 @@
 
     <style name="AddRecipeTheme" parent="HomeTheme">
         <item name="android:statusBarColor">@color/backToolbar</item>
+        <item name="android:colorBackground">@android:color/white</item>
 
         <item name="android:windowEnterTransition">@transition/add_activity_enter</item>
         <item name="android:windowReturnTransition">@transition/add_activity_return</item>

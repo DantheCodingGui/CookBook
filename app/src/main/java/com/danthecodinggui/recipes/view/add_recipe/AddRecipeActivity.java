@@ -18,12 +18,14 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.Snackbar;
 import android.support.transition.Slide;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.transition.TransitionManager;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Pair;
@@ -51,8 +53,11 @@ import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.msc.StringUtils;
 import com.danthecodinggui.recipes.msc.Utility;
 import com.danthecodinggui.recipes.view.CameraActivity;
+import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperAdapter;
+import com.danthecodinggui.recipes.view.ItemTouchHelper.OnStartDragListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_PATH;
@@ -64,7 +69,6 @@ import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_INGREDIE
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_IS_IMAGE_CAMERA;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_METHOD;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_RECIPE;
-import static com.danthecodinggui.recipes.msc.LogTags.CAMERA;
 
 /**
  * Provides functionality to add_activity_toolbar recipes
@@ -156,10 +160,28 @@ public class AddRecipeActivity extends AppCompatActivity implements
         binding.rvwNewIngredients.setLayoutManager(new LinearLayoutManager(this));
         ingAdapter = new IngredientsAddAdapter();
         binding.rvwNewIngredients.setAdapter(ingAdapter);
+        ItemTouchHelper.Callback ingTouchCallback = new AddItemTouchHelperCallback(ingAdapter);
+        final ItemTouchHelper ingTouchHelper = new ItemTouchHelper(ingTouchCallback);
+        ingTouchHelper.attachToRecyclerView(binding.rvwNewIngredients);
+        ingAdapter.setStartDragListener(new OnStartDragListener() {
+            @Override
+            public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+                ingTouchHelper.startDrag(viewHolder);
+            }
+        });
 
         binding.rvwNewSteps.setLayoutManager((new LinearLayoutManager(this)));
         methAdapter = new MethodStepAddAdapter();
         binding.rvwNewSteps.setAdapter(methAdapter);
+        ItemTouchHelper.Callback methTouchCallback = new AddItemTouchHelperCallback(methAdapter);
+        final ItemTouchHelper methTouchHelper = new ItemTouchHelper(methTouchCallback);
+        methTouchHelper.attachToRecyclerView(binding.rvwNewSteps);
+        methAdapter.setStartDragListener(new OnStartDragListener() {
+            @Override
+            public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+                methTouchHelper.startDrag(viewHolder);
+            }
+        });
 
         //Setup toolbar
         setSupportActionBar(binding.tbarAdd);
@@ -1045,8 +1067,15 @@ public class AddRecipeActivity extends AppCompatActivity implements
             binding.txtNoSteps.setVisibility(View.GONE);
     }
 
-    //TODO: consolidate adapters for this and view ingredients (are basically the same)
-    class IngredientsAddAdapter extends RecyclerView.Adapter<IngredientsAddAdapter.IngredientViewHolder> {
+    class IngredientsAddAdapter
+            extends RecyclerView.Adapter<IngredientsAddAdapter.IngredientViewHolder>
+            implements ItemTouchHelperAdapter {
+
+        private OnStartDragListener startDragListener;
+
+        void setStartDragListener(OnStartDragListener startDragListener) {
+            this.startDragListener = startDragListener;
+        }
 
         @Override
         public IngredientViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -1056,13 +1085,25 @@ public class AddRecipeActivity extends AppCompatActivity implements
         }
 
         @Override
-        public void onBindViewHolder(IngredientViewHolder holder, final int position) {
+        public void onBindViewHolder(final IngredientViewHolder holder, final int position) {
             Ingredient ingredient = newIngredients.get(position);
             holder.bind(ingredient);
+
+            holder.holderBinding.imvDragHandle.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN && startDragListener != null)
+                        startDragListener.onStartDrag(holder);
+                    return false;
+                }
+            });
 
             holder.holderBinding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
+                    int position = holder.getAdapterPosition();
+
                     if (ingredientsExpanded) {
                         EditIngredientFragment editIngFrag = new EditIngredientFragment();
                         editingPosition = position;
@@ -1083,6 +1124,9 @@ public class AddRecipeActivity extends AppCompatActivity implements
             holder.holderBinding.imbRemoveIngredient.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
+                    int position = holder.getAdapterPosition();
+
                     if (ingredientsExpanded) {
                         newIngredients.remove(position);
                         notifyItemRemoved(position);
@@ -1104,6 +1148,18 @@ public class AddRecipeActivity extends AppCompatActivity implements
             return newIngredients.size();
         }
 
+        @Override
+        public void onItemMove(int fromPosition, int toPosition) {
+            Utility.onRecyclerViewItemMoved(newIngredients, fromPosition, toPosition);
+            notifyItemMoved(fromPosition, toPosition);
+        }
+
+        @Override
+        public void onItemDismiss(int position) {
+            newIngredients.remove(position);
+            notifyItemRemoved(position);
+        }
+
         class IngredientViewHolder extends RecyclerView.ViewHolder {
 
             AddIngredientItemBinding holderBinding;
@@ -1120,7 +1176,15 @@ public class AddRecipeActivity extends AppCompatActivity implements
         }
     }
 
-    class MethodStepAddAdapter extends RecyclerView.Adapter<MethodStepAddAdapter.StepViewHolder> {
+    class MethodStepAddAdapter
+            extends RecyclerView.Adapter<MethodStepAddAdapter.StepViewHolder>
+            implements ItemTouchHelperAdapter {
+
+        private OnStartDragListener startDragListener;
+
+        void setStartDragListener(OnStartDragListener startDragListener) {
+            this.startDragListener = startDragListener;
+        }
 
         @Override
         public StepViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -1130,9 +1194,18 @@ public class AddRecipeActivity extends AppCompatActivity implements
         }
 
         @Override
-        public void onBindViewHolder(StepViewHolder holder, final int position) {
+        public void onBindViewHolder(final StepViewHolder holder, final int position) {
             MethodStep step = newSteps.get(position);
             holder.bind(step);
+
+            holder.holderBinding.imvDragHandle.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN && startDragListener != null)
+                        startDragListener.onStartDrag(holder);
+                    return false;
+                }
+            });
 
             holder.holderBinding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1158,14 +1231,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
                 @Override
                 public void onClick(View view) {
                     if (methodExpanded) {
-                        newSteps.remove(position);
-                        notifyItemRemoved(position);
 
-                        //Update the step numbers for the rest of the list
-                        for (int i = position; i < newSteps.size(); ++i)
-                           newSteps.get(i).setStepNumber(i + 1);
-
-                        notifyItemRangeChanged(position, newSteps.size());
+                        onItemDismiss(position);
 
                         if (newSteps.isEmpty())
                             binding.txtNoSteps.setVisibility(View.VISIBLE);
@@ -1181,6 +1248,29 @@ public class AddRecipeActivity extends AppCompatActivity implements
             if (newSteps == null)
                 return 0;
             return newSteps.size();
+        }
+
+        @Override
+        public void onItemMove(int fromPosition, int toPosition) {
+            Utility.onRecyclerViewItemMoved(newSteps, fromPosition, toPosition);
+            newSteps.get(toPosition).setStepNumber(toPosition + 1);
+            newSteps.get(fromPosition).setStepNumber(fromPosition + 1);
+            notifyItemChanged(fromPosition);
+            notifyItemChanged(toPosition);
+
+            notifyItemMoved(fromPosition, toPosition);
+        }
+
+        @Override
+        public void onItemDismiss(int position) {
+            newSteps.remove(position);
+            notifyItemRemoved(position);
+
+            //Update the step numbers for the rest of the list
+            for (int i = position; i < newSteps.size(); ++i)
+                newSteps.get(i).setStepNumber(i + 1);
+
+            notifyItemRangeChanged(position, newSteps.size());
         }
 
         class StepViewHolder extends RecyclerView.ViewHolder {

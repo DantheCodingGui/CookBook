@@ -17,7 +17,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.graphics.ColorUtils;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.transition.TransitionInflater;
@@ -502,6 +501,11 @@ public class HomeActivity extends AppCompatActivity
         }
 
         @Override
+        public void onItemMove(int fromPosition, int toPosition) {
+            //Not Supported Here
+        }
+
+        @Override
         public void onItemDismiss(final int position) {
 
             //Need to delete recipe from both filtered/unfiltered list
@@ -571,22 +575,9 @@ public class HomeActivity extends AppCompatActivity
                     alteredPercentSwiped = 1;
 
 
-                card.setCardBackgroundColor(interpolateRGB(0xffffff, 0xff0000, alteredPercentSwiped));
+                card.setCardBackgroundColor(Utility.interpolateRGB(0xffffff, 0xff0000, alteredPercentSwiped));
                 if (percentSwiped == 0 || percentSwiped == 1)
                     card.setCardBackgroundColor(Color.WHITE);
-            }
-
-            /**
-             * Interpolate between two colours
-             * @param bAmount Percentage between the two to go
-             * @return Interpolated colour
-             */
-            private int interpolateRGB(final int colorA, final int colorB, final float bAmount) {
-                final float aAmount = 1.0f - bAmount;
-                final int red = (int) (Color.red(colorA) * aAmount + Color.red(colorB) * bAmount);
-                final int green = (int) (Color.green(colorA) * aAmount + Color.green(colorB) * bAmount);
-                final int blue = (int) (Color.blue(colorA) * aAmount + Color.blue(colorB) * bAmount);
-                return Color.rgb(red, green, blue);
             }
         }
 
