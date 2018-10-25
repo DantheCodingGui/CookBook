@@ -17,8 +17,8 @@ import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.Snackbar;
 import android.support.transition.Slide;
+import android.support.transition.TransitionInflater;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -58,7 +58,6 @@ import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperViewHolde
 import com.danthecodinggui.recipes.view.ItemTouchHelper.OnStartDragListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_PATH;
@@ -858,6 +857,20 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         AnimateOutFabMenu();
 
+        //Fade in all non-essential views
+        for (int i = 0; i < newIngredients.size(); ++i) {
+            IngredientsAddAdapter.IngredientViewHolder holder = (IngredientsAddAdapter.IngredientViewHolder)
+                    binding.rvwNewIngredients.findViewHolderForAdapterPosition(i);
+            if (holder != null) {
+                TransitionManager.beginDelayedTransition((ViewGroup)holder.itemView,
+                        TransitionInflater.from(this).inflateTransition(R.transition.ingredient_card));
+
+                holder.holderBinding.imvIngredientDragHandle.setVisibility(View.VISIBLE);
+                holder.holderBinding.imbRemoveIngredient.setVisibility(View.VISIBLE);
+                holder.holderBinding.imvEditIngredient.setVisibility(View.VISIBLE);
+            }
+        }
+
         ingredientsExpanded = true;
     }
 
@@ -899,7 +912,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
         binding.etxtAddIngredient.setVisibility(View.GONE);
         binding.butAddIngredient.setVisibility(View.GONE);
 
-
         //Reset elevation AFTER size reduction to avoid toolbar and card cross-fading
         final LayoutTransition transition = binding.ctlyIngredientsContainer.getLayoutTransition();
         transition.addTransitionListener(new LayoutTransition.TransitionListener() {
@@ -914,6 +926,21 @@ public class AddRecipeActivity extends AppCompatActivity implements
         });
 
         AnimateInFabMenu();
+
+        //Fade out all non-essential views
+        for (int i = 0; i < newIngredients.size(); ++i) {
+            IngredientsAddAdapter.IngredientViewHolder holder = (IngredientsAddAdapter.IngredientViewHolder)
+                    binding.rvwNewIngredients.findViewHolderForAdapterPosition(i);
+            if (holder != null) {
+                TransitionManager.beginDelayedTransition((ViewGroup)holder.itemView,
+                        TransitionInflater.from(this).inflateTransition(R.transition.ingredient_card));
+
+
+                holder.holderBinding.imvIngredientDragHandle.setVisibility(View.GONE);
+                holder.holderBinding.imbRemoveIngredient.setVisibility(View.GONE);
+                holder.holderBinding.imvEditIngredient.setVisibility(View.GONE);
+            }
+        }
 
         ingredientsExpanded = false;
     }
@@ -945,6 +972,21 @@ public class AddRecipeActivity extends AppCompatActivity implements
         binding.butAddStep.setVisibility(View.VISIBLE);
 
         AnimateOutFabMenu();
+
+        //Fade in all non-essential views
+        for (int i = 0; i < newSteps.size(); ++i) {
+            MethodStepAddAdapter.StepViewHolder holder = (MethodStepAddAdapter.StepViewHolder)
+                    binding.rvwNewSteps.findViewHolderForAdapterPosition(i);
+            if (holder != null) {
+                TransitionManager.beginDelayedTransition((ViewGroup)holder.itemView,
+                        TransitionInflater.from(this).inflateTransition(R.transition.method_card));
+
+
+                holder.holderBinding.imvStepDragHandle.setVisibility(View.VISIBLE);
+                holder.holderBinding.imbRemoveStep.setVisibility(View.VISIBLE);
+                holder.holderBinding.imvEditStep.setVisibility(View.VISIBLE);
+            }
+        }
 
         methodExpanded = true;
     }
@@ -986,7 +1028,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
         binding.etxtAddStep.setVisibility(View.GONE);
         binding.butAddStep.setVisibility(View.GONE);
 
-
         //Reset elevation AFTER size reduction to avoid toolbar and card cross-fading
         final LayoutTransition transition = binding.ctlyMethodContainer.getLayoutTransition();
         transition.addTransitionListener(new LayoutTransition.TransitionListener() {
@@ -1001,6 +1042,20 @@ public class AddRecipeActivity extends AppCompatActivity implements
         });
 
         AnimateInFabMenu();
+
+        //Fade out all non-essential views
+        for (int i = 0; i < newSteps.size(); ++i) {
+            MethodStepAddAdapter.StepViewHolder holder = (MethodStepAddAdapter.StepViewHolder)
+                    binding.rvwNewSteps.findViewHolderForAdapterPosition(i);
+            if (holder != null) {
+                TransitionManager.beginDelayedTransition((ViewGroup)holder.itemView,
+                        TransitionInflater.from(this).inflateTransition(R.transition.method_card));
+
+                holder.holderBinding.imvStepDragHandle.setVisibility(View.GONE);
+                holder.holderBinding.imbRemoveStep.setVisibility(View.GONE);
+                holder.holderBinding.imvEditStep.setVisibility(View.GONE);
+            }
+        }
 
         methodExpanded = false;
     }
@@ -1090,7 +1145,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
             Ingredient ingredient = newIngredients.get(position);
             holder.bind(ingredient);
 
-            holder.holderBinding.imvDragHandle.setOnTouchListener(new View.OnTouchListener() {
+            holder.holderBinding.imvIngredientDragHandle.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
                     if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN && startDragListener != null)
@@ -1199,7 +1254,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
             MethodStep step = newSteps.get(position);
             holder.bind(step);
 
-            holder.holderBinding.imvDragHandle.setOnTouchListener(new View.OnTouchListener() {
+            holder.holderBinding.imvStepDragHandle.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
                     if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN && startDragListener != null)

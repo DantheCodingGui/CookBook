@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+    <slide
+        android:slideEdge="start">
+        <targets>
+            <target android:targetId="@+id/imb_remove_ingredient"/>
+        </targets>
+    </slide>
+    <slide
+        android:slideEdge="end">
+        <targets>
+            <target android:targetId="@+id/imv_edit_ingredient"/>
+            <target android:targetId="@+id/imv_ingredient_drag_handle"/>
+        </targets>
+    </slide>
+    <changeBounds>
+        <targets>
+            <target android:targetId="@+id/txt_ingredient_item"/>
+        </targets>
+    </changeBounds>
+</transitionSet>
