@@ -1054,6 +1054,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewSteps.getLayoutParams();
         params.height = binding.rvwNewSteps.getHeight();
+        recyclerviewRetractHeight = params.height;
 
         binding.llyToolbarContainer.setVisibility(View.VISIBLE);
         binding.crdvIngredients.setVisibility(View.VISIBLE);
