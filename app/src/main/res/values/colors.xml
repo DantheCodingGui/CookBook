@@ -7,7 +7,6 @@
     <color name="black_faded">#77222222</color>
     <color name="backToolbar">#E2E2E2</color>
 
-
     <color name="snackbar_action_default">#03A9F4</color>
 
     <color name="material_light_primary_text">#DE000000</color>
@@ -21,4 +20,6 @@
     <color name="scrimGrey">#77000000</color>
     <color name="colorAccentFaded">#44006600</color>
     <color name="colorBackground">#EEEEEE</color>
+    <!--<color name="colorCardSelected">#E0F7FA</color>-->
+    <color name="colorCardSelected">#E0F7FA</color>
 </resources>

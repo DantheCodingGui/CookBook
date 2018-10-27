@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view.view_recipe;
+package com.danthecodinggui.recipes.view.activity_view_recipe;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

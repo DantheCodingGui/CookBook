@@ -2,22 +2,56 @@ package com.danthecodinggui.recipes.msc;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.res.Resources;
-import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.ViewAnimationUtils;
-import android.view.animation.AccelerateInterpolator;
+import android.view.Window;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
+import android.view.animation.Interpolator;
 import android.view.animation.TranslateAnimation;
 
 import com.danthecodinggui.recipes.R;
 
 public class AnimUtils {
+
+    /**
+     * Fades the status bar colour from its current value to a new one
+     * @param activity The source activity
+     * @param newColour The new colour to animate to
+     * @param interpolator The animation interpolator to use
+     */
+    public static void animateStatusBarColour(Activity activity, int newColour, Interpolator interpolator) {
+
+        final Window window = activity.getWindow();
+
+        ValueAnimator fadeStatusBar = ValueAnimator.ofObject(new ArgbEvaluator(),
+                window.getStatusBarColor(),
+                newColour);
+        if (interpolator != null)
+            fadeStatusBar.setInterpolator(interpolator);
+        fadeStatusBar.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                window.setStatusBarColor((int)valueAnimator.getAnimatedValue());
+            }
+        });
+        fadeStatusBar.start();
+    }
+
+    /**
+     * Fades the status bar colour from its current value to a new one
+     * @param activity The source activity
+     * @param newColour The new colour to animate to
+     */
+    public static void animateStatusBarColour(Activity activity, int newColour) {
+        animateStatusBarColour(activity, newColour, null);
+    }
 
     public static void animateSearchToolbar(final Activity activity, final Toolbar toolbar, int numberOfMenuIcon, boolean containsOverflow, boolean shouldShow) {
 

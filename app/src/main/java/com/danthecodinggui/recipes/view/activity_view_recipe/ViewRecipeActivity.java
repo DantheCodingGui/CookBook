@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view.view_recipe;
+package com.danthecodinggui.recipes.view.activity_view_recipe;
 
 import android.Manifest;
 import android.databinding.DataBindingUtil;

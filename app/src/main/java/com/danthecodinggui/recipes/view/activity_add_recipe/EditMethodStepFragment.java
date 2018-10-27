@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view.add_recipe;
+package com.danthecodinggui.recipes.view.activity_add_recipe;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -7,56 +7,50 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Patterns;
+import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.msc.Utility;
 
+import static com.danthecodinggui.recipes.msc.GlobalConstants.METHOD_STEP_OBJECT;
+
 /**
- * Shows simple dialog to enter number of kcal per person for a recipe
+ * Shows simple dialog to edit an method step
  */
-public class AddImageURLFragment extends DialogFragment {
+public class EditMethodStepFragment extends DialogFragment {
 
-    private onURLSetListener callback;
+    private onStepEditedListener callback;
+    int stepPosition;
 
-    private EditText editURL;
+    private EditText editStep;
 
-    /**
-     * Sets the callback method to be called when the dialog has a result
-     */
-    public void SetURLListener(onURLSetListener callback) {
+    public void SetStepListener(onStepEditedListener callback, int position) {
         this.callback = callback;
+        this.stepPosition = position;
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.dialog_url_title)
-                .setView(R.layout.fragment_imageurl_picker)
+                .setView(R.layout.fragment_edit_step)
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        String URL = editURL.getText().toString();
-                        boolean isValidURL = Patterns.WEB_URL.matcher(URL).matches();
-                        boolean isImage = URL.matches("(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*\\.(?:jpg|gif|png))(?:\\?([^#]*))?(?:#(.*))?");
-                        if (isValidURL && isImage)
-                            callback.onURLSet(URL);
-                        else if (isValidURL)
-                            Toast.makeText(getActivity(), R.string.url_not_image, Toast.LENGTH_SHORT).show();
-                        else
-                            Toast.makeText(getActivity(), R.string.url_invalid, Toast.LENGTH_SHORT).show();
+                        String editedStep = editStep.getText().toString();
+                        callback.onStepEdited(editedStep, stepPosition);
                     }
                 })
                 .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Utility.setKeyboardVisibility(getActivity(), editURL, false);
+                        Utility.setKeyboardVisibility(getActivity(), editStep, false);
                     }
                 })
                 .create();
+
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         return dialog;
     }
@@ -65,9 +59,14 @@ public class AddImageURLFragment extends DialogFragment {
     public void onStart() {
         super.onStart();
 
-        editURL = getDialog().findViewById(R.id.etxt_add_image_url);
-        Utility.setKeyboardVisibility(getActivity(), editURL, true);
-        editURL.addTextChangedListener(new TextWatcher() {
+        Bundle args = getArguments();
+        String stepText = args.getString(METHOD_STEP_OBJECT);
+
+        editStep = getDialog().findViewById(R.id.etxt_edit_step);
+        editStep.setText(stepText);
+        editStep.setSelection(editStep.getText().length());
+
+        editStep.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
@@ -82,20 +81,22 @@ public class AddImageURLFragment extends DialogFragment {
         });
 
         Utility.CheckButtonEnabled(((AlertDialog)getDialog()).getButton(AlertDialog.BUTTON_POSITIVE),
-                editURL.getText().toString());
+                editStep.getText().toString());
     }
 
+
     /**
-     * Callback interface to alert implementors when the ImageURLFragment has a result.<br/>
-     * IMPORTANT: implementors must call {@link #SetURLListener(onURLSetListener) SetURLListener}
+     * Callback interface to alert implementors when the EditStepFragment has a result.<br/>
+     * IMPORTANT: implementors must call {@link #SetStepListener(onStepEditedListener, int) SetStepListener}
      * when instantiating the fragment
      */
-    public interface onURLSetListener {
+    public interface onStepEditedListener {
 
         /**
          * Called when the DialogFragment's 'OK' is clicked, ie. it has a result
-         * @param url  The URL of the image to be added
+         * @param stepText  The new text of the step
+         * @param stepText  The new text of the step
          */
-        void onURLSet(String url);
+        void onStepEdited(String stepText, int position);
     }
 }

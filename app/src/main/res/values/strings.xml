@@ -53,5 +53,9 @@
     <string name="snackbar_no_steps">Please enter at least one step for the method</string>
     <string name="perm_camera_denied">Without this permission, the photo cannot be saved</string>
     <string name="recipe_removed">Recipe Deleted</string>
+    <string name="multiple_recipes_removed">Recipes Deleted</string>
     <string name="snackbar_undo">UNDO</string>
+    <string name="menu_delete_recipe">Delete</string>
+    <string name="menu_select_all">Select All</string>
+    <string name="action_mode_title">%d Selected</string>
 </resources>

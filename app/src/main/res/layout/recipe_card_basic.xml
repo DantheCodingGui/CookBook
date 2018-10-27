@@ -4,12 +4,16 @@
         <variable
             name="recipe"
             type="com.danthecodinggui.recipes.model.object_models.Recipe"/>
+        <variable
+            name="isSelected"
+            type="boolean"/>
     </data>
     <android.support.v7.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/crd_root"
+        app:cardBackgroundColor="@{isSelected ? @color/colorCardSelected : @android:color/white}"
         style="@style/RecipeCard">
 
         <android.support.constraint.ConstraintLayout

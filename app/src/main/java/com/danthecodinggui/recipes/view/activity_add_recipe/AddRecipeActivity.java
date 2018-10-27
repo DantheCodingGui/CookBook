@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view.add_recipe;
+package com.danthecodinggui.recipes.view.activity_add_recipe;
 
 import android.Manifest;
 import android.animation.AnimatorInflater;
@@ -8,7 +8,6 @@ import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
 import android.net.Uri;

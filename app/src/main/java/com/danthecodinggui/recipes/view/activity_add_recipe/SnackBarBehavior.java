@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view.add_recipe;
+package com.danthecodinggui.recipes.view.activity_add_recipe;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;

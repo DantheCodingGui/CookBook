@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view.add_recipe;
+package com.danthecodinggui.recipes.view.activity_add_recipe;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

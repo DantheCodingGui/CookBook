@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity">
+    tools:context="com.danthecodinggui.recipes.view.activity_view_recipe.ViewRecipeActivity">
     <data>
         <variable
             name="recipe"

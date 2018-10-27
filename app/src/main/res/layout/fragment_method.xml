@@ -4,7 +4,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
-        tools:context="com.danthecodinggui.recipes.view.view_recipe.MethodTabFragment">
+        tools:context="com.danthecodinggui.recipes.view.activity_view_recipe.MethodTabFragment">
 
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"

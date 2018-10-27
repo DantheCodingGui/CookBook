@@ -1,4 +1,4 @@
-package com.danthecodinggui.recipes.view;
+package com.danthecodinggui.recipes.view.activity_home;
 
 import android.Manifest;
 import android.app.ActivityOptions;
@@ -15,11 +15,14 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.transition.Slide;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.transition.TransitionInflater;
+import android.transition.TransitionManager;
 import android.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +31,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,6 +39,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AlphaAnimation;
+import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 
@@ -44,7 +49,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.danthecodinggui.recipes.BR;
 import com.danthecodinggui.recipes.R;
-import com.danthecodinggui.recipes.databinding.ActivityMainBinding;
+import com.danthecodinggui.recipes.databinding.ActivityHomeBinding;
 import com.danthecodinggui.recipes.databinding.RecipeCardBasicBinding;
 import com.danthecodinggui.recipes.databinding.RecipeCardComplexBinding;
 import com.danthecodinggui.recipes.databinding.RecipeCardPhotoBasicBinding;
@@ -56,8 +61,8 @@ import com.danthecodinggui.recipes.msc.Utility;
 import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperAdapter;
 import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchSwipeHelper;
 import com.danthecodinggui.recipes.view.Loaders.GetRecipesLoader;
-import com.danthecodinggui.recipes.view.add_recipe.AddRecipeActivity;
-import com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity;
+import com.danthecodinggui.recipes.view.activity_add_recipe.AddRecipeActivity;
+import com.danthecodinggui.recipes.view.activity_view_recipe.ViewRecipeActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,10 +82,13 @@ import static com.danthecodinggui.recipes.msc.LogTags.GLIDE;
 public class HomeActivity extends AppCompatActivity
         implements Utility.PermissionDialogListener {
 
-    ActivityMainBinding binding;
+    ActivityHomeBinding binding;
 
-    List<Recipe> recipesList;
-    RecipesViewAdapter recipesAdapter;
+    private List<Recipe> recipesList;
+    private RecipesViewAdapter recipesAdapter;
+    private ItemTouchHelper recipesTouchHelper;
+
+    private ActionMode actionMode;
 
     //Flag determines if app can show local images (does the app have read external permission)
     private boolean noLocalImage = false;
@@ -89,6 +97,7 @@ public class HomeActivity extends AppCompatActivity
     private boolean searchOpen = false;
     private boolean restoringState = false;
     private boolean transitioningActivity = false;
+    private boolean inActionMode = false;
 
     private String lastSearchFilter;
 
@@ -103,6 +112,8 @@ public class HomeActivity extends AppCompatActivity
     //Instance state IDs
     private static final String SEARCH_OPEN = "SEARCH_OPEN";
     private static final String SEARCH_FILTER = "SEARCH_FILTER";
+    private static final String IN_ACTION_MODE = "IN_ACTION_MODE";
+    private static final String ACTION_MODE_SELECTION = "ACTION_MODE_SELECTION";
 
     //TODO remove later
     private boolean inserting = false;
@@ -112,7 +123,7 @@ public class HomeActivity extends AppCompatActivity
         setTheme(R.style.HomeTheme);
         super.onCreate(savedInstanceState);
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_home);
 
         //Conditionally set RecyclerView layout manager depending on screen orientation
         //Also ensure that landscape layout isn't used in split screen mode
@@ -130,8 +141,8 @@ public class HomeActivity extends AppCompatActivity
 
         //Setup ItemTouchHelper
         ItemTouchHelper.Callback itemTouchCallback = new HomeItemTouchHelperCallback(recipesAdapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(itemTouchCallback);
-        touchHelper.attachToRecyclerView(binding.rvwRecipes);
+        recipesTouchHelper = new ItemTouchHelper(itemTouchCallback);
+        recipesTouchHelper.attachToRecyclerView(binding.rvwRecipes);
 
         //Setup RecyclerView Animations
         ScaleInAnimator animator = new ScaleInAnimator(new OvershootInterpolator(1.f));
@@ -157,11 +168,6 @@ public class HomeActivity extends AppCompatActivity
 
         setSupportActionBar(binding.tbarHome);
 
-        if (savedInstanceState != null) {
-            searchOpen = savedInstanceState.getBoolean(SEARCH_OPEN);
-            lastSearchFilter = savedInstanceState.getString(SEARCH_FILTER);
-        }
-
         if (!inserting)
             getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, loaderCallbacks);
         else {
@@ -170,6 +176,30 @@ public class HomeActivity extends AppCompatActivity
             Utility.InsertValue(this, path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", true, false, 2);
             Utility.InsertValue(this, path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", false, true, 3);
             Utility.InsertValue(this, path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", true, true, 4);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(SEARCH_OPEN, searchOpen);
+        outState.putString(SEARCH_FILTER, lastSearchFilter);
+        outState.putBoolean(IN_ACTION_MODE, inActionMode);
+        outState.putIntegerArrayList(ACTION_MODE_SELECTION, new ArrayList<>(recipesAdapter.GetSelection()));
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        searchOpen = savedInstanceState.getBoolean(SEARCH_OPEN);
+        lastSearchFilter = savedInstanceState.getString(SEARCH_FILTER);
+        inActionMode = savedInstanceState.getBoolean(IN_ACTION_MODE);
+
+        if (inActionMode) {
+            recipesAdapter.EnableActionMode();
+            recipesAdapter.SetSelection(savedInstanceState.getIntegerArrayList(ACTION_MODE_SELECTION));
         }
     }
 
@@ -213,6 +243,79 @@ public class HomeActivity extends AppCompatActivity
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.menu_search:
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            getMenuInflater().inflate(R.menu.home_activity_select_toolbar, menu);
+
+            actionMode = mode;
+
+            inActionMode = true;
+
+            //Remove FAB
+            Slide anim = new Slide();
+            anim.addTarget(binding.fabAddRecipe);
+            anim.setSlideEdge(Gravity.END);
+            anim.setInterpolator(new AnticipateOvershootInterpolator(1.f));
+            TransitionManager.beginDelayedTransition(binding.clyMainRoot, anim);
+            binding.fabAddRecipe.setVisibility(View.INVISIBLE);
+
+            recipesTouchHelper.attachToRecyclerView(null);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            int id = item.getItemId();
+
+            switch (id) {
+                case R.id.menu_delete_recipe:
+                    recipesAdapter.DeleteSelection();
+                    return true;
+                case R.id.menu_select_all:
+                    recipesAdapter.ToggleSelectAll();
+                    return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+
+            actionMode = null;
+
+            inActionMode = false;
+
+            recipesTouchHelper.attachToRecyclerView(binding.rvwRecipes);
+
+            recipesAdapter.DisableActionMode();
+
+            //Show FAB
+            Slide anim = new Slide();
+            anim.addTarget(binding.fabAddRecipe);
+            anim.setSlideEdge(Gravity.END);
+            anim.setInterpolator(new AnticipateOvershootInterpolator(1.f));
+            TransitionManager.beginDelayedTransition(binding.clyMainRoot, anim);
+            binding.fabAddRecipe.setVisibility(View.VISIBLE);
+        }
+    };
+
     private SearchView.OnQueryTextListener searchTextChangedListener = new SearchView.OnQueryTextListener() {
         @Override
         public boolean onQueryTextSubmit(String query) {
@@ -245,14 +348,6 @@ public class HomeActivity extends AppCompatActivity
             return true;
         }
     };
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putBoolean(SEARCH_OPEN, searchOpen);
-        outState.putString(SEARCH_FILTER, lastSearchFilter);
-    }
 
     /**
      * Filters recipesList based on query from a searchview
@@ -317,17 +412,6 @@ public class HomeActivity extends AppCompatActivity
         recipesLoader.onPermissionResponse();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        switch (id) {
-            case R.id.menu_search:
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private LoaderManager.LoaderCallbacks<List<Recipe>> loaderCallbacks = new LoaderManager.LoaderCallbacks<List<Recipe>>() {
         @NonNull
         @Override
@@ -371,22 +455,47 @@ public class HomeActivity extends AppCompatActivity
         }
     };
 
+    private interface ActionModeSelection {
+        void EnableActionMode();
+        void DisableActionMode();
+        void onItemSelected(int position);
+        void onItemDeselected(int position);
+        void ToggleSelectAll();
+        void DeleteSelection();
+        List<Integer> GetSelection();
+        void SetSelection(List<Integer> newSelection);
+        boolean isItemSelected(int position);
+    }
+
     /**
      * Allows integration between the list of recipe objects and the recyclerview
      */
     class RecipesViewAdapter
             extends RecyclerView.Adapter<RecipesViewAdapter.RecipeViewHolder>
-            implements ItemTouchHelperAdapter {
+            implements ItemTouchHelperAdapter, ActionModeSelection {
 
-        List<Recipe> displayedRecipesList;
+        private List<Recipe> displayedRecipesList;
 
-        private final int BASIC = 0, COMPLEX = 1, PHOTO_BASIC = 2, PHOTO_COMPLEX = 3;
+        //ViewHolder type flags
+        private final int
+                BASIC = 0,
+                COMPLEX = 1,
+                PHOTO_BASIC = 2,
+                PHOTO_COMPLEX = 3;
+
+        private List<Integer> selectedItems;
+
+        //Flag stating whether toggle all button pressed when all items selected
+        //(Used to stop action mode closing with size 0 in this use case)
+        private boolean selectAllNone = false;
 
         RecipesViewAdapter(List<Recipe> list) {
             if (list != null)
                 displayedRecipesList = new ArrayList<>(list);
             else
                 displayedRecipesList = new ArrayList<>();
+
+            selectedItems = new ArrayList<>();
         }
 
         @Override
@@ -395,13 +504,21 @@ public class HomeActivity extends AppCompatActivity
 
             switch (viewType) {
                 case COMPLEX:
-                    return new ComplexViewHolder(RecipeCardComplexBinding.inflate(inflater, parent, false));
+                    return new ComplexViewHolder(
+                            RecipeCardComplexBinding.inflate(inflater, parent, false),
+                            this);
                 case PHOTO_BASIC:
-                    return new BasicPhotoViewHolder(RecipeCardPhotoBasicBinding.inflate(inflater, parent, false));
+                    return new BasicPhotoViewHolder(
+                            RecipeCardPhotoBasicBinding.inflate(inflater, parent, false),
+                            this);
                 case PHOTO_COMPLEX:
-                    return new ComplexPhotoViewHolder(RecipeCardPhotoComplexBinding.inflate(inflater, parent, false));
+                    return new ComplexPhotoViewHolder(
+                            RecipeCardPhotoComplexBinding.inflate(inflater, parent, false),
+                            this);
                 default:
-                    return new BasicViewHolder(RecipeCardBasicBinding.inflate(inflater, parent, false));
+                    return new BasicViewHolder(
+                            RecipeCardBasicBinding.inflate(inflater, parent, false),
+                            this);
             }
         }
 
@@ -411,6 +528,8 @@ public class HomeActivity extends AppCompatActivity
             Recipe recipe = displayedRecipesList.get(pos);
 
             holder.bind(recipe);
+
+            holder.binding.setVariable(BR.isSelected, isItemSelected(holder.getAdapterPosition()));
         }
 
         @Override
@@ -515,12 +634,152 @@ public class HomeActivity extends AppCompatActivity
             final Recipe recipeToDelete = removeItem(position);
             recipesList.remove(unfilteredPos);
 
-            Snackbar.make(binding.clyMainRoot, R.string.recipe_removed, Snackbar.LENGTH_LONG)
+            ShowDeletedSnackbar(false,
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            recipesList.add(unfilteredPos, recipeToDelete);
+                            addItem(position, recipeToDelete);
+                        }
+                    },
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            new DeleteRecipeTask(getApplicationContext()).execute(
+                                    Collections.singletonList(recipeToDelete.getRecipeId())
+                            );
+                        }
+                    }
+            );
+        }
+
+        @Override
+        public void EnableActionMode() {
+            startSupportActionMode(actionModeCallback);
+        }
+
+        @Override
+        public void DisableActionMode() {
+            if (actionMode != null)
+                actionMode.finish();
+
+            //Reset all still-selected items
+            if (selectedItems.size() != 0) {
+                for (int i = 0; i < selectedItems.size(); ++i) {
+                    RecipeViewHolder holder = (RecipeViewHolder) binding.rvwRecipes.findViewHolderForAdapterPosition(selectedItems.get(i));
+                    if (holder != null) {
+                        CardView card = (CardView) holder.binding.getRoot();
+                        card.setCardBackgroundColor(Color.WHITE);
+                    }
+                    else
+                        selectedItems.remove(i);
+                }
+                selectedItems.clear();
+            }
+        }
+
+        @Override
+        public void onItemSelected(int position) {
+            selectedItems.add(position);
+            InvalidateActionModeTitle();
+        }
+        @Override
+        public void onItemDeselected(int position) {
+            selectedItems.remove((Integer)position);
+            if (selectedItems.size() == 0) {
+                if (selectAllNone)
+                    selectAllNone = false;
+                else
+                    DisableActionMode();
+            }
+            InvalidateActionModeTitle();
+        }
+
+        @Override
+        public void ToggleSelectAll() {
+
+            boolean isAllSelected = selectedItems.size() == displayedRecipesList.size();
+            if (isAllSelected)
+                selectAllNone = true;
+
+            for (int i = 0; i < displayedRecipesList.size(); ++i) {
+                if (selectedItems.contains(i) && !isAllSelected)
+                    continue;
+
+                RecipeViewHolder holder = (RecipeViewHolder) binding.rvwRecipes.findViewHolderForAdapterPosition(i);
+                if (holder != null)
+                    holder.ToggleActionModeSelected();
+                else
+                    onItemSelected(i);
+            }
+        }
+
+        @Override
+        public void DeleteSelection() {
+            final List<Recipe> recipesToDelete = new ArrayList<>();
+            final List<Integer> unfilteredRecipePositions = new ArrayList<>();
+
+            Recipe removeTemp;
+            int unfilteredPosTemp;
+            for (Integer position: selectedItems) {
+                unfilteredPosTemp = getRecipePos(displayedRecipesList.get(position));
+                unfilteredRecipePositions.add(unfilteredPosTemp);
+            }
+            for (int i = 0; i < selectedItems.size(); ++i) {
+                removeTemp = removeItem(selectedItems.get(i) - i);
+
+                recipesToDelete.add(removeTemp);
+                recipesList.remove(unfilteredRecipePositions.get(i) - i);
+            }
+
+            ShowDeletedSnackbar(recipesToDelete.size() > 1,
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = 0; i < selectedItems.size(); ++i) {
+                                addItem(selectedItems.get(i), recipesToDelete.get(i));
+                                recipesList.add(unfilteredRecipePositions.get(i), recipesToDelete.get(i));
+                            }
+                        }
+                    },
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            List<Long> recipePrimaryKeys = new ArrayList<>();
+                            for (Recipe recipe: recipesToDelete)
+                                recipePrimaryKeys.add(recipe.getRecipeId());
+
+                            new DeleteRecipeTask(getApplicationContext()).execute(recipePrimaryKeys);
+                        }
+                    }
+            );
+
+        }
+
+        @Override
+        public List<Integer> GetSelection() {
+            return selectedItems;
+        }
+
+        @Override
+        public void SetSelection(List<Integer> newSelection) {
+            selectedItems = newSelection;
+            InvalidateActionModeTitle();
+        }
+
+        private void InvalidateActionModeTitle() {
+            if (actionMode != null)
+                actionMode.setTitle(getResources().getString(R.string.action_mode_title, selectedItems.size()));
+        }
+
+        private void ShowDeletedSnackbar(boolean isMultiDelete, final Runnable onActionClicked, final Runnable onDismissed) {
+            Snackbar.make(binding.clyMainRoot,
+                    isMultiDelete ? R.string.multiple_recipes_removed : R.string.recipe_removed,
+                    Snackbar.LENGTH_LONG)
                     .setAction(R.string.snackbar_undo, new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            recipesList.add(recipeToDelete);
-                            addItem(position, recipeToDelete);
+                            new Handler(getMainLooper()).post(onActionClicked);
                         }
                     })
                     .addCallback(new Snackbar.Callback() {
@@ -528,11 +787,16 @@ public class HomeActivity extends AppCompatActivity
                         public void onDismissed(Snackbar snackbar, int event) {
                             //Start AsyncTask to delete recipe
                             if (event != DISMISS_EVENT_ACTION)
-                                new DeleteRecipeTask(getApplicationContext()).execute(recipeToDelete.getRecipeId());
+                                new Handler(getMainLooper()).post(onDismissed);
                         }
                     })
                     .setActionTextColor(getResources().getColor(R.color.snackbar_action_default))
                     .show();
+        }
+
+        @Override
+        public boolean isItemSelected(int position) {
+            return selectedItems.contains(position);
         }
 
         /**
@@ -542,12 +806,14 @@ public class HomeActivity extends AppCompatActivity
                 implements View.OnClickListener, View.OnLongClickListener, ItemTouchSwipeHelper {
 
             ViewDataBinding binding;
+            private ActionModeSelection actionModeSelection;
 
-            RecipeViewHolder(View itemView) {
+            RecipeViewHolder(View itemView, ActionModeSelection actionModeSelection) {
                 super(itemView);
 
                 itemView.setOnClickListener(this);
                 itemView.setOnLongClickListener(this);
+                this.actionModeSelection = actionModeSelection;
             }
 
             public void bind(Recipe item) {
@@ -557,17 +823,41 @@ public class HomeActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
-                ViewRecipe(displayedRecipesList.get(getAdapterPosition()), null);
+                if (inActionMode)
+                    ToggleActionModeSelected();
+                else
+                    ViewRecipe(displayedRecipesList.get(getAdapterPosition()), null);
             }
 
             @Override
             public boolean onLongClick(View view) {
-                //TODO implement toolbar with delete option
+                if (!inActionMode) {
+                    actionModeSelection.EnableActionMode();
+                    ToggleActionModeSelected();
+                }
                 return true;
+            }
+
+            void ToggleActionModeSelected() {
+                CardView card = binding.getRoot().findViewById(R.id.crd_root);
+
+                int pos = getAdapterPosition();
+                if (actionModeSelection.isItemSelected(pos)) {
+                    actionModeSelection.onItemDeselected(pos);
+                    card.setCardBackgroundColor(Color.WHITE);
+                }
+                else {
+                    actionModeSelection.onItemSelected(pos);
+                    card.setCardBackgroundColor(getResources().getColor(R.color.colorCardSelected));
+                }
             }
 
             @Override
             public void onItemSwipe(float percentSwiped) {
+
+                if (inActionMode)
+                    return;
+
                 CardView card = binding.getRoot().findViewById(R.id.crd_root);
 
                 float alteredPercentSwiped = percentSwiped * 1.1f;
@@ -586,8 +876,8 @@ public class HomeActivity extends AppCompatActivity
          */
         class BasicViewHolder extends RecipeViewHolder {
 
-            BasicViewHolder(RecipeCardBasicBinding itemBinding) {
-                super(itemBinding.getRoot());
+            BasicViewHolder(RecipeCardBasicBinding itemBinding, ActionModeSelection actionModeSelection) {
+                super(itemBinding.getRoot(), actionModeSelection);
                 binding = itemBinding;
             }
         }
@@ -596,8 +886,8 @@ public class HomeActivity extends AppCompatActivity
          */
         class ComplexViewHolder extends RecipeViewHolder {
 
-            ComplexViewHolder(RecipeCardComplexBinding itemBinding) {
-                super(itemBinding.getRoot());
+            ComplexViewHolder(RecipeCardComplexBinding itemBinding, ActionModeSelection actionModeSelection) {
+                super(itemBinding.getRoot(), actionModeSelection);
                 binding = itemBinding;
             }
         }
@@ -609,8 +899,8 @@ public class HomeActivity extends AppCompatActivity
 
             RecipeCardPhotoBasicBinding photoBinding;
 
-            BasicPhotoViewHolder(RecipeCardPhotoBasicBinding itemBinding) {
-                super(itemBinding.getRoot());
+            BasicPhotoViewHolder(RecipeCardPhotoBasicBinding itemBinding, ActionModeSelection actionModeSelection) {
+                super(itemBinding.getRoot(), actionModeSelection);
                 binding = photoBinding = itemBinding;
             }
 
@@ -640,7 +930,10 @@ public class HomeActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
-                ViewRecipe(displayedRecipesList.get(getAdapterPosition()), photoBinding.ivwCrdPreview);
+                if (inActionMode)
+                    ToggleActionModeSelected();
+                else
+                    ViewRecipe(displayedRecipesList.get(getAdapterPosition()), photoBinding.ivwCrdPreview);
             }
         }
         /**
@@ -650,8 +943,8 @@ public class HomeActivity extends AppCompatActivity
 
             RecipeCardPhotoComplexBinding photoBinding;
 
-            ComplexPhotoViewHolder(RecipeCardPhotoComplexBinding itemBinding) {
-                super(itemBinding.getRoot());
+            ComplexPhotoViewHolder(RecipeCardPhotoComplexBinding itemBinding, ActionModeSelection actionModeSelection) {
+                super(itemBinding.getRoot(), actionModeSelection);
                 binding = photoBinding = itemBinding;
             }
 
@@ -681,7 +974,10 @@ public class HomeActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
-                ViewRecipe(displayedRecipesList.get(getAdapterPosition()), photoBinding.ivwCrdPreview);
+                if (inActionMode)
+                    ToggleActionModeSelected();
+                else
+                    ViewRecipe(displayedRecipesList.get(getAdapterPosition()), photoBinding.ivwCrdPreview);
             }
         }
     }

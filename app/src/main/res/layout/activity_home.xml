@@ -6,7 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/cly_main_root"
-        tools:context="com.danthecodinggui.recipes.view.HomeActivity">
+        tools:context="com.danthecodinggui.recipes.view.activity_home.HomeActivity">
 
         <android.support.design.widget.AppBarLayout
             android:id="@+id/abl_main"

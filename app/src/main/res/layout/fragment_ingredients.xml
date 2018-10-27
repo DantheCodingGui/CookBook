@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
         app:shouldShowLandscapePadding="@{isLandscapeLayout}"
-        tools:context="com.danthecodinggui.recipes.view.view_recipe.IngredientsTabFragment">
+        tools:context="com.danthecodinggui.recipes.view.activity_view_recipe.IngredientsTabFragment">
 
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"

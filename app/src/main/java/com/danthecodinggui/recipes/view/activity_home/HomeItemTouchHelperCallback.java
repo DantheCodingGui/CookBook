@@ -1,25 +1,26 @@
-package com.danthecodinggui.recipes.view.add_recipe;
+package com.danthecodinggui.recipes.view.activity_home;
 
+import android.graphics.Canvas;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
 import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperAdapter;
-import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperViewHolder;
+import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchSwipeHelper;
 
 /**
  * Group of utility callback methods to enable swipe and drag & drop features to RecyclerView
  */
-public class AddItemTouchHelperCallback extends ItemTouchHelper.Callback {
+public class HomeItemTouchHelperCallback  extends ItemTouchHelper.Callback {
 
     private final ItemTouchHelperAdapter touchHelperAdapter;
 
-    AddItemTouchHelperCallback(ItemTouchHelperAdapter adapter) {
+    HomeItemTouchHelperCallback(ItemTouchHelperAdapter adapter) {
         touchHelperAdapter = adapter;
     }
 
     @Override
     public boolean isLongPressDragEnabled() {
-        return true;
+        return false;
     }
     @Override
     public boolean isItemViewSwipeEnabled() {
@@ -28,15 +29,13 @@ public class AddItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     @Override
     public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-        final int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
         final int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
-        return makeMovementFlags(dragFlags, swipeFlags);
+        return makeMovementFlags(0, swipeFlags);
     }
 
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
                           RecyclerView.ViewHolder target) {
-        touchHelperAdapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
         return true;
     }
 
@@ -46,12 +45,15 @@ public class AddItemTouchHelperCallback extends ItemTouchHelper.Callback {
     }
 
     @Override
-    public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-        super.clearView(recyclerView, viewHolder);
+    public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+        //Pass % swiped over to change card view
+        float percent = Math.abs(dX / c.getWidth());
 
-        if (viewHolder instanceof ItemTouchHelperViewHolder) {
-            ItemTouchHelperViewHolder helper = (ItemTouchHelperViewHolder) viewHolder;
-            helper.onItemClear();
+        if (viewHolder instanceof ItemTouchSwipeHelper) {
+            ItemTouchSwipeHelper helper = (ItemTouchSwipeHelper) viewHolder;
+            helper.onItemSwipe(percent);
         }
+
+        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
     }
 }
