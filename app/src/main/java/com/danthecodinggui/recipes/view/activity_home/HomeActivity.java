@@ -8,12 +8,14 @@ import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.Snackbar;
 import android.transition.Slide;
 import android.support.v4.app.LoaderManager;
@@ -35,6 +37,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -98,10 +101,13 @@ public class HomeActivity extends AppCompatActivity
     private boolean restoringState = false;
     private boolean transitioningActivity = false;
     private boolean inActionMode = false;
+    private boolean sortBySheetExpanded = false;
 
     private String lastSearchFilter;
 
     private GetRecipesLoader recipesLoader;
+
+    private BottomSheetBehavior sortBySheetBehaviour;
 
     //Loader IDs
     private static final int LOADER_RECIPE_PREVIEWS = 101;
@@ -114,6 +120,7 @@ public class HomeActivity extends AppCompatActivity
     private static final String SEARCH_FILTER = "SEARCH_FILTER";
     private static final String IN_ACTION_MODE = "IN_ACTION_MODE";
     private static final String ACTION_MODE_SELECTION = "ACTION_MODE_SELECTION";
+    private static final String SORT_BY_SHEET_OPEN = "SORT_BY_SHEET_OPEN";
 
     //TODO remove later
     private boolean inserting = false;
@@ -168,6 +175,21 @@ public class HomeActivity extends AppCompatActivity
 
         setSupportActionBar(binding.tbarHome);
 
+        //Setup sort by photo sheet
+        sortBySheetBehaviour = BottomSheetBehavior.from(binding.includeSortSheet.sortBy);
+        sortBySheetBehaviour.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_EXPANDED)
+                    sortBySheetExpanded = true;
+                else if (newState == BottomSheetBehavior.STATE_COLLAPSED)
+                    sortBySheetExpanded = false;
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
+        });
+
         if (!inserting)
             getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, loaderCallbacks);
         else {
@@ -186,6 +208,7 @@ public class HomeActivity extends AppCompatActivity
         outState.putBoolean(SEARCH_OPEN, searchOpen);
         outState.putString(SEARCH_FILTER, lastSearchFilter);
         outState.putBoolean(IN_ACTION_MODE, inActionMode);
+        outState.putBoolean(SORT_BY_SHEET_OPEN, sortBySheetExpanded);
         outState.putIntegerArrayList(ACTION_MODE_SELECTION, new ArrayList<>(recipesAdapter.GetSelection()));
     }
 
@@ -196,6 +219,7 @@ public class HomeActivity extends AppCompatActivity
         searchOpen = savedInstanceState.getBoolean(SEARCH_OPEN);
         lastSearchFilter = savedInstanceState.getString(SEARCH_FILTER);
         inActionMode = savedInstanceState.getBoolean(IN_ACTION_MODE);
+        sortBySheetExpanded = savedInstanceState.getBoolean(SORT_BY_SHEET_OPEN);
 
         if (inActionMode) {
             recipesAdapter.EnableActionMode();
@@ -216,7 +240,7 @@ public class HomeActivity extends AppCompatActivity
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 // Called when SearchView is collapsing
                 if (searchItem.isActionViewExpanded()) {
-                    AnimUtils.animateSearchToolbar(HomeActivity.this, binding.tbarHome, 1, false, false);
+                    AnimUtils.animateSearchToolbar(HomeActivity.this, binding.tbarHome, 3, false, false);
                     binding.txtSearchNoItems.setVisibility(View.INVISIBLE);
                     searchOpen = false;
                 }
@@ -226,7 +250,7 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 // Called when SearchView is expanding
-                AnimUtils.animateSearchToolbar(HomeActivity.this, binding.tbarHome, 1, true, true);
+                AnimUtils.animateSearchToolbar(HomeActivity.this, binding.tbarHome, 3, false, true);
                 searchOpen = true;
                 return true;
             }
@@ -249,6 +273,12 @@ public class HomeActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.menu_search:
+                return true;
+            case R.id.menu_sort_by:
+                if (sortBySheetExpanded)
+                    CloseSortBySheet();
+                else
+                    OpenSortBySheet();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -316,6 +346,35 @@ public class HomeActivity extends AppCompatActivity
         }
     };
 
+    @Override
+    public void onBackPressed() {
+        if (sortBySheetExpanded)
+            CloseSortBySheet();
+        else
+            super.onBackPressed();
+    }
+
+    private void OpenSortBySheet() {
+        sortBySheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+    private void CloseSortBySheet() {
+        sortBySheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
+    @Override public boolean dispatchTouchEvent(MotionEvent event){
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (sortBySheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+
+                Rect outRect = new Rect();
+                binding.includeSortSheet.sortBy.getGlobalVisibleRect(outRect);
+
+                if(!outRect.contains((int)event.getRawX(), (int)event.getRawY()))
+                    CloseSortBySheet();
+            }
+        }
+        return super.dispatchTouchEvent(event);
+    }
+
     private SearchView.OnQueryTextListener searchTextChangedListener = new SearchView.OnQueryTextListener() {
         @Override
         public boolean onQueryTextSubmit(String query) {
@@ -365,6 +424,14 @@ public class HomeActivity extends AppCompatActivity
                 filteredRecipes.add(r);
         }
         return filteredRecipes;
+    }
+
+    public void SortByName(View view) {
+        CloseSortBySheet();
+    }
+
+    public void SortByDate(View view) {
+        CloseSortBySheet();
     }
 
     /**

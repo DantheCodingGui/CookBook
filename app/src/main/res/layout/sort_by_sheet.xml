@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sort_by"
+        android:background="@android:color/white"
+        android:elevation="10dp"
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
+        app:behavior_hideable="true"
+        app:behavior_peekHeight="0dp">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:padding="10dp"
+            android:textSize="15sp"
+            android:text="@string/sort_by_sheet_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btn_sort_by_name"
+            style="@style/ButtonBottomSheet"
+            android:onClick="SortByName"
+            android:text="@string/btn_sort_by_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+        <Button
+            android:id="@+id/btn_sort_by_date"
+            style="@style/ButtonBottomSheet"
+            android:text="@string/btn_sort_by_date"
+            android:onClick="SortByDate"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_sort_by_name" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

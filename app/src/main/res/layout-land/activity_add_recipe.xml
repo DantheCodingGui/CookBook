@@ -380,12 +380,12 @@
             app:fabSize="mini"
             android:layout_margin="70dp"
             android:src="@drawable/ic_image"
-            app:layout_behavior="com.danthecodinggui.recipes.view.add_recipe.SnackBarBehavior"
+            app:layout_behavior="com.danthecodinggui.recipes.view.activity_add_recipe.SnackBarBehavior"
             android:onClick="addImage" />
         <TextView
             android:id="@+id/txt_add_photo"
             style="@style/FabTag"
-            app:layout_behavior="com.danthecodinggui.recipes.view.add_recipe.SnackBarBehavior"
+            app:layout_behavior="com.danthecodinggui.recipes.view.activity_add_recipe.SnackBarBehavior"
             android:layout_marginBottom="77dp"
             android:layout_marginEnd="119dp"
             android:text="@string/txt_add_image"/>
@@ -397,12 +397,12 @@
             android:layout_marginBottom="10dp"
             android:layout_marginEnd="86dp"
             android:src="@drawable/ic_time"
-            app:layout_behavior="com.danthecodinggui.recipes.view.add_recipe.SnackBarBehavior"
+            app:layout_behavior="com.danthecodinggui.recipes.view.activity_add_recipe.SnackBarBehavior"
             android:onClick="AddTime"/>
         <TextView
             android:id="@+id/txt_add_time"
             style="@style/FabTag"
-            app:layout_behavior="com.danthecodinggui.recipes.view.add_recipe.SnackBarBehavior"
+            app:layout_behavior="com.danthecodinggui.recipes.view.activity_add_recipe.SnackBarBehavior"
             android:layout_marginBottom="17dp"
             android:layout_marginEnd="135dp"
             android:text="@string/txt_add_time"/>
@@ -414,12 +414,12 @@
             android:layout_marginBottom="86dp"
             android:layout_marginEnd="10dp"
             android:src="@drawable/ic_kcal"
-            app:layout_behavior="com.danthecodinggui.recipes.view.add_recipe.SnackBarBehavior"
+            app:layout_behavior="com.danthecodinggui.recipes.view.activity_add_recipe.SnackBarBehavior"
             android:onClick="AddKcal"/>
         <TextView
             android:id="@+id/txt_add_kcal"
             style="@style/FabTag"
-            app:layout_behavior="com.danthecodinggui.recipes.view.add_recipe.SnackBarBehavior"
+            app:layout_behavior="com.danthecodinggui.recipes.view.activity_add_recipe.SnackBarBehavior"
             android:layout_marginBottom="135dp"
             android:layout_marginEnd="10dp"
             android:text="@string/txt_add_kcal"/>

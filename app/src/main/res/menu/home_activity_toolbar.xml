@@ -8,4 +8,9 @@
         android:icon="@drawable/ic_search"
         app:showAsAction="always|collapseActionView"
         app:actionLayout="@layout/svw_circular_reveal"/>
+    <item
+        android:id="@+id/menu_sort_by"
+        android:title="@string/menu_sort_by"
+        android:icon="@drawable/ic_sort_by"
+        app:showAsAction="ifRoom|collapseActionView"/>
 </menu>

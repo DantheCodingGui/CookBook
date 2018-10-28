@@ -85,5 +85,9 @@
             android:onClick="AddRecipe"
             android:transitionName="bg"/>
 
+        <include
+            android:id="@+id/includeSortSheet"
+            layout="@layout/sort_by_sheet"/>
+
     </android.support.design.widget.CoordinatorLayout>
 </layout>

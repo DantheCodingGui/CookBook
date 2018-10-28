@@ -493,7 +493,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
                     ClosePhotoSheet();
             }
         }
-
         return super.dispatchTouchEvent(event);
     }
 

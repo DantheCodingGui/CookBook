@@ -58,4 +58,8 @@
     <string name="menu_delete_recipe">Delete</string>
     <string name="menu_select_all">Select All</string>
     <string name="action_mode_title">%d Selected</string>
+    <string name="menu_sort_by">Sort By</string>
+    <string name="btn_sort_by_name">Name</string>
+    <string name="btn_sort_by_date">Last Added</string>
+    <string name="sort_by_sheet_title">Sort By</string>
 </resources>
