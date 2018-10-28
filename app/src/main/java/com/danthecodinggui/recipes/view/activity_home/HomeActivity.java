@@ -102,6 +102,7 @@ public class HomeActivity extends AppCompatActivity
     private boolean transitioningActivity = false;
     private boolean inActionMode = false;
     private boolean sortBySheetExpanded = false;
+    private int currentSortOrder = SORT_ORDER_ALPHABETICAL;
 
     private String lastSearchFilter;
 
@@ -121,6 +122,11 @@ public class HomeActivity extends AppCompatActivity
     private static final String IN_ACTION_MODE = "IN_ACTION_MODE";
     private static final String ACTION_MODE_SELECTION = "ACTION_MODE_SELECTION";
     private static final String SORT_BY_SHEET_OPEN = "SORT_BY_SHEET_OPEN";
+    private static final String CURRENT_SORT_ORDER = "CURRENT_SORT_ORDER";
+
+    //Sort orders
+    private static final int SORT_ORDER_ALPHABETICAL = 301;
+    private static final int SORT_ORDER_TIME_ADDED = 302;
 
     //TODO remove later
     private boolean inserting = false;
@@ -190,6 +196,8 @@ public class HomeActivity extends AppCompatActivity
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
         });
 
+        SetSortOrderView(currentSortOrder);
+
         if (!inserting)
             getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, loaderCallbacks);
         else {
@@ -209,6 +217,7 @@ public class HomeActivity extends AppCompatActivity
         outState.putString(SEARCH_FILTER, lastSearchFilter);
         outState.putBoolean(IN_ACTION_MODE, inActionMode);
         outState.putBoolean(SORT_BY_SHEET_OPEN, sortBySheetExpanded);
+        outState.putInt(CURRENT_SORT_ORDER, currentSortOrder);
         outState.putIntegerArrayList(ACTION_MODE_SELECTION, new ArrayList<>(recipesAdapter.GetSelection()));
     }
 
@@ -220,6 +229,7 @@ public class HomeActivity extends AppCompatActivity
         lastSearchFilter = savedInstanceState.getString(SEARCH_FILTER);
         inActionMode = savedInstanceState.getBoolean(IN_ACTION_MODE);
         sortBySheetExpanded = savedInstanceState.getBoolean(SORT_BY_SHEET_OPEN);
+        currentSortOrder = savedInstanceState.getInt(CURRENT_SORT_ORDER);
 
         if (inActionMode) {
             recipesAdapter.EnableActionMode();
@@ -375,6 +385,23 @@ public class HomeActivity extends AppCompatActivity
         return super.dispatchTouchEvent(event);
     }
 
+    private void SetSortOrderView(int sortOrder) {
+
+        //Remove selected icon from all other options
+        if (sortOrder == SORT_ORDER_ALPHABETICAL) {
+            binding.includeSortSheet.btnSortByName.
+                    setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_sheet_item_selected, 0);
+            binding.includeSortSheet.btnSortByDate
+                    .setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        }
+        else {
+            binding.includeSortSheet.btnSortByDate
+                    .setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_sheet_item_selected, 0);
+            binding.includeSortSheet.btnSortByName
+                    .setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        }
+    }
+
     private SearchView.OnQueryTextListener searchTextChangedListener = new SearchView.OnQueryTextListener() {
         @Override
         public boolean onQueryTextSubmit(String query) {
@@ -427,10 +454,12 @@ public class HomeActivity extends AppCompatActivity
     }
 
     public void SortByName(View view) {
+        SetSortOrderView(binding.includeSortSheet.btnSortByName);
         CloseSortBySheet();
     }
 
     public void SortByDate(View view) {
+        SetSortOrderView(binding.includeSortSheet.btnSortByDate);
         CloseSortBySheet();
     }
 
