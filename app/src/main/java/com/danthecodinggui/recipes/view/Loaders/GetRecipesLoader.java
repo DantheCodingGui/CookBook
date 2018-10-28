@@ -2,10 +2,12 @@ package com.danthecodinggui.recipes.view.Loaders;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
@@ -14,16 +16,23 @@ import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.LogTags;
 import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.view.activity_home.HomeActivity;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_KEY_HOME_SORT_ORDER;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.SORT_ORDER_ALPHABETICAL;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.SORT_ORDER_TIME_ADDED;
 import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 
 /**
  * Loads recipes from database into HomeActivity view
  */
-public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
+public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
+        implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private ContentResolver contentResolver;
 
@@ -37,12 +46,15 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
 
     private Handler uiThread;
 
+    private int recipesSortOrder;
+
     public GetRecipesLoader(Context context, Handler uiThread,
-                     ImagePermissionsListener permissionCallback) {
+                     ImagePermissionsListener permissionCallback, int recipesSortOrder) {
         super(context);
         this.uiThread = uiThread;
         contentResolver = context.getContentResolver();
         this.permissionsCallback = permissionCallback;
+        this.recipesSortOrder = recipesSortOrder;
     }
 
     @Override
@@ -78,6 +90,7 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
         //Sortorders (both ASC and DSC):
         //-alphabetical
         //-date added (just base on primary keys) (test that primary keys aren't reused)
+        //TODO invert ASC AND DESC for date added
 
         //Query recipes table for all records
         Cursor baseCursor = contentResolver.query(
@@ -85,7 +98,7 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
                 ProviderContract.RECIPE_PROJECTION_FULL,
                 null,
                 null,
-                ProviderContract.RecipeEntry.TITLE + " ASC"
+                 ParseSortOrder()
         );
         //Cursor for the ingredients/method queries afterwards
         Cursor countCursor;
@@ -264,6 +277,46 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
                 cursor.getColumnIndexOrThrow(BaseColumns._COUNT))
         );
         return currentModel;
+    }
+
+    private String ParseSortOrder() {
+        if (recipesSortOrder == SORT_ORDER_ALPHABETICAL)
+            return ProviderContract.RecipeEntry.TITLE + " ASC";
+        else
+            return ProviderContract.RecipeEntry._ID + " DESC";
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String prefKey) {
+        switch (prefKey) {
+            case PREF_KEY_HOME_SORT_ORDER:
+                int recipesSortOrder = sharedPreferences.getInt(prefKey, SORT_ORDER_ALPHABETICAL);
+
+                Comparator<Recipe> comparator;
+
+                //Sort cached list and resend to activity
+                if (recipesSortOrder == SORT_ORDER_ALPHABETICAL)
+                    comparator = new Comparator<Recipe>() {
+                        @Override
+                        public int compare(Recipe recipe1, Recipe recipe2) {
+                            return recipe1.getTitle().compareToIgnoreCase(recipe2.getTitle());
+                        }
+                    };
+                else
+                    comparator = new Comparator<Recipe>() {
+                        @Override
+                        public int compare(Recipe recipe1, Recipe recipe2) {
+                            if (recipe1.getRecipeId() < recipe2.getRecipeId())
+                                return 1;
+                            else
+                                return -1;
+                        }
+                    };
+
+                Collections.sort(cachedRecords, comparator);
+                onStartLoading();
+                break;
+        }
     }
 
     public interface ImagePermissionsListener {

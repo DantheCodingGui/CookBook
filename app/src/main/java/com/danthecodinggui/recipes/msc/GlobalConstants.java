@@ -20,4 +20,12 @@ public class GlobalConstants {
     public static final String SAVE_TASK_METHOD = "SAVE_TASK_METHOD";
     public static final String SAVE_TASK_IS_IMAGE_CAMERA = "SAVE_TASK_IS_IMAGE_CAMERA";
     public static final String SAVE_TASK_CAMERA_DIR_PATH = "SAVE_TASK_CAMERA_DIR_PATH";
+
+    public static final String PREF_FILE_NAME = "RecipeSharedPreferences";
+
+    //Shared Preference Keys
+    public static final String PREF_KEY_HOME_SORT_ORDER = "home_sort_order";
+
+    public static final int SORT_ORDER_ALPHABETICAL = 1;
+    public static final int SORT_ORDER_TIME_ADDED = 2;
 }

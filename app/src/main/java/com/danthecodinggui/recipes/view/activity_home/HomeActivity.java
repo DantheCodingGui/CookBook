@@ -2,7 +2,9 @@ package com.danthecodinggui.recipes.view.activity_home;
 
 import android.Manifest;
 import android.app.ActivityOptions;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
@@ -13,6 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -74,8 +77,12 @@ import java.util.List;
 import jp.wasabeef.recyclerview.animators.ScaleInAnimator;
 
 import static com.danthecodinggui.recipes.msc.GlobalConstants.IMAGE_TRANSITION_NAME;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_FILE_NAME;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_KEY_HOME_SORT_ORDER;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_BUNDLE;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_OBJECT;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.SORT_ORDER_ALPHABETICAL;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.SORT_ORDER_TIME_ADDED;
 import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 import static com.danthecodinggui.recipes.msc.LogTags.GLIDE;
 
@@ -108,6 +115,8 @@ public class HomeActivity extends AppCompatActivity
 
     private GetRecipesLoader recipesLoader;
 
+    SharedPreferences homePrefs;
+
     private BottomSheetBehavior sortBySheetBehaviour;
 
     //Loader IDs
@@ -123,10 +132,6 @@ public class HomeActivity extends AppCompatActivity
     private static final String ACTION_MODE_SELECTION = "ACTION_MODE_SELECTION";
     private static final String SORT_BY_SHEET_OPEN = "SORT_BY_SHEET_OPEN";
     private static final String CURRENT_SORT_ORDER = "CURRENT_SORT_ORDER";
-
-    //Sort orders
-    private static final int SORT_ORDER_ALPHABETICAL = 301;
-    private static final int SORT_ORDER_TIME_ADDED = 302;
 
     //TODO remove later
     private boolean inserting = false;
@@ -195,6 +200,10 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
         });
+
+        homePrefs = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+
+        currentSortOrder = GetCurrentSortOrder();
 
         SetSortOrderView(currentSortOrder);
 
@@ -364,6 +373,13 @@ public class HomeActivity extends AppCompatActivity
             super.onBackPressed();
     }
 
+    /**
+     * Gets the current sort order shared preference
+     */
+    private int GetCurrentSortOrder() {
+        return homePrefs.getInt(PREF_KEY_HOME_SORT_ORDER, SORT_ORDER_ALPHABETICAL);
+    }
+
     private void OpenSortBySheet() {
         sortBySheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
@@ -454,13 +470,24 @@ public class HomeActivity extends AppCompatActivity
     }
 
     public void SortByName(View view) {
-        SetSortOrderView(binding.includeSortSheet.btnSortByName);
+        currentSortOrder = SORT_ORDER_ALPHABETICAL;
+        SetSortOrderView(SORT_ORDER_ALPHABETICAL);
+        WriteNewSortOrder();
         CloseSortBySheet();
     }
 
     public void SortByDate(View view) {
-        SetSortOrderView(binding.includeSortSheet.btnSortByDate);
+        currentSortOrder = SORT_ORDER_TIME_ADDED;
+        SetSortOrderView(SORT_ORDER_TIME_ADDED);
+        WriteNewSortOrder();
         CloseSortBySheet();
+    }
+
+    private void WriteNewSortOrder() {
+        SharedPreferences pref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor prefEditor = pref.edit();
+        prefEditor.putInt(PREF_KEY_HOME_SORT_ORDER, currentSortOrder);
+        prefEditor.apply();
     }
 
     /**
@@ -477,7 +504,6 @@ public class HomeActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
-
         transitioningActivity = false;
     }
 
@@ -513,7 +539,8 @@ public class HomeActivity extends AppCompatActivity
         @Override
         public Loader<List<Recipe>> onCreateLoader(int id, @Nullable Bundle args) {
             Handler uiThread = new Handler(getMainLooper());
-            return recipesLoader = new GetRecipesLoader(HomeActivity.this, uiThread,
+
+            recipesLoader = new GetRecipesLoader(HomeActivity.this, uiThread,
                     new GetRecipesLoader.ImagePermissionsListener() {
                         @Override
                         public void onImagePermRequested() {
@@ -526,7 +553,10 @@ public class HomeActivity extends AppCompatActivity
                                 onFeatureDisabled();
 
                         }
-                    });
+                    }, currentSortOrder);
+
+            homePrefs.registerOnSharedPreferenceChangeListener(recipesLoader);
+            return recipesLoader;
         }
 
         @Override
@@ -547,6 +577,8 @@ public class HomeActivity extends AppCompatActivity
 
         @Override
         public void onLoaderReset(@NonNull Loader<List<Recipe>> loader) {
+            homePrefs.unregisterOnSharedPreferenceChangeListener(recipesLoader);
+
             recipesAdapter.UpdateRecords(Collections.<Recipe>emptyList());
         }
     };
