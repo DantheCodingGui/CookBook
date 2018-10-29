@@ -1,0 +1,90 @@
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:name="vector"
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+            <group android:name="group">
+                <path
+                    android:name="top_right"
+                    android:pathData="M 11.198 4.594 L 17.043 10.462"
+                    android:fillColor="#000000"
+                    android:strokeColor="#636363"
+                    android:strokeWidth="2.287"/>
+                <path
+                    android:name="top_left"
+                    android:pathData="M 12.807 4.594 L 6.962 10.462"
+                    android:strokeColor="#636363"
+                    android:strokeWidth="2.287"/>
+                <path
+                    android:name="backbone"
+                    android:pathData="M 11.999 4.889 L 11.999 19.112"
+                    android:strokeColor="#636363"
+                    android:strokeWidth="2.223"/>
+                <path
+                    android:name="bottom_left"
+                    android:pathData="M 12.807 19.392 L 6.962 13.524"
+                    android:fillColor="#000"
+                    android:strokeColor="#636363"
+                    android:strokeWidth="2.287"
+                    android:trimPathEnd="0"/>
+                <path
+                    android:name="bottom_right"
+                    android:pathData="M 11.198 19.392 L 17.043 13.524"
+                    android:strokeColor="#636363"
+                    android:strokeWidth="2.287"
+                    android:trimPathEnd="0"/>
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="top_left">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="trimPathEnd"
+                android:duration="150"
+                android:valueFrom="1"
+                android:valueTo="0"
+                android:valueType="floatType"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"/>
+        </aapt:attr>
+    </target>
+    <target android:name="top_right">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="trimPathEnd"
+                android:duration="150"
+                android:valueFrom="1"
+                android:valueTo="0"
+                android:valueType="floatType"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"/>
+        </aapt:attr>
+    </target>
+    <target android:name="bottom_left">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="trimPathEnd"
+                android:startOffset="150"
+                android:duration="150"
+                android:valueFrom="0"
+                android:valueTo="1"
+                android:valueType="floatType"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"/>
+        </aapt:attr>
+    </target>
+    <target android:name="bottom_right">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="trimPathEnd"
+                android:startOffset="150"
+                android:duration="150"
+                android:valueFrom="0"
+                android:valueTo="1"
+                android:valueType="floatType"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"/>
+        </aapt:attr>
+    </target>
+</animated-vector>

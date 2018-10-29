@@ -7,7 +7,6 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
@@ -16,16 +15,15 @@ import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.LogTags;
 import com.danthecodinggui.recipes.msc.Utility;
-import com.danthecodinggui.recipes.view.activity_home.HomeActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_KEY_HOME_SORT_DIR;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_KEY_HOME_SORT_ORDER;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SORT_ORDER_ALPHABETICAL;
-import static com.danthecodinggui.recipes.msc.GlobalConstants.SORT_ORDER_TIME_ADDED;
 import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 
 /**
@@ -47,14 +45,17 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
     private Handler uiThread;
 
     private int recipesSortOrder;
+    private boolean isSortDirAsc;
 
     public GetRecipesLoader(Context context, Handler uiThread,
-                     ImagePermissionsListener permissionCallback, int recipesSortOrder) {
+                     ImagePermissionsListener permissionCallback,
+                        int recipesSortOrder, boolean recipesSortDir) {
         super(context);
         this.uiThread = uiThread;
         contentResolver = context.getContentResolver();
         this.permissionsCallback = permissionCallback;
         this.recipesSortOrder = recipesSortOrder;
+        this.isSortDirAsc = recipesSortDir;
     }
 
     @Override
@@ -280,43 +281,65 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
     }
 
     private String ParseSortOrder() {
+        String sortDir = isSortDirAsc ? " ASC" : " DESC";
+
         if (recipesSortOrder == SORT_ORDER_ALPHABETICAL)
-            return ProviderContract.RecipeEntry.TITLE + " ASC";
+            return ProviderContract.RecipeEntry.TITLE + sortDir;
         else
-            return ProviderContract.RecipeEntry._ID + " DESC";
+            return ProviderContract.RecipeEntry._ID + sortDir;
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String prefKey) {
         switch (prefKey) {
             case PREF_KEY_HOME_SORT_ORDER:
-                int recipesSortOrder = sharedPreferences.getInt(prefKey, SORT_ORDER_ALPHABETICAL);
+                recipesSortOrder = sharedPreferences.getInt(prefKey, SORT_ORDER_ALPHABETICAL);
 
-                Comparator<Recipe> comparator;
+                onRecipeSortChanged();
+                break;
+            case PREF_KEY_HOME_SORT_DIR:
+                isSortDirAsc = sharedPreferences.getBoolean(prefKey, true);
 
-                //Sort cached list and resend to activity
-                if (recipesSortOrder == SORT_ORDER_ALPHABETICAL)
-                    comparator = new Comparator<Recipe>() {
-                        @Override
-                        public int compare(Recipe recipe1, Recipe recipe2) {
-                            return recipe1.getTitle().compareToIgnoreCase(recipe2.getTitle());
-                        }
-                    };
-                else
-                    comparator = new Comparator<Recipe>() {
-                        @Override
-                        public int compare(Recipe recipe1, Recipe recipe2) {
-                            if (recipe1.getRecipeId() < recipe2.getRecipeId())
-                                return 1;
-                            else
-                                return -1;
-                        }
-                    };
-
-                Collections.sort(cachedRecords, comparator);
-                onStartLoading();
+                onRecipeSortChanged();
                 break;
         }
+    }
+
+    private void onRecipeSortChanged() {
+
+        if (cachedRecords == null) {
+            startLoading();
+            return;
+        }
+
+        Comparator<Recipe> comparator;
+
+        //Sort cached list and resend to activity
+        if (recipesSortOrder == SORT_ORDER_ALPHABETICAL)
+            comparator = new Comparator<Recipe>() {
+                @Override
+                public int compare(Recipe recipe1, Recipe recipe2) {
+                    if (isSortDirAsc)
+                        return recipe1.getTitle().compareToIgnoreCase(recipe2.getTitle());
+                    else
+                        return recipe2.getTitle().compareToIgnoreCase(recipe1.getTitle());
+                }
+            };
+        else
+            comparator = new Comparator<Recipe>() {
+                @Override
+                public int compare(Recipe recipe1, Recipe recipe2) {
+                    if (isSortDirAsc ?
+                            (recipe1.getRecipeId() > recipe2.getRecipeId()) :
+                            (recipe1.getRecipeId() < recipe2.getRecipeId()))
+                        return 1;
+                    else
+                        return -1;
+                }
+            };
+
+        Collections.sort(cachedRecords, comparator);
+        onStartLoading();
     }
 
     public interface ImagePermissionsListener {

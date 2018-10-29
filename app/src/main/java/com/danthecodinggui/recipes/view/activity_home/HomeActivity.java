@@ -11,15 +11,16 @@ import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.Snackbar;
+import android.support.graphics.drawable.AnimatedVectorDrawableCompat;
 import android.transition.Slide;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -78,6 +79,7 @@ import jp.wasabeef.recyclerview.animators.ScaleInAnimator;
 
 import static com.danthecodinggui.recipes.msc.GlobalConstants.IMAGE_TRANSITION_NAME;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_FILE_NAME;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_KEY_HOME_SORT_DIR;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_KEY_HOME_SORT_ORDER;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_BUNDLE;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_OBJECT;
@@ -110,6 +112,7 @@ public class HomeActivity extends AppCompatActivity
     private boolean inActionMode = false;
     private boolean sortBySheetExpanded = false;
     private int currentSortOrder = SORT_ORDER_ALPHABETICAL;
+    private boolean isSortAsc = true;
 
     private String lastSearchFilter;
 
@@ -132,6 +135,7 @@ public class HomeActivity extends AppCompatActivity
     private static final String ACTION_MODE_SELECTION = "ACTION_MODE_SELECTION";
     private static final String SORT_BY_SHEET_OPEN = "SORT_BY_SHEET_OPEN";
     private static final String CURRENT_SORT_ORDER = "CURRENT_SORT_ORDER";
+    private static final String IS_SORT_ASC = "IS_SORT_ASC";
 
     //TODO remove later
     private boolean inserting = false;
@@ -204,6 +208,7 @@ public class HomeActivity extends AppCompatActivity
         homePrefs = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
 
         currentSortOrder = GetCurrentSortOrder();
+        isSortAsc = GetCurrentSortDir();
 
         SetSortOrderView(currentSortOrder);
 
@@ -227,6 +232,7 @@ public class HomeActivity extends AppCompatActivity
         outState.putBoolean(IN_ACTION_MODE, inActionMode);
         outState.putBoolean(SORT_BY_SHEET_OPEN, sortBySheetExpanded);
         outState.putInt(CURRENT_SORT_ORDER, currentSortOrder);
+        outState.putBoolean(IS_SORT_ASC, isSortAsc);
         outState.putIntegerArrayList(ACTION_MODE_SELECTION, new ArrayList<>(recipesAdapter.GetSelection()));
     }
 
@@ -239,11 +245,14 @@ public class HomeActivity extends AppCompatActivity
         inActionMode = savedInstanceState.getBoolean(IN_ACTION_MODE);
         sortBySheetExpanded = savedInstanceState.getBoolean(SORT_BY_SHEET_OPEN);
         currentSortOrder = savedInstanceState.getInt(CURRENT_SORT_ORDER);
+        isSortAsc = savedInstanceState.getBoolean(IS_SORT_ASC);
 
         if (inActionMode) {
             recipesAdapter.EnableActionMode();
             recipesAdapter.SetSelection(savedInstanceState.getIntegerArrayList(ACTION_MODE_SELECTION));
         }
+        if (!isSortAsc)
+            binding.includeSortSheet.imvSortDir.setImageDrawable(getDrawable(R.drawable.ic_sort_dir_desc));
     }
 
     @Override
@@ -380,6 +389,10 @@ public class HomeActivity extends AppCompatActivity
         return homePrefs.getInt(PREF_KEY_HOME_SORT_ORDER, SORT_ORDER_ALPHABETICAL);
     }
 
+    private boolean GetCurrentSortDir() {
+        return homePrefs.getBoolean(PREF_KEY_HOME_SORT_DIR, true);
+    }
+
     private void OpenSortBySheet() {
         sortBySheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
@@ -388,6 +401,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override public boolean dispatchTouchEvent(MotionEvent event){
+        //TODO can still click recipe cards when sheet open BUG
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             if (sortBySheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
 
@@ -469,17 +483,57 @@ public class HomeActivity extends AppCompatActivity
         return filteredRecipes;
     }
 
+    public void ToggleSortDir(View view) {
+        final ImageView imageView = (ImageView) view;
+
+        SetSortDirDrawable(imageView);
+
+        Drawable imageDrawable = imageView.getDrawable();
+
+        if (imageDrawable instanceof AnimatedVectorDrawableCompat) {
+            AnimatedVectorDrawableCompat avd = (AnimatedVectorDrawableCompat) imageDrawable;
+            avd.start();
+        }
+        else if (imageDrawable instanceof AnimatedVectorDrawable) {
+            AnimatedVectorDrawable avd = (AnimatedVectorDrawable) imageDrawable;
+            avd.start();
+        }
+
+        isSortAsc = !isSortAsc;
+        WriteNewSortDir();
+    }
+
+    private void SetSortDirDrawable(ImageView imageView) {
+        //Change animated vector drawable
+        if (isSortAsc)
+            imageView.setImageDrawable(getDrawable(R.drawable.ic_sort_dir_asc));
+        else
+            imageView.setImageDrawable(getDrawable(R.drawable.ic_sort_dir_desc));
+    }
+
     public void SortByName(View view) {
-        currentSortOrder = SORT_ORDER_ALPHABETICAL;
-        SetSortOrderView(SORT_ORDER_ALPHABETICAL);
-        WriteNewSortOrder();
+
+        if (currentSortOrder != SORT_ORDER_ALPHABETICAL) {
+            currentSortOrder = SORT_ORDER_ALPHABETICAL;
+            if (!isSortAsc)
+                ToggleSortDir(binding.includeSortSheet.imvSortDir);
+
+            SetSortOrderView(SORT_ORDER_ALPHABETICAL);
+            WriteNewSortOrder();
+        }
         CloseSortBySheet();
     }
 
     public void SortByDate(View view) {
-        currentSortOrder = SORT_ORDER_TIME_ADDED;
-        SetSortOrderView(SORT_ORDER_TIME_ADDED);
-        WriteNewSortOrder();
+
+        if (currentSortOrder != SORT_ORDER_TIME_ADDED) {
+            currentSortOrder = SORT_ORDER_TIME_ADDED;
+            if (isSortAsc)
+                ToggleSortDir(binding.includeSortSheet.imvSortDir);
+
+            SetSortOrderView(SORT_ORDER_TIME_ADDED);
+            WriteNewSortOrder();
+        }
         CloseSortBySheet();
     }
 
@@ -490,10 +544,17 @@ public class HomeActivity extends AppCompatActivity
         prefEditor.apply();
     }
 
+    private void WriteNewSortDir() {
+        SharedPreferences pref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor prefEditor = pref.edit();
+        prefEditor.putBoolean(PREF_KEY_HOME_SORT_DIR, isSortAsc);
+        prefEditor.apply();
+    }
+
     /**
      * Returns position of recipe in unfiltered list (needed for swipe-to-delete)
      */
-    private int getRecipePos(Recipe r) {
+    private int getRecipesPos(Recipe r) {
         for (int i = 0; i < recipesList.size(); ++i) {
             if (recipesList.get(i).equals(r))
                 return i;
@@ -553,7 +614,7 @@ public class HomeActivity extends AppCompatActivity
                                 onFeatureDisabled();
 
                         }
-                    }, currentSortOrder);
+                    }, currentSortOrder, isSortAsc);
 
             homePrefs.registerOnSharedPreferenceChangeListener(recipesLoader);
             return recipesLoader;
@@ -755,8 +816,10 @@ public class HomeActivity extends AppCompatActivity
         @Override
         public void onItemDismiss(final int position) {
 
+            //TODO Bug, position can't be final as changes in/out of search
+
             //Need to delete recipe from both filtered/unfiltered list
-            final int unfilteredPos = getRecipePos(displayedRecipesList.get(position));
+            final int unfilteredPos = getRecipesPos(displayedRecipesList.get(position));
 
             //Now we have positions, can delete from both lists
             final Recipe recipeToDelete = removeItem(position);
@@ -850,7 +913,7 @@ public class HomeActivity extends AppCompatActivity
             Recipe removeTemp;
             int unfilteredPosTemp;
             for (Integer position: selectedItems) {
-                unfilteredPosTemp = getRecipePos(displayedRecipesList.get(position));
+                unfilteredPosTemp = getRecipesPos(displayedRecipesList.get(position));
                 unfilteredRecipePositions.add(unfilteredPosTemp);
             }
             for (int i = 0; i < selectedItems.size(); ++i) {

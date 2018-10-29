@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
+<layout xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -14,24 +14,46 @@
         app:behavior_peekHeight="0dp">
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/sort_by_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:padding="10dp"
-            android:textSize="15sp"
             android:text="@string/sort_by_sheet_title"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toTopOf="@+id/gln_subtitle_divider"
+            app:layout_constraintEnd_toStartOf="@+id/imv_sort_dir"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imv_sort_dir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="ToggleSortDir"
+            android:padding="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/gln_subtitle_divider"
+            app:srcCompat="@drawable/ic_sort_dir_asc" />
 
         <Button
             android:id="@+id/btn_sort_by_name"
             style="@style/ButtonBottomSheet"
+            android:layout_height="65dp"
             android:onClick="SortByName"
             android:text="@string/btn_sort_by_name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView" />
+            app:layout_constraintTop_toTopOf="@+id/gln_subtitle_divider" />
 
         <Button
             android:id="@+id/btn_sort_by_date"
@@ -41,6 +63,13 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btn_sort_by_name" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/gln_subtitle_divider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_end="118dp" />
 
     </android.support.constraint.ConstraintLayout>
 </layout>

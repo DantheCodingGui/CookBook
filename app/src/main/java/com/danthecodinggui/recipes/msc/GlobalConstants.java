@@ -25,6 +25,7 @@ public class GlobalConstants {
 
     //Shared Preference Keys
     public static final String PREF_KEY_HOME_SORT_ORDER = "home_sort_order";
+    public static final String PREF_KEY_HOME_SORT_DIR = "home_sort_direction";
 
     public static final int SORT_ORDER_ALPHABETICAL = 1;
     public static final int SORT_ORDER_TIME_ADDED = 2;
