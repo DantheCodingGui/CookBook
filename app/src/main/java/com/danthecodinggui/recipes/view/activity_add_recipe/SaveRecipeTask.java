@@ -109,8 +109,6 @@ public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
 
         ContentValues record = new ContentValues();
 
-        //TODO remove vieworder later when sorting implemented
-        record.put(ProviderContract.RecipeEntry.VIEW_ORDER, 1);
         record.put(ProviderContract.RecipeEntry.TITLE, item.getTitle());
 
         //optional data

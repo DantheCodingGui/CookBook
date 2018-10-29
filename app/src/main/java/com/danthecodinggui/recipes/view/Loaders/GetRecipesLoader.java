@@ -87,12 +87,6 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
 
         List<Recipe> records = new ArrayList<>();
 
-        //TODO choose sortorder based on shared preference
-        //Sortorders (both ASC and DSC):
-        //-alphabetical
-        //-date added (just base on primary keys) (test that primary keys aren't reused)
-        //TODO invert ASC AND DESC for date added
-
         //Query recipes table for all records
         Cursor baseCursor = contentResolver.query(
                 ProviderContract.RECIPES_URI,

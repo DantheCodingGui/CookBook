@@ -147,7 +147,7 @@ public class Utility {
      * Test method to insert dummy recipe, used until AddRecipeActivity is functional
      * @param imagePath
      */
-    public static void InsertValue(Context context, String imagePath, boolean image, boolean complex, int viewOrder) {
+    public static void InsertValue(Context context, String imagePath, boolean image, boolean complex) {
 
         //TODO remove later
 
@@ -155,7 +155,6 @@ public class Utility {
 
         ContentValues values = new ContentValues();
 
-        values.put(ProviderContract.RecipeEntry.VIEW_ORDER, viewOrder);
         values.put(ProviderContract.RecipeEntry.TITLE, "Pasta Aglio E Olio");
         if (complex) {
             values.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, 340);
