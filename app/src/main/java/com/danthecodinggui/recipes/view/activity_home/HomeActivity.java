@@ -292,6 +292,10 @@ public class HomeActivity extends AppCompatActivity
             searchView.clearFocus();
         }
 
+        //Animate menu items in
+        Drawable imageDrawable = searchItem.getIcon();
+        AnimateVectorDrawable(imageDrawable);
+
         return true;
     }
 
@@ -483,23 +487,29 @@ public class HomeActivity extends AppCompatActivity
     }
 
     public void ToggleSortDir(View view) {
+
         final ImageView imageView = (ImageView) view;
 
         SetSortDirDrawable(imageView);
 
-        Drawable imageDrawable = imageView.getDrawable();
-
-        if (imageDrawable instanceof AnimatedVectorDrawableCompat) {
-            AnimatedVectorDrawableCompat avd = (AnimatedVectorDrawableCompat) imageDrawable;
-            avd.start();
-        }
-        else if (imageDrawable instanceof AnimatedVectorDrawable) {
-            AnimatedVectorDrawable avd = (AnimatedVectorDrawable) imageDrawable;
-            avd.start();
-        }
+        AnimateVectorDrawable(imageView.getDrawable());
 
         isSortAsc = !isSortAsc;
         WriteNewSortDir();
+    }
+
+    /**
+     * Animate an Animated Vector Drawable
+     */
+    private void AnimateVectorDrawable(Drawable drawable) {
+        if (drawable instanceof AnimatedVectorDrawableCompat) {
+            AnimatedVectorDrawableCompat avd = (AnimatedVectorDrawableCompat) drawable;
+            avd.start();
+        }
+        else if (drawable instanceof AnimatedVectorDrawable) {
+            AnimatedVectorDrawable avd = (AnimatedVectorDrawable) drawable;
+            avd.start();
+        }
     }
 
     private void SetSortDirDrawable(ImageView imageView) {
