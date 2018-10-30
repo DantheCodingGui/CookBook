@@ -307,7 +307,7 @@ public class HomeActivity extends AppCompatActivity
             public void run() {
                 AnimateVectorDrawable(sortItem.getIcon());
             }
-        }, 1200);
+        }, 900);
 
         return true;
     }
