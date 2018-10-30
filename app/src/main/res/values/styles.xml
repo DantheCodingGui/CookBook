@@ -151,7 +151,7 @@
         <item name="android:src">@drawable/ic_edit_textview</item>
     </style>
 
-    <style name="ButtonBottomSheet">
+    <style name="BottomSheetButton">
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:background">?attr/selectableItemBackground</item>

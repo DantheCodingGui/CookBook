@@ -27,6 +27,7 @@ import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipeBinding;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipePhotoBinding;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
+import com.danthecodinggui.recipes.msc.AnimUtils;
 import com.danthecodinggui.recipes.msc.MaterialColours;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.msc.Utility;
@@ -225,6 +226,13 @@ public class ViewRecipeActivity extends AppCompatActivity
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
+
+                Drawable icon = tab.getIcon();
+
+                if (tab.getPosition() == 0)
+                    AnimUtils.animateVectorDrawable(icon);
+                else if (tab.getPosition() == 1)
+                    AnimUtils.animateVectorDrawable(icon);
             }
 
             @Override

@@ -6,6 +6,9 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.res.Resources;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.Drawable;
+import android.support.graphics.drawable.AnimatedVectorDrawableCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.ViewAnimationUtils;
@@ -51,6 +54,20 @@ public class AnimUtils {
      */
     public static void animateStatusBarColour(Activity activity, int newColour) {
         animateStatusBarColour(activity, newColour, null);
+    }
+
+    /**
+     * Animate an Animated Vector Drawable
+     */
+    public static void animateVectorDrawable(Drawable drawable) {
+        if (drawable instanceof AnimatedVectorDrawableCompat) {
+            AnimatedVectorDrawableCompat avd = (AnimatedVectorDrawableCompat) drawable;
+            avd.start();
+        }
+        else if (drawable instanceof AnimatedVectorDrawable) {
+            AnimatedVectorDrawable avd = (AnimatedVectorDrawable) drawable;
+            avd.start();
+        }
     }
 
     public static void animateSearchToolbar(final Activity activity, final Toolbar toolbar, int numberOfMenuIcon, boolean containsOverflow, boolean shouldShow) {

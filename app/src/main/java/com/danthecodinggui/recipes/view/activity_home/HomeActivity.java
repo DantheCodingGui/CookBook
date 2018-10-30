@@ -11,7 +11,6 @@ import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,7 +19,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.Snackbar;
-import android.support.graphics.drawable.AnimatedVectorDrawableCompat;
 import android.transition.Slide;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -299,15 +297,15 @@ public class HomeActivity extends AppCompatActivity
         uiThread.postDelayed(new Runnable() {
             @Override
             public void run() {
-                AnimateVectorDrawable(searchItem.getIcon());
+                AnimUtils.animateVectorDrawable(searchItem.getIcon());
             }
-        }, 500);
+        }, 300);
         uiThread.postDelayed(new Runnable() {
             @Override
             public void run() {
-                AnimateVectorDrawable(sortItem.getIcon());
+                AnimUtils.animateVectorDrawable(sortItem.getIcon());
             }
-        }, 900);
+        }, 700);
 
         return true;
     }
@@ -505,24 +503,10 @@ public class HomeActivity extends AppCompatActivity
 
         SetSortDirDrawable(imageView);
 
-        AnimateVectorDrawable(imageView.getDrawable());
+        AnimUtils.animateVectorDrawable(imageView.getDrawable());
 
         isSortAsc = !isSortAsc;
         WriteNewSortDir();
-    }
-
-    /**
-     * Animate an Animated Vector Drawable
-     */
-    private void AnimateVectorDrawable(Drawable drawable) {
-        if (drawable instanceof AnimatedVectorDrawableCompat) {
-            AnimatedVectorDrawableCompat avd = (AnimatedVectorDrawableCompat) drawable;
-            avd.start();
-        }
-        else if (drawable instanceof AnimatedVectorDrawable) {
-            AnimatedVectorDrawable avd = (AnimatedVectorDrawable) drawable;
-            avd.start();
-        }
     }
 
     private void SetSortDirDrawable(ImageView imageView) {

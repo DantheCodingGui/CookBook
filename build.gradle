@@ -19,6 +19,10 @@ allprojects {
     repositories {
         google()
         jcenter()
+
+        //For optroundcardview library
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases" }
     }
 }
 
