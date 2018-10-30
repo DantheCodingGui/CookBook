@@ -259,6 +259,7 @@ public class HomeActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.home_activity_toolbar, menu);
         final MenuItem searchItem = menu.findItem(R.id.menu_search);
+        final MenuItem sortItem = menu.findItem(R.id.menu_sort_by);
         final SearchView searchView = (SearchView) searchItem.getActionView();
 
         searchView.setOnQueryTextListener(searchTextChangedListener);
@@ -292,9 +293,21 @@ public class HomeActivity extends AppCompatActivity
             searchView.clearFocus();
         }
 
+        Handler uiThread = new Handler(getMainLooper());
+
         //Animate menu items in
-        Drawable imageDrawable = searchItem.getIcon();
-        AnimateVectorDrawable(imageDrawable);
+        uiThread.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                AnimateVectorDrawable(searchItem.getIcon());
+            }
+        }, 500);
+        uiThread.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                AnimateVectorDrawable(sortItem.getIcon());
+            }
+        }, 1200);
 
         return true;
     }

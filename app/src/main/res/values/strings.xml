@@ -62,4 +62,7 @@
     <string name="btn_sort_by_name">Name</string>
     <string name="btn_sort_by_date">Last Added</string>
     <string name="sort_by_sheet_title">Sort By</string>
+
+    <string name="shortcut_add_recipe_short">Add Recipe</string>
+    <string name="shortcut_add_recipe_long">Add New Recipe</string>
 </resources>

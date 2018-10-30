@@ -34,9 +34,11 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="636363" />
-                            <entry key="outputName" value="ic_sort_direction" />
+                            <entry key="height" value="48" />
+                            <entry key="outputName" value="shortcut_add_recipe" />
                             <entry key="overrideSize" value="true" />
                             <entry key="sourceFile" value="C:\Users\Dan" />
+                            <entry key="width" value="48" />
                           </map>
                         </option>
                       </PersistentState>
