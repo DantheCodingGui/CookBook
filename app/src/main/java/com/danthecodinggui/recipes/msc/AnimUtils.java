@@ -70,6 +70,22 @@ public class AnimUtils {
         }
     }
 
+    /**
+     * Animate an Animated Vector Drawable instantly (for use when shouldn't run animation)
+     */
+    public static void instaAnimateVectorDrawable(Drawable drawable) {
+        if (drawable instanceof AnimatedVectorDrawableCompat) {
+            AnimatedVectorDrawableCompat avd = (AnimatedVectorDrawableCompat) drawable;
+            avd.start();
+            avd.stop();
+        }
+        else if (drawable instanceof AnimatedVectorDrawable) {
+            AnimatedVectorDrawable avd = (AnimatedVectorDrawable) drawable;
+            avd.start();
+            avd.stop();
+        }
+    }
+
     public static void animateSearchToolbar(final Activity activity, final Toolbar toolbar, int numberOfMenuIcon, boolean containsOverflow, boolean shouldShow) {
 
         toolbar.setBackgroundColor(ContextCompat.getColor(activity, android.R.color.white));

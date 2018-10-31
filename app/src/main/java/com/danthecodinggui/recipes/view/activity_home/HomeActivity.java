@@ -111,6 +111,7 @@ public class HomeActivity extends AppCompatActivity
     private boolean sortBySheetExpanded = false;
     private int currentSortOrder = SORT_ORDER_ALPHABETICAL;
     private boolean isSortAsc = true;
+    private boolean shouldShowMenuAnims = true;
 
     private String lastSearchFilter;
 
@@ -251,6 +252,9 @@ public class HomeActivity extends AppCompatActivity
         }
         if (!isSortAsc)
             binding.includeSortSheet.imvSortDir.setImageDrawable(getDrawable(R.drawable.ic_sort_dir_desc));
+
+        //Only show if activity open is fresh
+        shouldShowMenuAnims = false;
     }
 
     @Override
@@ -293,19 +297,26 @@ public class HomeActivity extends AppCompatActivity
 
         Handler uiThread = new Handler(getMainLooper());
 
-        //Animate menu items in
-        uiThread.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                AnimUtils.animateVectorDrawable(searchItem.getIcon());
-            }
-        }, 300);
-        uiThread.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                AnimUtils.animateVectorDrawable(sortItem.getIcon());
-            }
-        }, 700);
+        //Ensure animation doesn't run on orientation change
+        if (shouldShowMenuAnims) {
+            //Animate menu items in
+            uiThread.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    AnimUtils.animateVectorDrawable(searchItem.getIcon());
+                }
+            }, 300);
+            uiThread.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    AnimUtils.animateVectorDrawable(sortItem.getIcon());
+                }
+            }, 700);
+        }
+        else {
+            AnimUtils.instaAnimateVectorDrawable(searchItem.getIcon());
+            AnimUtils.instaAnimateVectorDrawable(sortItem.getIcon());
+        }
 
         return true;
     }
