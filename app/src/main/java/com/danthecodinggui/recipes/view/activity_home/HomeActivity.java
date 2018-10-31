@@ -211,6 +211,11 @@ public class HomeActivity extends AppCompatActivity
 
         SetSortOrderView(currentSortOrder);
 
+        //Flip sort direction icon if not ASC
+        if (!isSortAsc)
+            binding.includeSortSheet.imvSortDir.setImageDrawable(
+                    getDrawable(R.drawable.ic_sort_dir_desc));
+
         if (!inserting)
             getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, loaderCallbacks);
         else {
