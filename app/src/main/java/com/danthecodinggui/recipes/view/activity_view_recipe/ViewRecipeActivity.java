@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.transition.TransitionInflater;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -161,6 +162,10 @@ public class ViewRecipeActivity extends AppCompatActivity
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe);
 
+        if (recipe.hasExtendedInfo()) {
+            binding.clyVwOptionals.setVisibility(View.VISIBLE);
+        }
+
         binding.setRecipe(recipe);
 
         setSupportActionBar(binding.tbarVwRecipe);
@@ -180,6 +185,7 @@ public class ViewRecipeActivity extends AppCompatActivity
             randIngredientsCol = MaterialColours.nextColour();
 
         binding.tbarVwRecipe.setBackgroundColor(randIngredientsCol);
+        binding.clyVwOptionals.setBackgroundColor(randIngredientsCol);
         binding.tlyViewRecipe.setBackgroundColor(randIngredientsCol);
         binding.vwFragBackground.setBackgroundColor(randIngredientsCol);
 
