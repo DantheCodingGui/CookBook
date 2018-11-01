@@ -4,6 +4,7 @@ import android.Manifest;
 import android.animation.AnimatorInflater;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -1099,6 +1100,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         }
     }
 
+    @SuppressLint("RestrictedApi")
     private void AnimateInFabMenu() {
 
         Slide anim = new Slide();
@@ -1108,6 +1110,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         binding.fabAddMenu.setVisibility(View.VISIBLE);
     }
 
+    @SuppressLint("RestrictedApi")
     private void AnimateOutFabMenu() {
         Slide anim = new Slide();
         anim.addTarget(binding.fabAddMenu);

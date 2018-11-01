@@ -1,6 +1,7 @@
 package com.danthecodinggui.recipes.view.activity_home;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
@@ -108,7 +109,7 @@ public class HomeActivity extends AppCompatActivity
     private boolean restoringState = false;
     private boolean transitioningActivity = false;
     private boolean inActionMode = false;
-    private boolean sortBySheetExpanded = false;
+    private boolean isSortSheetOpen = false;
     private int currentSortOrder = SORT_ORDER_ALPHABETICAL;
     private boolean isSortAsc = true;
     private boolean shouldShowMenuAnims = true;
@@ -195,9 +196,9 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 if (newState == BottomSheetBehavior.STATE_EXPANDED)
-                    sortBySheetExpanded = true;
+                    isSortSheetOpen = true;
                 else if (newState == BottomSheetBehavior.STATE_COLLAPSED)
-                    sortBySheetExpanded = false;
+                    isSortSheetOpen = false;
             }
 
             @Override
@@ -234,7 +235,7 @@ public class HomeActivity extends AppCompatActivity
         outState.putBoolean(SEARCH_OPEN, searchOpen);
         outState.putString(SEARCH_FILTER, lastSearchFilter);
         outState.putBoolean(IN_ACTION_MODE, inActionMode);
-        outState.putBoolean(SORT_BY_SHEET_OPEN, sortBySheetExpanded);
+        outState.putBoolean(SORT_BY_SHEET_OPEN, isSortSheetOpen);
         outState.putInt(CURRENT_SORT_ORDER, currentSortOrder);
         outState.putBoolean(IS_SORT_ASC, isSortAsc);
         outState.putIntegerArrayList(ACTION_MODE_SELECTION, new ArrayList<>(recipesAdapter.GetSelection()));
@@ -247,7 +248,7 @@ public class HomeActivity extends AppCompatActivity
         searchOpen = savedInstanceState.getBoolean(SEARCH_OPEN);
         lastSearchFilter = savedInstanceState.getString(SEARCH_FILTER);
         inActionMode = savedInstanceState.getBoolean(IN_ACTION_MODE);
-        sortBySheetExpanded = savedInstanceState.getBoolean(SORT_BY_SHEET_OPEN);
+        isSortSheetOpen = savedInstanceState.getBoolean(SORT_BY_SHEET_OPEN);
         currentSortOrder = savedInstanceState.getInt(CURRENT_SORT_ORDER);
         isSortAsc = savedInstanceState.getBoolean(IS_SORT_ASC);
 
@@ -334,7 +335,7 @@ public class HomeActivity extends AppCompatActivity
             case R.id.menu_search:
                 return true;
             case R.id.menu_sort_by:
-                if (sortBySheetExpanded)
+                if (isSortSheetOpen)
                     CloseSortBySheet();
                 else
                     OpenSortBySheet();
@@ -344,6 +345,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
+        @SuppressLint("RestrictedApi")
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             getMenuInflater().inflate(R.menu.home_activity_select_toolbar, menu);
@@ -384,6 +386,7 @@ public class HomeActivity extends AppCompatActivity
             return false;
         }
 
+        @SuppressLint("RestrictedApi")
         @Override
         public void onDestroyActionMode(ActionMode mode) {
 
@@ -406,7 +409,7 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        if (sortBySheetExpanded)
+        if (isSortSheetOpen)
             CloseSortBySheet();
         else
             super.onBackPressed();
@@ -1036,6 +1039,9 @@ public class HomeActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
+                if (isSortSheetOpen)
+                    return;
+
                 if (inActionMode)
                     ToggleActionModeSelected();
                 else
@@ -1143,6 +1149,9 @@ public class HomeActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
+                if (isSortSheetOpen)
+                    return;
+
                 if (inActionMode)
                     ToggleActionModeSelected();
                 else
@@ -1187,6 +1196,9 @@ public class HomeActivity extends AppCompatActivity
 
             @Override
             public void onClick(View view) {
+                if (isSortSheetOpen)
+                    return;
+
                 if (inActionMode)
                     ToggleActionModeSelected();
                 else
