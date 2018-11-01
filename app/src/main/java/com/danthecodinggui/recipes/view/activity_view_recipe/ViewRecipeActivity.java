@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.transition.TransitionInflater;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -276,5 +277,14 @@ public class ViewRecipeActivity extends AppCompatActivity
         //When AppBarLayout expansion fully animated, THEN the activity can close
         if (closingAnimating && verticalOffset == 0)
             supportFinishAfterTransition();
+
+        float adjustedF = (f - 102) / 0.255f - 200;
+        if (adjustedF < 0)
+            adjustedF = 0;
+
+        Log.d("temp", "adjustedF = " + (400 - adjustedF));
+
+        bindingPhoto.txtVwDuration.setTranslationX(400 - adjustedF);
+        bindingPhoto.txtVwKcal.setTranslationX(400 - adjustedF);
     }
 }

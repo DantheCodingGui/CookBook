@@ -33,9 +33,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
                 app:title="@{recipe.getTitle()}"
-                app:expandedTitleMarginBottom="5dp"
+                app:expandedTitleMarginBottom="10dp"
+                app:expandedTitleMarginEnd="120dp"
                 app:collapsedTitleTextAppearance="@font/open_sans_light"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
                 android:fitsSystemWindows="true"
                 app:contentScrim="@android:color/transparent"
                 app:statusBarScrim="@android:color/transparent">
@@ -77,6 +78,38 @@
                     android:gravity="top"
                     app:layout_collapseMode="pin"
                     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+                <TextView
+                    android:id="@+id/txt_vw_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="50dp"
+                    android:layout_marginStart="20dp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/open_sans_light"
+                    android:textSize="16sp"
+                    android:text="@{(recipe.getCalories == 0) ? @string/empty : @plurals/txt_calories(recipe.getCalories(), recipe.getCalories())}"
+                    tools:text="15 mins"
+                    app:layout_collapseMode="parallax" />
+
+                <TextView
+                    android:id="@+id/txt_vw_kcal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginStart="20dp"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/open_sans_light"
+                    android:text="@{StringUtils.minsToHourMins(recipe.getTimeInMins())}"
+                    tools:text="25kcal"
+                    app:layout_collapseMode="parallax" />
 
             </android.support.design.widget.CollapsingToolbarLayout>
 
