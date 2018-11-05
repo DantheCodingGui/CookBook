@@ -340,8 +340,6 @@ public class RecipeProvider extends ContentProvider {
                 throw new IllegalArgumentException("Invalid URI for deletion: " + uri);
         }
 
-        getContext().getContentResolver().notifyChange(uri, null);
-
         return rowNumDeleted;
 
     }

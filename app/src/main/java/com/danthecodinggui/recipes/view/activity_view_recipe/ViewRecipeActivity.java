@@ -34,6 +34,8 @@ import com.danthecodinggui.recipes.msc.MaterialColours;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
 import com.danthecodinggui.recipes.msc.Utility;
 
+import net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -131,6 +133,21 @@ public class ViewRecipeActivity extends AppCompatActivity
                 return false;
             }
         });
+
+        //Resize CollapsingToolbarLayout title text size based on title length
+        int titleSize = recipe.getTitle().length();
+        //Need to cast as CollapsingToolbarLayout is a library implementation
+        CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout)bindingPhoto.ctlVwRecipe;
+        if (titleSize <= 5)
+            collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarTitleMax);
+        else if (titleSize <= 10)
+            collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarTitleLarge);
+        else if (titleSize <= 20)
+            collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarTitleMedium);
+        else if (titleSize <= 30)
+            collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarTitleSmall);
+        else
+            collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarTitleMin);
 
         if (Utility.atLeastLollipop()) {
             //Set the shared elements transition name

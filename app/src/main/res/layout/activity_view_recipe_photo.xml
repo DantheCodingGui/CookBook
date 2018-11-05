@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.danthecodinggui.recipes.view.activity_view_recipe.ViewRecipeActivity">
     <data>
         <import type="android.graphics.drawable.Drawable"/>
         <import type="com.danthecodinggui.recipes.msc.StringUtils"/>
@@ -11,14 +15,10 @@
             type="com.bumptech.glide.request.RequestListener&lt;Drawable&gt;"/>
     </data>
     <android.support.design.widget.CoordinatorLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/view_recipe_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
-        tools:context="com.danthecodinggui.recipes.view.activity_view_recipe.ViewRecipeActivity"
-        android:id="@+id/view_recipe_root">
+        android:fitsSystemWindows="true">
 
         <android.support.design.widget.AppBarLayout
             android:id="@+id/abl_view_recipe"
@@ -29,7 +29,7 @@
             android:fitsSystemWindows="true"
             android:elevation="0dp">
 
-            <android.support.design.widget.CollapsingToolbarLayout
+            <net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout
                 android:id="@+id/ctl_vw_recipe"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
@@ -37,6 +37,7 @@
                 app:expandedTitleMarginBottom="10dp"
                 app:expandedTitleMarginEnd="120dp"
                 app:collapsedTitleTextAppearance="@font/open_sans_light"
+                app:maxLines="2"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
                 android:fitsSystemWindows="true"
                 app:contentScrim="@android:color/transparent"
@@ -112,7 +113,7 @@
                     tools:text="25kcal"
                     app:layout_collapseMode="parallax" />
 
-            </android.support.design.widget.CollapsingToolbarLayout>
+            </net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout>
 
             <android.support.design.widget.TabLayout
                 android:id="@+id/tly_view_recipe"

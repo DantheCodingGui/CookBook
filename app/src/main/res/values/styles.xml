@@ -183,4 +183,20 @@
     <style name="ActionModeTitleTextStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionMode.Title">
         <item name="android:textColor">@android:color/white</item>
     </style>
+
+    <style name="CollapsingToolbarTitleMax" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
+        <item name="android:textSize">50sp</item>
+    </style>
+    <style name="CollapsingToolbarTitleLarge" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
+        <item name="android:textSize">38sp</item>
+    </style>
+    <style name="CollapsingToolbarTitleMedium" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
+        <item name="android:textSize">35sp</item>
+    </style>
+    <style name="CollapsingToolbarTitleSmall" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
+        <item name="android:textSize">26sp</item>
+    </style>
+    <style name="CollapsingToolbarTitleMin" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
+        <item name="android:textSize">21sp</item>
+    </style>
 </resources>

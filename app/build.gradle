@@ -44,6 +44,7 @@ dependencies {
     implementation 'com.asksira.android:bsimagepicker:1.0.1'
     implementation 'io.fotoapparat:fotoapparat:2.4.0'
     implementation 'com.github.captain-miao:optroundcardview:1.0.0'
+    implementation 'net.opacapp:multiline-collapsingtoolbar:27.1.1'
 
     implementation 'com.makeramen:roundedimageview:2.3.0'
 
