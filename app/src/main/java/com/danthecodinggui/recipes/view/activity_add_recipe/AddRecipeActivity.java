@@ -6,6 +6,7 @@ import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -21,6 +22,7 @@ import android.support.transition.Slide;
 import android.support.transition.TransitionInflater;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -371,9 +373,50 @@ public class AddRecipeActivity extends AppCompatActivity implements
         else if (fabMenuOpen)
             AnimateFabMenu(binding.fabAddMenu);
         else {
-            super.onBackPressed();
-            Utility.ClearDir(photosDirPath);
+            CheckCloseActivity();
         }
+    }
+
+    /**
+     * If recipe empty then just close activity, if not then show 'Are you sure' alert dialog before
+     * closing
+     */
+    private void CheckCloseActivity() {
+        if (isRecipeEmpty())
+            CloseActivity();
+        else {
+            AlertDialog verification = new AlertDialog.Builder(this)
+                    .setMessage(R.string.are_you_sure_discard)
+                    .setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            CloseActivity();
+                        }
+                    })
+                    .setNegativeButton(R.string.dialog_no, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {}
+                    })
+                    .create();
+            verification.show();
+        }
+    }
+
+    private void CloseActivity() {
+        super.onBackPressed();
+        Utility.ClearDir(photosDirPath);
+    }
+
+    /**
+     * Check if any information has been entered in a recipe
+     */
+    private boolean isRecipeEmpty() {
+        return binding.etxtRecipeName.getText().length() == 0 &&
+                recipeDuration == 0 &&
+                recipeKcalPerPerson == 0 &&
+                newIngredients.size() == 0 &&
+                newSteps.size() == 0 &&
+                currentImagePath == null;
     }
 
     @Override
@@ -477,9 +520,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
     @Override
     public boolean onSupportNavigateUp() {
-        super.onBackPressed();
-
-        Utility.ClearDir(photosDirPath);
+        CheckCloseActivity();
         return true;
     }
 

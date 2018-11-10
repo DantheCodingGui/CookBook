@@ -65,4 +65,7 @@
 
     <string name="shortcut_add_recipe_short">Add Recipe</string>
     <string name="shortcut_add_recipe_long">Add New Recipe</string>
+    <string name="are_you_sure_discard">Are you sure you want to leave?</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
 </resources>
