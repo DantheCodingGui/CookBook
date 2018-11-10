@@ -864,6 +864,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
         else if (methodExpanded)
             return;
 
+        Utility.setKeyboardVisibility(this, false);
+
         //Do this first then do rest after its done
         binding.crdvIngredients.setElevation(Utility.dpToPx(this, 10));
 
@@ -985,6 +987,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
             return;
         else if (ingredientsExpanded)
             return;
+
+        Utility.setKeyboardVisibility(this, false);
 
         //Do this first then do rest after its done
         binding.crdvMethod.setElevation(Utility.dpToPx(this, 10));
