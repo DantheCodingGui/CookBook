@@ -9,6 +9,10 @@
         android:shortcutLongLabel="@string/shortcut_add_recipe_long">
         <intent
             android:action="android.intent.action.VIEW"
+            android:targetClass="com.danthecodinggui.recipes.view.activity_home.HomeActivity"
+            android:targetPackage="com.danthecodinggui.recipes"/>
+        <intent
+            android:action="android.intent.action.VIEW"
             android:targetClass="com.danthecodinggui.recipes.view.activity_add_recipe.AddRecipeActivity"
             android:targetPackage="com.danthecodinggui.recipes"/>
     </shortcut>
