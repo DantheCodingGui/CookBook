@@ -149,6 +149,9 @@ public class ViewRecipeActivity extends AppCompatActivity
         else
             collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarTitleMin);
 
+        if (!recipe.hasExtendedInfo())
+            collapsingToolbarLayout.setExpandedTitleMarginEnd(Utility.dpToPx(this, 30));
+
         if (Utility.atLeastLollipop()) {
             //Set the shared elements transition name
             postponeEnterTransition();
