@@ -400,6 +400,11 @@ public class HomeActivity extends AppCompatActivity
 
             recipesTouchHelper.attachToRecyclerView(binding.rvwRecipes);
 
+            //If scroll was active and fab was hidden, if all recipes have been deleted, can't scroll
+            //to re-show fab, so show here
+            if (recipesList.isEmpty())
+                binding.fabAddRecipe.show();
+
             recipesAdapter.DisableActionMode();
 
             //Show FAB
@@ -859,12 +864,19 @@ public class HomeActivity extends AppCompatActivity
             final Recipe recipeToDelete = removeItem(position);
             recipesList.remove(unfilteredPos);
 
+            if (recipesList.isEmpty()) {
+                TransitionManager.beginDelayedTransition(binding.clyMainRoot);
+                binding.txtNoItems.setVisibility(View.VISIBLE);
+            }
+
             ShowDeletedSnackbar(false,
                     new Runnable() {
                         @Override
                         public void run() {
                             recipesList.add(unfilteredPos, recipeToDelete);
                             addItem(position, recipeToDelete);
+
+                            binding.txtNoItems.setVisibility(View.INVISIBLE);
                         }
                     },
                     new Runnable() {
@@ -965,6 +977,11 @@ public class HomeActivity extends AppCompatActivity
             deleteSelectionSize = selectedItems.size();
             InvalidateActionModeTitle();
 
+            if (recipesList.isEmpty()) {
+                TransitionManager.beginDelayedTransition(binding.clyMainRoot);
+                binding.txtNoItems.setVisibility(View.VISIBLE);
+            }
+
             ShowDeletedSnackbar(recipesToDelete.size() > 1,
                     new Runnable() {
                         @Override
@@ -973,6 +990,8 @@ public class HomeActivity extends AppCompatActivity
                                 addItem(selectedItems.get(i), recipesToDelete.get(i));
                                 recipesList.add(unfilteredRecipePositions.get(i), recipesToDelete.get(i));
                             }
+
+                            binding.txtNoItems.setVisibility(View.INVISIBLE);
 
                             deleteSelectionSize = 0;
                             InvalidateActionModeTitle();
@@ -991,7 +1010,6 @@ public class HomeActivity extends AppCompatActivity
                         }
                     }
             );
-
         }
 
         @Override
