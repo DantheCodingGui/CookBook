@@ -181,6 +181,10 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+
+                if (inActionMode)
+                    return;
+
                 if (dy > 0 && binding.fabAddRecipe.getVisibility() == View.VISIBLE) {
                     binding.fabAddRecipe.hide();
                 } else if (dy < 0 && binding.fabAddRecipe.getVisibility() != View.VISIBLE) {
