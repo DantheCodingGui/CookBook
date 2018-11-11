@@ -703,6 +703,7 @@ public class HomeActivity extends AppCompatActivity
         //Flag stating whether toggle all button pressed when all items selected
         //(Used to stop action mode closing with size 0 in this use case)
         private boolean selectAllNone = false;
+        private int deleteSelectionSize = 0;
 
         RecipesViewAdapter(List<Recipe> list) {
             if (list != null)
@@ -744,7 +745,10 @@ public class HomeActivity extends AppCompatActivity
 
             holder.bind(recipe);
 
-            holder.binding.setVariable(BR.isSelected, isItemSelected(holder.getAdapterPosition()));
+            if (inActionMode)
+                holder.binding.setVariable(BR.isSelected, isItemSelected(holder.getAdapterPosition()));
+            else
+                holder.binding.setVariable(BR.isSelected, false);
         }
 
         @Override
@@ -873,6 +877,8 @@ public class HomeActivity extends AppCompatActivity
         @Override
         public void EnableActionMode() {
             startSupportActionMode(actionModeCallback);
+            selectedItems.clear();
+            InvalidateActionModeTitle();
         }
 
         @Override
@@ -880,18 +886,13 @@ public class HomeActivity extends AppCompatActivity
             if (actionMode != null)
                 actionMode.finish();
 
-            //Reset all still-selected items
+            //Reset views of all still-selected items
             if (selectedItems.size() != 0) {
                 for (int i = 0; i < selectedItems.size(); ++i) {
                     RecipeViewHolder holder = (RecipeViewHolder) binding.rvwRecipes.findViewHolderForAdapterPosition(selectedItems.get(i));
-                    if (holder != null) {
-                        CardView card = (CardView) holder.binding.getRoot();
-                        card.setCardBackgroundColor(Color.WHITE);
-                    }
-                    else
-                        selectedItems.remove(i);
+                    if (holder != null)
+                        holder.binding.setVariable(BR.isSelected, false);
                 }
-                selectedItems.clear();
             }
         }
 
@@ -926,13 +927,21 @@ public class HomeActivity extends AppCompatActivity
                 RecipeViewHolder holder = (RecipeViewHolder) binding.rvwRecipes.findViewHolderForAdapterPosition(i);
                 if (holder != null)
                     holder.ToggleActionModeSelected();
-                else
-                    onItemSelected(i);
+                else {
+                    if (selectedItems.contains(i))
+                        onItemDeselected(i);
+                    else
+                        onItemSelected(i);
+                }
             }
         }
 
         @Override
         public void DeleteSelection() {
+
+            if (selectedItems.isEmpty())
+                return;
+
             final List<Recipe> recipesToDelete = new ArrayList<>();
             final List<Integer> unfilteredRecipePositions = new ArrayList<>();
 
@@ -949,6 +958,9 @@ public class HomeActivity extends AppCompatActivity
                 recipesList.remove(unfilteredRecipePositions.get(i) - i);
             }
 
+            deleteSelectionSize = selectedItems.size();
+            InvalidateActionModeTitle();
+
             ShowDeletedSnackbar(recipesToDelete.size() > 1,
                     new Runnable() {
                         @Override
@@ -957,6 +969,9 @@ public class HomeActivity extends AppCompatActivity
                                 addItem(selectedItems.get(i), recipesToDelete.get(i));
                                 recipesList.add(unfilteredRecipePositions.get(i), recipesToDelete.get(i));
                             }
+
+                            deleteSelectionSize = 0;
+                            InvalidateActionModeTitle();
                         }
                     },
                     new Runnable() {
@@ -967,6 +982,8 @@ public class HomeActivity extends AppCompatActivity
                                 recipePrimaryKeys.add(recipe.getRecipeId());
 
                             new DeleteRecipeTask(getApplicationContext()).execute(recipePrimaryKeys);
+
+                            deleteSelectionSize = 0;
                         }
                     }
             );
@@ -986,7 +1003,7 @@ public class HomeActivity extends AppCompatActivity
 
         private void InvalidateActionModeTitle() {
             if (actionMode != null)
-                actionMode.setTitle(getResources().getString(R.string.action_mode_title, selectedItems.size()));
+                actionMode.setTitle(getResources().getString(R.string.action_mode_title, selectedItems.size() - deleteSelectionSize));
         }
 
         private void ShowDeletedSnackbar(boolean isMultiDelete, final Runnable onActionClicked, final Runnable onDismissed) {
@@ -1051,7 +1068,7 @@ public class HomeActivity extends AppCompatActivity
 
             @Override
             public boolean onLongClick(View view) {
-                if (!inActionMode) {
+                if (!inActionMode && deleteSelectionSize == 0) {
                     actionModeSelection.EnableActionMode();
                     ToggleActionModeSelected();
                 }
@@ -1059,16 +1076,15 @@ public class HomeActivity extends AppCompatActivity
             }
 
             void ToggleActionModeSelected() {
-                CardView card = binding.getRoot().findViewById(R.id.crd_root);
 
                 int pos = getAdapterPosition();
                 if (actionModeSelection.isItemSelected(pos)) {
                     actionModeSelection.onItemDeselected(pos);
-                    card.setCardBackgroundColor(Color.WHITE);
+                    binding.setVariable(BR.isSelected, false);
                 }
                 else {
                     actionModeSelection.onItemSelected(pos);
-                    card.setCardBackgroundColor(getResources().getColor(R.color.colorCardSelected));
+                    binding.setVariable(BR.isSelected, true);
                 }
             }
 
@@ -1083,7 +1099,6 @@ public class HomeActivity extends AppCompatActivity
                 float alteredPercentSwiped = percentSwiped * 1.1f;
                 if (alteredPercentSwiped > 1)
                     alteredPercentSwiped = 1;
-
 
                 card.setCardBackgroundColor(Utility.interpolateRGB(0xffffff, 0xff0000, alteredPercentSwiped));
                 if (percentSwiped == 0 || percentSwiped == 1)
