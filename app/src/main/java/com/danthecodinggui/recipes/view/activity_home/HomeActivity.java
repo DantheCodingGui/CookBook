@@ -72,6 +72,7 @@ import com.danthecodinggui.recipes.view.activity_view_recipe.ViewRecipeActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import jp.wasabeef.recyclerview.animators.ScaleInAnimator;
@@ -935,16 +936,16 @@ public class HomeActivity extends AppCompatActivity
             final List<Recipe> recipesToDelete = new ArrayList<>();
             final List<Integer> unfilteredRecipePositions = new ArrayList<>();
 
-            Recipe removeTemp;
-            int unfilteredPosTemp;
-            for (Integer position: selectedItems) {
-                unfilteredPosTemp = getRecipesPos(displayedRecipesList.get(position));
-                unfilteredRecipePositions.add(unfilteredPosTemp);
-            }
-            for (int i = 0; i < selectedItems.size(); ++i) {
-                removeTemp = removeItem(selectedItems.get(i) - i);
+            //First need to sort selected items so later removal offset doesn't cause crash
+            Collections.sort(selectedItems);
 
-                recipesToDelete.add(removeTemp);
+            //Then record and make a list of all unfiltered positions (before they are removed)
+            for (Integer position: selectedItems)
+                unfilteredRecipePositions.add(getRecipesPos(displayedRecipesList.get(position)));
+
+            //Then actually remove elements from both unfiltered and filtered recipes lists
+            for (int i = 0; i < selectedItems.size(); ++i) {
+                recipesToDelete.add(removeItem(selectedItems.get(i) - i));
                 recipesList.remove(unfilteredRecipePositions.get(i) - i);
             }
 
