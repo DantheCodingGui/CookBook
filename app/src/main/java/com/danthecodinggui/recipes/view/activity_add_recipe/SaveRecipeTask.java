@@ -106,7 +106,7 @@ public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
                         externalMetaData.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(internalOrientation));
                         externalMetaData.saveAttributes();
                     } catch (IOException e) {
-                        Log.e(SAVE_RECIPE, "Failed to copy file Exif information", e);
+                        Log.e(SAVE_RECIPE, "Failed to copy file Exif information to external file", e);
                         e.printStackTrace();
                     }
                 }

@@ -85,6 +85,12 @@ public class AddImageURLFragment extends DialogFragment {
                 editURL.getText().toString());
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        Utility.setKeyboardVisibility(getActivity(), editURL, false);
+    }
+
     /**
      * Callback interface to alert implementors when the ImageURLFragment has a result.<br/>
      * IMPORTANT: implementors must call {@link #SetURLListener(onURLSetListener) SetURLListener}
