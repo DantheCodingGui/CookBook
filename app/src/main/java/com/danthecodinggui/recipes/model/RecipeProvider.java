@@ -9,6 +9,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
+
+import static com.danthecodinggui.recipes.msc.LogTags.CONTENT_PROVIDER;
 
 /**
  * Content provider for accessing all application data
@@ -83,6 +86,8 @@ public class RecipeProvider extends ContentProvider {
 
         db = dbHelper.getWritableDatabase();
         long id = db.insert(tableName, null, values);
+
+        Log.i(CONTENT_PROVIDER, "Provider insertion, notifying any listeners...");
 
         getContext().getContentResolver().notifyChange(uri, null);
 
@@ -259,6 +264,8 @@ public class RecipeProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Invalid URI for updating: " + uri);
         }
+
+        Log.i(CONTENT_PROVIDER, "Provider update, notifying any listeners...");
 
         getContext().getContentResolver().notifyChange(uri, null);
 

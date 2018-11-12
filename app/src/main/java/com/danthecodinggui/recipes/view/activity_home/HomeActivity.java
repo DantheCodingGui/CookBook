@@ -72,7 +72,6 @@ import com.danthecodinggui.recipes.view.activity_view_recipe.ViewRecipeActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import jp.wasabeef.recyclerview.animators.ScaleInAnimator;
@@ -444,7 +443,6 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override public boolean dispatchTouchEvent(MotionEvent event){
-        //TODO can still click recipe cards when sheet open BUG
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             if (sortBySheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
 
@@ -668,7 +666,7 @@ public class HomeActivity extends AppCompatActivity
             else
                 recipesAdapter.UpdateRecords(loadedRecipes);
 
-            Log.v(DATA_LOADING, "Load complete");
+            Log.v(DATA_LOADING, "HomeActivity Recipes Load Complete");
         }
 
         @Override
@@ -902,14 +900,7 @@ public class HomeActivity extends AppCompatActivity
             if (actionMode != null)
                 actionMode.finish();
 
-            //Reset views of all still-selected items
-            if (selectedItems.size() != 0) {
-                for (int i = 0; i < selectedItems.size(); ++i) {
-                    RecipeViewHolder holder = (RecipeViewHolder) binding.rvwRecipes.findViewHolderForAdapterPosition(selectedItems.get(i));
-                    if (holder != null)
-                        holder.binding.setVariable(BR.isSelected, false);
-                }
-            }
+            notifyDataSetChanged();
         }
 
         @Override
@@ -940,16 +931,13 @@ public class HomeActivity extends AppCompatActivity
                 if (selectedItems.contains(i) && !isAllSelected)
                     continue;
 
-                RecipeViewHolder holder = (RecipeViewHolder) binding.rvwRecipes.findViewHolderForAdapterPosition(i);
-                if (holder != null)
-                    holder.ToggleActionModeSelected();
-                else {
-                    if (selectedItems.contains(i))
-                        onItemDeselected(i);
-                    else
-                        onItemSelected(i);
-                }
+                if (selectedItems.contains(i))
+                    onItemDeselected(i);
+                else
+                    onItemSelected(i);
             }
+
+            notifyDataSetChanged();
         }
 
         @Override
