@@ -67,6 +67,10 @@ import static io.fotoapparat.selector.ResolutionSelectorsKt.highestResolution;
 import static io.fotoapparat.selector.SelectorsKt.firstAvailable;
 import static io.fotoapparat.selector.SensorSensitivitySelectorsKt.highestSensorSensitivity;
 
+/**
+ * Shows camera preview, can take photos with front/rear cameras with flash on/off. </br>
+ * When a photo is taken, show a preview before returning to AddRecipeActivity.
+ */
 public class CameraActivity extends AppCompatActivity {
 
     ActivityCameraBinding binding;

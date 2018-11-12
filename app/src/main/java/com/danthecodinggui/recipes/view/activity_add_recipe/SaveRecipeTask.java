@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.media.ExifInterface;
 import android.util.Log;
 
 import com.danthecodinggui.recipes.model.ProviderContract;
@@ -69,6 +70,15 @@ public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
                 //First must read image file from private storage
                 Bitmap camImage = BitmapFactory.decodeFile(item.getImagePath());
 
+                //Also must extract bitmap internal rotation
+                int internalOrientation = ExifInterface.ORIENTATION_NORMAL;
+                try {
+                    internalOrientation = new ExifInterface(item.getImagePath()).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                } catch (IOException e) {
+                    Log.e(SAVE_RECIPE, "Failed to read Exif information from internal image file", e);
+                    e.printStackTrace();
+                }
+
                 //Then save the image into external storage (recipes folder)
                 File dirFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), RECIPES_CAM_DIR_NAME);
                 String dirPath = dirFile.getPath();
@@ -87,6 +97,18 @@ public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
                 } catch (IOException e) {
                     Log.e(SAVE_RECIPE, "Saving camera bitmap failed", e);
                     e.printStackTrace();
+                }
+
+                //As Exif orientation will be overwritten, need to preserve orientation in new file
+                if (internalOrientation != ExifInterface.ORIENTATION_NORMAL) {
+                    try {
+                        ExifInterface externalMetaData = new ExifInterface(imageFile.getAbsolutePath());
+                        externalMetaData.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(internalOrientation));
+                        externalMetaData.saveAttributes();
+                    } catch (IOException e) {
+                        Log.e(SAVE_RECIPE, "Failed to copy file Exif information", e);
+                        e.printStackTrace();
+                    }
                 }
 
                 //Alert media scanner that new file has been added
