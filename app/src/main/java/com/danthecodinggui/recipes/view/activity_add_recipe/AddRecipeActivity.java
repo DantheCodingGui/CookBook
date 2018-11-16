@@ -64,6 +64,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.GlobalConstants.CAMERA_PHOTO_PATH;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.EDIT_RECIPE_BUNDLE;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.EDIT_RECIPE_INGREDIENTS;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.EDIT_RECIPE_OBJECT;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.EDIT_RECIPE_STEPS;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.INGREDIENT_OBJECT;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.METHOD_STEP_OBJECT;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.PHOTOS_DIRECTORY_PATH;
@@ -84,6 +88,8 @@ public class AddRecipeActivity extends AppCompatActivity implements
     ActivityAddRecipeBinding binding;
 
     private boolean isPortrait;
+
+    private boolean isAdding = true;
 
     //Fragment Tags
     private static final String FRAG_TAG_TIME = "FRAG_TAG_TIME";
@@ -156,11 +162,35 @@ public class AddRecipeActivity extends AppCompatActivity implements
                         (ConstraintLayout.LayoutParams) binding.spcAdd.getLayoutParams();
                 params.height = Utility.dpToPx(this, 1);
             }
-
         }
 
-        newIngredients = new ArrayList<>();
-        newSteps = new ArrayList<>();
+        //TODO move this into its own function to clean up onCreate
+        Bundle editBundle = getIntent().getBundleExtra(EDIT_RECIPE_BUNDLE);
+        Recipe recipeToEdit;
+        if (editBundle != null) {
+            //We know we are editing a recipe
+            isAdding = false;
+
+            recipeToEdit = editBundle.getParcelable(EDIT_RECIPE_OBJECT);
+            binding.etxtRecipeName.setText(recipeToEdit.getTitle());
+            if (recipeToEdit.hasPhoto())
+                SetImage(recipeToEdit.getImagePath());
+
+            recipeDuration = recipeToEdit.getTimeInMins();
+            recipeKcalPerPerson = recipeToEdit.getCalories();
+
+            if (recipeDuration != 0)
+                onDurationSet(recipeDuration);
+            if (recipeKcalPerPerson != 0)
+                onCaloriesSet(recipeKcalPerPerson);
+
+            //newIngredients = new ArrayList<>(editBundle.<Ingredient>getParcelableArrayList(EDIT_RECIPE_INGREDIENTS));
+            //newSteps = new ArrayList<>(editBundle.<MethodStep>getParcelableArrayList(EDIT_RECIPE_STEPS));
+        }
+        else {
+            newIngredients = new ArrayList<>();
+            newSteps = new ArrayList<>();
+        }
 
         binding.rvwNewIngredients.setLayoutManager(new LinearLayoutManager(this));
         ingAdapter = new IngredientsAddAdapter();
@@ -297,6 +327,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
             binding.rvwNewIngredients.setVisibility(View.VISIBLE);
 
             if (!ingredientsExpanded) {
+                //TODO need to find a way to do this if editing (as can't open/close card first)
                 ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.rvwNewIngredients.getLayoutParams();
                 params.height = recyclerviewRetractHeight;
                 uiThread.postDelayed(new Runnable() {
@@ -510,8 +541,11 @@ public class AddRecipeActivity extends AppCompatActivity implements
         saveData.putBoolean(SAVE_TASK_IS_IMAGE_CAMERA, isImageFromCam);
         saveData.putString(SAVE_TASK_CAMERA_DIR_PATH, photosDirPath);
 
-        //Start saving recipe
-        new SaveRecipeTask(getApplicationContext()).execute(saveData);
+        if (isAdding)
+            new SaveRecipeTask(getApplicationContext()).execute(saveData);
+        else
+            ;//TODO add some kind of updating recipe task for the new recipe
+
 
         supportFinishAfterTransition();
     }

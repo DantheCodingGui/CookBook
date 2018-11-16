@@ -15,6 +15,11 @@ public class GlobalConstants {
     public static final String CAMERA_PHOTO_SAVED = "CAMERA_PHOTO_SAVED";
     public static final String CAMERA_PHOTO_PATH = "CAMERA_PHOTO_PATH";
 
+    public static final String EDIT_RECIPE_BUNDLE = "EDIT_RECIPE_BUNDLE";
+    public static final String EDIT_RECIPE_OBJECT = "EDIT_RECIPE_OBJECT";
+    public static final String EDIT_RECIPE_INGREDIENTS = "EDIT_RECIPE_INGREDIENTS";
+    public static final String EDIT_RECIPE_STEPS = "EDIT_RECIPE_STEPS";
+
     public static final String SAVE_TASK_RECIPE = "SAVE_TASK_RECIPE";
     public static final String SAVE_TASK_INGREDIENTS = "SAVE_TASK_INGREDIENTS";
     public static final String SAVE_TASK_METHOD = "SAVE_TASK_METHOD";

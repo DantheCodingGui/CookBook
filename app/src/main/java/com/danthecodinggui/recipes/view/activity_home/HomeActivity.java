@@ -118,7 +118,7 @@ public class HomeActivity extends AppCompatActivity
 
     private GetRecipesLoader recipesLoader;
 
-    SharedPreferences homePrefs;
+    private SharedPreferences homePrefs;
 
     private BottomSheetBehavior sortBySheetBehaviour;
 
@@ -268,7 +268,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.home_activity_toolbar, menu);
         final MenuItem searchItem = menu.findItem(R.id.menu_search);
         final MenuItem sortItem = menu.findItem(R.id.menu_sort_by);
