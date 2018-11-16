@@ -283,6 +283,7 @@ public class HomeActivity extends AppCompatActivity
                 if (searchItem.isActionViewExpanded()) {
                     AnimUtils.animateSearchToolbar(HomeActivity.this, binding.tbarHome, 3, false, false);
                     binding.txtSearchNoItems.setVisibility(View.INVISIBLE);
+                    sortItem.setVisible(true);
                     searchOpen = false;
                 }
                 return true;
@@ -292,6 +293,7 @@ public class HomeActivity extends AppCompatActivity
             public boolean onMenuItemActionExpand(MenuItem item) {
                 // Called when SearchView is expanding
                 AnimUtils.animateSearchToolbar(HomeActivity.this, binding.tbarHome, 3, false, true);
+                sortItem.setVisible(false);
                 searchOpen = true;
                 return true;
             }
