@@ -5,8 +5,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-import com.danthecodinggui.recipes.model.object_models.Ingredient;
-
 import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_ID;

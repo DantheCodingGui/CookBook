@@ -132,7 +132,13 @@ public class Recipe implements Parcelable {
             return false;
 
         Recipe ob = (Recipe) obj;
-        return ob.recipePk == recipePk;
+        return ob.recipePk == recipePk &&
+                ob.getTitle().equals(title) &&
+                ob.getCalories() == calories &&
+                ob.getTimeInMins() == timeInMins &&
+                (imagePath == null ? ob.getImagePath() == null : imagePath.equals(ob.getImagePath())) &&
+                ob.getIngredientsNo() == ingredientsNo &&
+                ob.getStepsNo() == stepsNo;
     }
 
     /**

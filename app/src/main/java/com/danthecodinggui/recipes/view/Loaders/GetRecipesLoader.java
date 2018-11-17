@@ -15,6 +15,7 @@ import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.LogTags;
 import com.danthecodinggui.recipes.msc.utility.FileUtils;
+import com.danthecodinggui.recipes.msc.utility.Utility;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,7 +41,7 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
 
     private boolean waitingForPermissionResponse = false;
 
-    private ContentObserver contentObserver;
+    private ContentObserver recipesObserver;
 
     private Handler uiThread;
 
@@ -70,14 +71,14 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
             forceLoad();
         }
 
-        if (contentObserver == null) {
-            contentObserver = new ContentObserver(uiThread) {
+        if (recipesObserver == null) {
+            recipesObserver = new ContentObserver(uiThread) {
                 @Override
                 public void onChange(boolean selfChange, Uri uri) {
                     onContentChanged();
                 }
             };
-            contentResolver.registerContentObserver(ProviderContract.RECIPES_URI, false, contentObserver);
+            contentResolver.registerContentObserver(ProviderContract.RECIPES_URI, false, recipesObserver);
         }
     }
 
@@ -103,7 +104,7 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
 
         while (baseCursor.moveToNext()) {
             //Get base recipe data
-            temp = BuildBaseModel(baseCursor);
+            temp = Utility.BuildModelFromCursor(baseCursor);
 
             //Add ingredients data to record
             String[] countSelArgs = { Long.toString(
@@ -172,9 +173,9 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
         if (cachedRecords != null)
             cachedRecords = null;
 
-        if (contentObserver != null) {
-            contentResolver.unregisterContentObserver(contentObserver);
-            contentObserver = null;
+        if (recipesObserver != null) {
+            contentResolver.unregisterContentObserver(recipesObserver);
+            recipesObserver = null;
         }
     }
 
@@ -214,40 +215,6 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
      */
     public void onPermissionResponse() {
         waitingForPermissionResponse = false;
-    }
-
-    /**
-     * Decides what type of Recipe to build based on what data is saved in the table
-     * record
-     * @return The base Recipe constructed with the data found in the record
-     */
-    private Recipe BuildBaseModel(Cursor cursor) {
-
-        //Constant values, always used in constructor
-        long pk = cursor.getLong(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry._ID));
-        String recipeTitle = cursor.getString(cursor.getColumnIndexOrThrow(
-                ProviderContract.RecipeEntry.TITLE));
-
-        int calories = 0;
-        int timeInMins = 0;
-        String photoPath = null;
-
-        //If optional values exist assign to variables
-        if (!cursor.isNull(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.CALORIES_PER_PERSON)))
-            calories = cursor.getInt(cursor.getColumnIndexOrThrow(
-                    ProviderContract.RecipeEntry.CALORIES_PER_PERSON));
-        if (!cursor.isNull(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.DURATION)))
-            timeInMins = cursor.getInt(cursor.getColumnIndexOrThrow(
-                    ProviderContract.RecipeEntry.DURATION));
-        if (!cursor.isNull(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.IMAGE_PATH)))
-            photoPath = cursor.getString(cursor.getColumnIndexOrThrow(
-                    ProviderContract.RecipeEntry.IMAGE_PATH));
-
-        return new Recipe.RecipeBuilder(pk, recipeTitle)
-                .calories(calories)
-                .timeInMins(timeInMins)
-                .imageFilePath(photoPath)
-                .build();
     }
 
     /**

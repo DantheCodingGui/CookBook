@@ -2,12 +2,15 @@ package com.danthecodinggui.recipes.view.activity_view_recipe;
 
 import android.Manifest;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
@@ -20,6 +23,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -31,6 +35,7 @@ import com.danthecodinggui.recipes.BR;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipeBinding;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipePhotoBinding;
+import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.model.object_models.MethodStep;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
@@ -62,6 +67,9 @@ public class ViewRecipeActivity extends AppCompatActivity
         IngredientsTabFragment.onIngredientsLoadedListener,
         MethodTabFragment.onMethodStepsLoadedListener {
 
+    ActivityViewRecipeBinding binding;
+    ActivityViewRecipePhotoBinding bindingPhoto;
+
     //TODO duplicate static value, find way to push into 1 class
     //Permission request codes
     private static final int REQ_CODE_READ_EXTERNAL = 211;
@@ -72,11 +80,6 @@ public class ViewRecipeActivity extends AppCompatActivity
     private String imageTransitionName;
 
     private int randIngredientsCol = -1;
-
-    ActivityViewRecipeBinding binding;
-    ActivityViewRecipePhotoBinding bindingPhoto;
-
-    private RecipePagerAdapter pagerAdapter;
 
     private Recipe recipe;
     private List<Ingredient> recipeIngredients;
@@ -94,17 +97,7 @@ public class ViewRecipeActivity extends AppCompatActivity
         if (recipe.hasPhoto()) {
             imageTransitionName = extras.getString(IMAGE_TRANSITION_NAME);
 
-            int response = PermissionsHandler.AskForPermission(this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL);
-
-            switch (response) {
-                case PermissionsHandler.PERMISSION_GRANTED:
-                    SetupPhotoLayout();
-                    break;
-                case PermissionsHandler.PERMISSION_DENIED:
-                    SetupNoPhotoLayout();
-                    break;
-            }
+            AskPhotoLayoutPerm();
         }
         else {
             if (savedInstanceState != null)
@@ -112,8 +105,48 @@ public class ViewRecipeActivity extends AppCompatActivity
             SetupNoPhotoLayout();
         }
 
+        ContentObserver contentObserver = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(boolean selfChange, Uri uri) {
+
+                new UpdateViewedRecipeTask(ViewRecipeActivity.this,
+                        new UpdateViewedRecipeTask.onRecipeReadListener() {
+                    @Override
+                    public void onRecipeRead(Recipe updatedRecipe) {
+                        recipe = updatedRecipe;
+
+                        //Pretty much just load the whole ui again
+                        // (should make new ingredient/method fragments and update their values)
+                        if (updatedRecipe.hasPhoto())
+                            AskPhotoLayoutPerm();
+                        else
+                            SetupNoPhotoLayout();
+
+                        //Must call again as new binding will overwrite view
+                        if (getSupportActionBar() != null)
+                            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    }
+                }).execute(recipe.getRecipeId());
+            }
+        };
+        getContentResolver().registerContentObserver(ProviderContract.RECIPES_URI, false, contentObserver);
+
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void AskPhotoLayoutPerm() {
+        int response = PermissionsHandler.AskForPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL);
+
+        switch (response) {
+            case PermissionsHandler.PERMISSION_GRANTED:
+                SetupPhotoLayout();
+                break;
+            case PermissionsHandler.PERMISSION_DENIED:
+                SetupNoPhotoLayout();
+                break;
+        }
     }
 
     @Override
@@ -302,7 +335,7 @@ public class ViewRecipeActivity extends AppCompatActivity
 
         tabLayout.setupWithViewPager(viewPager);
 
-        pagerAdapter = new RecipePagerAdapter(getSupportFragmentManager(),
+        RecipePagerAdapter pagerAdapter = new RecipePagerAdapter(getSupportFragmentManager(),
                 tabLayout.getTabCount(), tabTitles, recipe.getRecipeId());
         viewPager.setAdapter(pagerAdapter);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {

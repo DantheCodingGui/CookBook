@@ -2,7 +2,10 @@ package com.danthecodinggui.recipes.view.Loaders;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
@@ -23,9 +26,14 @@ public class GetMethodStepsLoader extends AsyncTaskLoader<List<MethodStep>> {
 
     private long recipePk;
 
-    public GetMethodStepsLoader(Context context, long recipePk) {
+    private ContentObserver methodStepsObserver;
+
+    private Handler uiThread;
+
+    public GetMethodStepsLoader(Context context, Handler uiThread, long recipePk) {
         super(context);
 
+        this.uiThread = uiThread;
         contentResolver = context.getContentResolver();
         this.recipePk = recipePk;
     }
@@ -40,6 +48,16 @@ public class GetMethodStepsLoader extends AsyncTaskLoader<List<MethodStep>> {
         else {
             Log.v(DATA_LOADING, "Ingredients loading started: Load new values");
             forceLoad();
+        }
+
+        if (methodStepsObserver == null) {
+            methodStepsObserver = new ContentObserver(uiThread) {
+                @Override
+                public void onChange(boolean selfChange, Uri uri) {
+                    onContentChanged();
+                }
+            };
+            contentResolver.registerContentObserver(ProviderContract.RECIPES_URI, false, methodStepsObserver);
         }
     }
 
@@ -111,5 +129,10 @@ public class GetMethodStepsLoader extends AsyncTaskLoader<List<MethodStep>> {
 
         if (cachedRecords != null)
             cachedRecords = null;
+
+        if (methodStepsObserver != null) {
+            contentResolver.unregisterContentObserver(methodStepsObserver);
+            methodStepsObserver = null;
+        }
     }
 }

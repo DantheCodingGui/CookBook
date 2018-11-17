@@ -2,7 +2,10 @@ package com.danthecodinggui.recipes.view.Loaders;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.AsyncTaskLoader;
@@ -27,9 +30,14 @@ public class GetIngredientsLoader extends AsyncTaskLoader<List<Ingredient>> {
 
     private long recipePk;
 
-    public GetIngredientsLoader(@NonNull Context context, long recipePk) {
+    private ContentObserver ingredientsObserver;
+
+    private Handler uiThread;
+
+    public GetIngredientsLoader(@NonNull Context context, Handler uiThread, long recipePk) {
         super(context);
 
+        this.uiThread = uiThread;
         contentResolver = context.getContentResolver();
         this.recipePk = recipePk;
     }
@@ -44,6 +52,16 @@ public class GetIngredientsLoader extends AsyncTaskLoader<List<Ingredient>> {
         else {
             Log.v(DATA_LOADING, "Ingredients loading started: Load new values");
             forceLoad();
+        }
+
+        if (ingredientsObserver == null) {
+            ingredientsObserver = new ContentObserver(uiThread) {
+                @Override
+                public void onChange(boolean selfChange, Uri uri) {
+                    onContentChanged();
+                }
+            };
+            contentResolver.registerContentObserver(ProviderContract.RECIPES_URI, false, ingredientsObserver);
         }
     }
 
@@ -109,5 +127,10 @@ public class GetIngredientsLoader extends AsyncTaskLoader<List<Ingredient>> {
 
         if (cachedRecords != null)
             cachedRecords = null;
+
+        if (ingredientsObserver != null) {
+            contentResolver.unregisterContentObserver(ingredientsObserver);
+            ingredientsObserver = null;
+        }
     }
 }

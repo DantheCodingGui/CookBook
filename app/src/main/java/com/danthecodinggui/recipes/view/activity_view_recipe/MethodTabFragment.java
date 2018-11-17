@@ -2,6 +2,8 @@ package com.danthecodinggui.recipes.view.activity_view_recipe;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -52,19 +54,14 @@ public class MethodTabFragment extends Fragment {
 
         recipeId = getArguments().getLong(RECIPE_DETAIL_ID);
 
-        getActivity().getSupportLoaderManager().initLoader(METHOD_LOADER, null, loaderCallbacks);
-
-        return view;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
         methodStepsAdapter = new MethodViewAdapter();
         methodStepsList = new ArrayList<>();
         binding.rvwMethod.setAdapter(methodStepsAdapter);
         binding.rvwMethod.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        getActivity().getSupportLoaderManager().initLoader(METHOD_LOADER, null, loaderCallbacks);
+
+        return view;
     }
 
     @Override
@@ -80,7 +77,7 @@ public class MethodTabFragment extends Fragment {
         @NonNull
         @Override
         public Loader<List<MethodStep>> onCreateLoader(int id, @Nullable Bundle args) {
-            return new GetMethodStepsLoader(getActivity(), recipeId);
+            return new GetMethodStepsLoader(getActivity(), new Handler(Looper.getMainLooper()), recipeId);
         }
 
         @Override

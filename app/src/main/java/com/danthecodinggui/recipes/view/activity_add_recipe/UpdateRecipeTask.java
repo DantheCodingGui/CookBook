@@ -67,35 +67,12 @@ public class UpdateRecipeTask extends AsyncTask<Bundle, Void, Void> {
         long recipeId = item.getRecipeId();
         String[] selectionArgs =  new String[] {Long.toString(recipeId)};
 
-        //Build the record just as SaveRecipeTask does
+
         ContentResolver resolver = context.getContentResolver();
 
-        ContentValues record = new ContentValues();
+        ContentValues record;
 
-        record.put(ProviderContract.RecipeEntry.TITLE, item.getTitle());
-
-        //optional data
-        int duration = item.getTimeInMins();
-        int kcal = item.getCalories();
-        if (duration != 0)
-            record.put(ProviderContract.RecipeEntry.DURATION, duration);
-        else
-            record.putNull(ProviderContract.RecipeEntry.DURATION);
-        if (kcal != 0)
-            record.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, kcal);
-        else
-            record.putNull(ProviderContract.RecipeEntry.CALORIES_PER_PERSON);
-        if (item.hasPhoto())
-            record.put(ProviderContract.RecipeEntry.IMAGE_PATH, item.getImagePath());
-        else
-            record.putNull(ProviderContract.RecipeEntry.IMAGE_PATH);
-
-        resolver.update(ProviderContract.RECIPES_URI,
-                record,
-                ProviderContract.RecipeEntry._ID + " = ?",
-                selectionArgs);
-
-        //Now must update ingredients and steps
+        //Update ingredients/method first to ensure when recipe content listeners fired, everything is updated
 
         List<Ingredient> oldIngredients = param.getParcelableArrayList(SAVE_TASK_OLD_INGREDIENTS);
         List<MethodStep> oldMethod = param.getParcelableArrayList(SAVE_TASK_OLD_METHOD);
@@ -132,6 +109,31 @@ public class UpdateRecipeTask extends AsyncTask<Bundle, Void, Void> {
                 resolver.insert(ProviderContract.METHOD_URI, record);
             }
         }
+
+        record = new ContentValues();
+
+        record.put(ProviderContract.RecipeEntry.TITLE, item.getTitle());
+
+        //optional data
+        int duration = item.getTimeInMins();
+        int kcal = item.getCalories();
+        if (duration != 0)
+            record.put(ProviderContract.RecipeEntry.DURATION, duration);
+        else
+            record.putNull(ProviderContract.RecipeEntry.DURATION);
+        if (kcal != 0)
+            record.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, kcal);
+        else
+            record.putNull(ProviderContract.RecipeEntry.CALORIES_PER_PERSON);
+        if (item.hasPhoto())
+            record.put(ProviderContract.RecipeEntry.IMAGE_PATH, item.getImagePath());
+        else
+            record.putNull(ProviderContract.RecipeEntry.IMAGE_PATH);
+
+        resolver.update(ProviderContract.RECIPES_URI,
+                record,
+                ProviderContract.RecipeEntry._ID + " = ?",
+                selectionArgs);
 
         context = null;
 

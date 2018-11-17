@@ -3,6 +3,8 @@ package com.danthecodinggui.recipes.view.activity_view_recipe;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -51,6 +53,11 @@ public class IngredientsTabFragment extends Fragment {
 
         recipeId = getArguments().getLong(RECIPE_DETAIL_ID);
 
+        ingredientsAdapter = new IngredientsViewAdapter();
+        binding.rvwIngredients.setAdapter(ingredientsAdapter);
+
+        binding.rvwIngredients.setLayoutManager(new LinearLayoutManager(getContext()));
+
         getActivity().getSupportLoaderManager().initLoader(INGREDIENTS_LOADER, null, loaderCallbacks);
 
         return binding.getRoot();
@@ -60,22 +67,17 @@ public class IngredientsTabFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ingredientsAdapter = new IngredientsViewAdapter();
-        binding.rvwIngredients.setAdapter(ingredientsAdapter);
-
         int orientation = getResources().getConfiguration().orientation;
         boolean isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE;
 
         binding.setIsLandscapeLayout(isLandscape && !Utility.isMultiWindow(getActivity()));
-
-        binding.rvwIngredients.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
     private LoaderManager.LoaderCallbacks<List<Ingredient>> loaderCallbacks = new LoaderManager.LoaderCallbacks<List<Ingredient>>() {
         @NonNull
         @Override
         public Loader<List<Ingredient>> onCreateLoader(int id, @Nullable Bundle args) {
-            return new GetIngredientsLoader(getContext(), recipeId);
+            return new GetIngredientsLoader(getContext(), new Handler(Looper.getMainLooper()), recipeId);
         }
 
         @Override
