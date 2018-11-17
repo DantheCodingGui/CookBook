@@ -7,7 +7,7 @@
         <variable
             name="isSelected"
             type="boolean"/>
-        <import type="com.danthecodinggui.recipes.msc.StringUtils"/>
+        <import type="com.danthecodinggui.recipes.msc.utility.StringUtils"/>
     </data>
     <android.support.v7.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"

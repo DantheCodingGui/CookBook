@@ -1,6 +1,7 @@
 package com.danthecodinggui.recipes.view.activity_view_recipe;
 
 import android.Manifest;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 
@@ -16,6 +17,8 @@ import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.transition.TransitionInflater;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -28,11 +31,14 @@ import com.danthecodinggui.recipes.BR;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipeBinding;
 import com.danthecodinggui.recipes.databinding.ActivityViewRecipePhotoBinding;
+import com.danthecodinggui.recipes.model.object_models.Ingredient;
+import com.danthecodinggui.recipes.model.object_models.MethodStep;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
-import com.danthecodinggui.recipes.msc.AnimUtils;
+import com.danthecodinggui.recipes.msc.utility.AnimUtils;
 import com.danthecodinggui.recipes.msc.MaterialColours;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
-import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.msc.utility.Utility;
+import com.danthecodinggui.recipes.view.activity_add_recipe.AddEditRecipeActivity;
 
 import net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout;
 
@@ -40,6 +46,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.danthecodinggui.recipes.msc.GlobalConstants.EDIT_RECIPE_BUNDLE;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.EDIT_RECIPE_INGREDIENTS;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.EDIT_RECIPE_OBJECT;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.EDIT_RECIPE_STEPS;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.IMAGE_TRANSITION_NAME;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_BUNDLE;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_OBJECT;
@@ -48,7 +58,9 @@ import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_OBJE
  * Display details of a specific recipe
  */
 public class ViewRecipeActivity extends AppCompatActivity
-        implements AppBarLayout.OnOffsetChangedListener {
+        implements AppBarLayout.OnOffsetChangedListener,
+        IngredientsTabFragment.onIngredientsLoadedListener,
+        MethodTabFragment.onMethodStepsLoadedListener {
 
     //TODO duplicate static value, find way to push into 1 class
     //Permission request codes
@@ -67,6 +79,8 @@ public class ViewRecipeActivity extends AppCompatActivity
     private RecipePagerAdapter pagerAdapter;
 
     private Recipe recipe;
+    private List<Ingredient> recipeIngredients;
+    private List<MethodStep> recipeSteps;
 
     private boolean closingAnimating = false;
 
@@ -107,6 +121,16 @@ public class ViewRecipeActivity extends AppCompatActivity
         super.onSaveInstanceState(savedInstanceState);
 
         savedInstanceState.putInt(STATE_MATERIAL_COLOUR, randIngredientsCol);
+    }
+
+    @Override
+    public void onIngredientsLoaded(List<Ingredient> ingredients) {
+        recipeIngredients = new ArrayList<>(ingredients);
+    }
+
+    @Override
+    public void onMethodStepsLoaded(List<MethodStep> steps) {
+        recipeSteps = new ArrayList<>(steps);
     }
 
     /**
@@ -214,6 +238,38 @@ public class ViewRecipeActivity extends AppCompatActivity
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(randIngredientsCol);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.view_activity_toolbar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.menu_view_edit:
+                //TODO take recipe, package into intent and start AddEditActivity
+
+                Intent editRecipe = new Intent(getApplicationContext(), AddEditRecipeActivity.class);
+
+                Bundle extras = new Bundle();
+                extras.putParcelable(EDIT_RECIPE_OBJECT, recipe);
+                extras.putParcelableArrayList(EDIT_RECIPE_INGREDIENTS, new ArrayList<>(recipeIngredients));
+                extras.putParcelableArrayList(EDIT_RECIPE_STEPS, new ArrayList<>(recipeSteps));
+
+                editRecipe.putExtra(EDIT_RECIPE_BUNDLE, extras);
+
+                //TODO add transition version of startActivity
+
+                startActivity(editRecipe);
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     /**

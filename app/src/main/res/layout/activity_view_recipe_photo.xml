@@ -6,7 +6,7 @@
     tools:context="com.danthecodinggui.recipes.view.activity_view_recipe.ViewRecipeActivity">
     <data>
         <import type="android.graphics.drawable.Drawable"/>
-        <import type="com.danthecodinggui.recipes.msc.StringUtils"/>
+        <import type="com.danthecodinggui.recipes.msc.utility.StringUtils"/>
         <variable
             name="recipe"
             type="com.danthecodinggui.recipes.model.object_models.Recipe"/>

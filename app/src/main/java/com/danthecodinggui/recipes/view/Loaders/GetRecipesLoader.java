@@ -14,7 +14,8 @@ import android.util.Log;
 import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.LogTags;
-import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.msc.utility.FileUtils;
+import com.danthecodinggui.recipes.msc.utility.Utility;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -137,7 +138,7 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
 
 
             //Need to ask for permission if a recipe includes a local photo
-            if (temp.hasPhoto() && Utility.isImageLocal(temp.getImagePath()) && permissionsCallback != null) {
+            if (temp.hasPhoto() && FileUtils.isImageLocal(temp.getImagePath()) && permissionsCallback != null) {
                 AskForReadPermission();
 
                 while (waitingForPermissionResponse) {

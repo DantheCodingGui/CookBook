@@ -38,6 +38,16 @@ public class MethodStep implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof MethodStep))
+            return false;
+
+        MethodStep ob = (MethodStep) obj;
+        return ob.stepNumber == stepNumber &&
+                ob.stepText.equals(stepText);
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }

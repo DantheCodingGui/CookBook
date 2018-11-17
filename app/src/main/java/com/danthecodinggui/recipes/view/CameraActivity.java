@@ -28,7 +28,8 @@ import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.request.RequestOptions;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.ActivityCameraBinding;
-import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.msc.utility.FileUtils;
+import com.danthecodinggui.recipes.msc.utility.Utility;
 
 import java.io.File;
 import java.security.MessageDigest;
@@ -69,7 +70,7 @@ import static io.fotoapparat.selector.SensorSensitivitySelectorsKt.highestSensor
 
 /**
  * Shows camera preview, can take photos with front/rear cameras with flash on/off. </br>
- * When a photo is taken, show a preview before returning to AddRecipeActivity.
+ * When a photo is taken, show a preview before returning to AddEditRecipeActivity.
  */
 public class CameraActivity extends AppCompatActivity {
 
@@ -266,7 +267,7 @@ public class CameraActivity extends AppCompatActivity {
             }, 400);
 
 
-        Utility.CreateDir(photoFilesDir);
+        FileUtils.CreateDir(photoFilesDir);
 
         String filename = UUID.randomUUID().toString() + ".jpg";
 
@@ -428,7 +429,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     /**
-     * Confirm photo and return to AddRecipeActivity
+     * Confirm photo and return to AddEditRecipeActivity
      * @param view
      */
     public void ConfirmPhoto(View view) {
@@ -455,7 +456,7 @@ public class CameraActivity extends AppCompatActivity {
         binding.cdlyImageConfirm.setVisibility(View.GONE);
 
         //Delete photo(s)
-        Utility.ClearDir(photoFilesDir);
+        FileUtils.ClearDir(photoFilesDir);
 
         resultCachePath = null;
     }

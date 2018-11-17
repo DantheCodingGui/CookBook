@@ -61,13 +61,14 @@ import com.danthecodinggui.recipes.databinding.RecipeCardComplexBinding;
 import com.danthecodinggui.recipes.databinding.RecipeCardPhotoBasicBinding;
 import com.danthecodinggui.recipes.databinding.RecipeCardPhotoComplexBinding;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
-import com.danthecodinggui.recipes.msc.AnimUtils;
+import com.danthecodinggui.recipes.msc.utility.AnimUtils;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
-import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.msc.utility.FileUtils;
+import com.danthecodinggui.recipes.msc.utility.Utility;
 import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperAdapter;
 import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchSwipeHelper;
 import com.danthecodinggui.recipes.view.Loaders.GetRecipesLoader;
-import com.danthecodinggui.recipes.view.activity_add_recipe.AddRecipeActivity;
+import com.danthecodinggui.recipes.view.activity_add_recipe.AddEditRecipeActivity;
 import com.danthecodinggui.recipes.view.activity_view_recipe.ViewRecipeActivity;
 
 import java.util.ArrayList;
@@ -766,7 +767,7 @@ public class HomeActivity extends AppCompatActivity
             Recipe item = displayedRecipesList.get(position);
 
             boolean isComplex = item.hasExtendedInfo();
-            boolean hasPhoto = item.hasPhoto() && !noLocalImage && Utility.imageExists(item.getImagePath());
+            boolean hasPhoto = item.hasPhoto() && !noLocalImage && FileUtils.ImageExists(item.getImagePath());
 
             //Nullify path to ensure android doesn't try and animate image in shared transition
             if (!hasPhoto)
@@ -1289,7 +1290,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
     public void AddRecipe(View view) {
-        Intent addRecipe = new Intent(getApplicationContext(), AddRecipeActivity.class);
+        Intent addRecipe = new Intent(getApplicationContext(), AddEditRecipeActivity.class);
 
         if (Utility.atLeastLollipop()) {
 

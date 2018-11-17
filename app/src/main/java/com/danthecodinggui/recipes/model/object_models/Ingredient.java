@@ -36,6 +36,16 @@ public class Ingredient implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Ingredient))
+            return false;
+
+        Ingredient ob = (Ingredient) obj;
+        return ob.getViewOrder() == viewOrder &&
+                ob.ingredientText.equals(ingredientText);
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }

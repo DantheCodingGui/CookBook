@@ -11,7 +11,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.danthecodinggui.recipes.R;
-import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.msc.utility.Utility;
 
 import static com.danthecodinggui.recipes.msc.GlobalConstants.METHOD_STEP_OBJECT;
 

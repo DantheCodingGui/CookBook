@@ -53,8 +53,9 @@ import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.model.object_models.MethodStep;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
-import com.danthecodinggui.recipes.msc.StringUtils;
-import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.msc.utility.FileUtils;
+import com.danthecodinggui.recipes.msc.utility.StringUtils;
+import com.danthecodinggui.recipes.msc.utility.Utility;
 import com.danthecodinggui.recipes.view.CameraActivity;
 import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperAdapter;
 import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperViewHolder;
@@ -75,12 +76,14 @@ import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_CAMERA_D
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_INGREDIENTS;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_IS_IMAGE_CAMERA;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_METHOD;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_OLD_INGREDIENTS;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_OLD_METHOD;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_RECIPE;
 
 /**
  * Provides functionality to add_activity_toolbar recipes
  */
-public class AddRecipeActivity extends AppCompatActivity implements
+public class AddEditRecipeActivity extends AppCompatActivity implements
         CaloriesPickerFragment.onCaloriesSetListener,
         DurationPickerFragment.onDurationSetListener, AddImageURLFragment.onURLSetListener,
         BSImagePicker.OnSingleImageSelectedListener, Utility.PermissionDialogListener {
@@ -139,6 +142,11 @@ public class AddRecipeActivity extends AppCompatActivity implements
     private List<Ingredient> newIngredients;
     private List<MethodStep> newSteps;
 
+    //Required when editing recipe to compare ingredients/steps
+    private List<Ingredient> oldIngredients;
+    private List<MethodStep> oldSteps;
+    private long editRecipeId;
+
     private IngredientsAddAdapter ingAdapter;
     private MethodStepAddAdapter methAdapter;
 
@@ -162,34 +170,6 @@ public class AddRecipeActivity extends AppCompatActivity implements
                         (ConstraintLayout.LayoutParams) binding.spcAdd.getLayoutParams();
                 params.height = Utility.dpToPx(this, 1);
             }
-        }
-
-        //TODO move this into its own function to clean up onCreate
-        Bundle editBundle = getIntent().getBundleExtra(EDIT_RECIPE_BUNDLE);
-        Recipe recipeToEdit;
-        if (editBundle != null) {
-            //We know we are editing a recipe
-            isAdding = false;
-
-            recipeToEdit = editBundle.getParcelable(EDIT_RECIPE_OBJECT);
-            binding.etxtRecipeName.setText(recipeToEdit.getTitle());
-            if (recipeToEdit.hasPhoto())
-                SetImage(recipeToEdit.getImagePath());
-
-            recipeDuration = recipeToEdit.getTimeInMins();
-            recipeKcalPerPerson = recipeToEdit.getCalories();
-
-            if (recipeDuration != 0)
-                onDurationSet(recipeDuration);
-            if (recipeKcalPerPerson != 0)
-                onCaloriesSet(recipeKcalPerPerson);
-
-            //newIngredients = new ArrayList<>(editBundle.<Ingredient>getParcelableArrayList(EDIT_RECIPE_INGREDIENTS));
-            //newSteps = new ArrayList<>(editBundle.<MethodStep>getParcelableArrayList(EDIT_RECIPE_STEPS));
-        }
-        else {
-            newIngredients = new ArrayList<>();
-            newSteps = new ArrayList<>();
         }
 
         binding.rvwNewIngredients.setLayoutManager(new LinearLayoutManager(this));
@@ -273,6 +253,52 @@ public class AddRecipeActivity extends AppCompatActivity implements
         //Disable camera option if device doesn't have camera
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
             binding.includeImageSheet.btnAddPhoto.setVisibility(View.GONE);
+
+        //TODO move this into its own function to clean up onCreate
+        Bundle editBundle = getIntent().getBundleExtra(EDIT_RECIPE_BUNDLE);
+        Recipe recipeToEdit;
+        if (editBundle != null) {
+            //We know we are editing a recipe
+            isAdding = false;
+
+            recipeToEdit = editBundle.getParcelable(EDIT_RECIPE_OBJECT);
+            binding.etxtRecipeName.setText(recipeToEdit.getTitle());
+            if (recipeToEdit.hasPhoto())
+                SetImage(recipeToEdit.getImagePath());
+
+            editRecipeId = recipeToEdit.getRecipeId();
+
+            recipeDuration = recipeToEdit.getTimeInMins();
+            recipeKcalPerPerson = recipeToEdit.getCalories();
+
+            if (recipeDuration != 0)
+                onDurationSet(recipeDuration);
+            if (recipeKcalPerPerson != 0)
+                onCaloriesSet(recipeKcalPerPerson);
+
+            List<Ingredient> ingredients = editBundle.<Ingredient>getParcelableArrayList(EDIT_RECIPE_INGREDIENTS);
+            List<MethodStep> steps = editBundle.<MethodStep>getParcelableArrayList(EDIT_RECIPE_STEPS);
+
+            if (ingredients != null) {
+                newIngredients = new ArrayList<>(ingredients);
+                newSteps = new ArrayList<>(steps);
+
+                oldIngredients = new ArrayList<>(ingredients);
+                oldSteps = new ArrayList<>(steps);
+            }
+            else {
+                ;
+                //TODO when accessing this from HomeActivity, ingredients/steps will be null,
+                //  handle this with asynctask to get data
+            }
+
+            ShowRetractedIngredients();
+            ShowRetractedSteps();
+        }
+        else {
+            newIngredients = new ArrayList<>();
+            newSteps = new ArrayList<>();
+        }
     }
 
     @Override
@@ -316,46 +342,16 @@ public class AddRecipeActivity extends AppCompatActivity implements
         photoSheetExpanded = savedInstanceState.getBoolean(PHOTO_SHEET_OPEN);
         hasAskedWritePerm = savedInstanceState.getBoolean(HAS_ASKED_WRITE_PERM);
 
-        Handler uiThread = new Handler(getMainLooper());
-
         recyclerviewRetractHeight = savedInstanceState.getInt(RECYCLERVIEW_RETRACT_HEIGHT);
 
         //Restore ingredient and method steps
         newIngredients = savedInstanceState.getParcelableArrayList(INGREDIENTS_LIST);
-        if (!newIngredients.isEmpty()) {
-            binding.imvNoIngredients.setVisibility(View.GONE);
-            binding.rvwNewIngredients.setVisibility(View.VISIBLE);
+        if (!newIngredients.isEmpty())
+            ShowRetractedIngredients();
 
-            if (!ingredientsExpanded) {
-                //TODO need to find a way to do this if editing (as can't open/close card first)
-                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.rvwNewIngredients.getLayoutParams();
-                params.height = recyclerviewRetractHeight;
-                uiThread.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        RemoveEditIngViews(false);
-                        binding.rvwNewIngredients.setLayoutFrozen(true);
-                    }
-                }, 50);
-            }
-        }
         newSteps = savedInstanceState.getParcelableArrayList(METHOD_LIST);
-        if (!newSteps.isEmpty()) {
-            binding.imvNoMethod.setVisibility(View.GONE);
-            binding.rvwNewSteps.setVisibility(View.VISIBLE);
-
-            if (!methodExpanded) {
-                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.rvwNewSteps.getLayoutParams();
-                params.height = recyclerviewRetractHeight;
-                uiThread.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        RemoveEditMethViews(false);
-                        binding.rvwNewSteps.setLayoutFrozen(true);
-                    }
-                }, 50);
-            }
-        }
+        if (!newSteps.isEmpty())
+            ShowRetractedSteps();
 
         //Restore views
         if (recipeDuration != 0)
@@ -393,6 +389,46 @@ public class AddRecipeActivity extends AppCompatActivity implements
         editingPosition = -1;
     }
 
+    private void ShowRetractedIngredients() {
+
+        Handler uiThread = new Handler(getMainLooper());
+
+        binding.imvNoIngredients.setVisibility(View.GONE);
+        binding.rvwNewIngredients.setVisibility(View.VISIBLE);
+
+        if (!ingredientsExpanded) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.rvwNewIngredients.getLayoutParams();
+            params.height = recyclerviewRetractHeight;
+            uiThread.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    RemoveEditIngViews(false);
+                    binding.rvwNewIngredients.setLayoutFrozen(true);
+                }
+            }, 50);
+        }
+    }
+
+    private void ShowRetractedSteps() {
+
+        Handler uiThread = new Handler(getMainLooper());
+
+        binding.imvNoMethod.setVisibility(View.GONE);
+        binding.rvwNewSteps.setVisibility(View.VISIBLE);
+
+        if (!methodExpanded) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.rvwNewSteps.getLayoutParams();
+            params.height = recyclerviewRetractHeight;
+            uiThread.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    RemoveEditMethViews(false);
+                    binding.rvwNewSteps.setLayoutFrozen(true);
+                }
+            }, 50);
+        }
+    }
+
     @Override
     public void onBackPressed() {
         if (ingredientsExpanded)
@@ -413,7 +449,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
      * closing
      */
     private void CheckCloseActivity() {
-        if (isRecipeEmpty())
+        if (isRecipeEmpty() || !isAdding)
             CloseActivity();
         else {
             AlertDialog verification = new AlertDialog.Builder(this)
@@ -435,7 +471,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
     private void CloseActivity() {
         super.onBackPressed();
-        Utility.ClearDir(photosDirPath);
+        FileUtils.ClearDir(photosDirPath);
     }
 
     /**
@@ -461,7 +497,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         int id = item.getItemId();
 
         switch (id) {
-            case R.id.menu_add_recipe:
+            case R.id.menu_add_confirm:
                 VerifyRecipe();
                 return true;
         }
@@ -527,7 +563,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
         String title = binding.etxtRecipeName.getText().toString();
 
         //Prepare data for saving
-        Recipe recipe = new Recipe.RecipeBuilder(-1, title)
+        Recipe recipe = new Recipe.RecipeBuilder(isAdding ? -1 : editRecipeId, title)
                 .imageFilePath(currentImagePath)
                 .timeInMins(recipeDuration)
                 .calories(recipeKcalPerPerson)
@@ -543,9 +579,13 @@ public class AddRecipeActivity extends AppCompatActivity implements
 
         if (isAdding)
             new SaveRecipeTask(getApplicationContext()).execute(saveData);
-        else
-            ;//TODO add some kind of updating recipe task for the new recipe
+        else {
+            //Add extra data needed here
+            saveData.putParcelableArrayList(SAVE_TASK_OLD_INGREDIENTS, new ArrayList<>(oldIngredients));
+            saveData.putParcelableArrayList(SAVE_TASK_OLD_METHOD, new ArrayList<>(oldSteps));
 
+            new UpdateRecipeTask(getApplicationContext()).execute(saveData);
+        }
 
         supportFinishAfterTransition();
     }
@@ -763,7 +803,7 @@ public class AddRecipeActivity extends AppCompatActivity implements
             case ACT_REQ_CODE_CAMERA:
                 if (resultCode == RESULT_OK) {
                     if (currentImagePath != null)
-                        Utility.DeleteFile(currentImagePath);
+                        FileUtils.DeleteFile(currentImagePath);
 
                     SetImage(data.getStringExtra(CAMERA_PHOTO_PATH));
                     isImageFromCam = true;

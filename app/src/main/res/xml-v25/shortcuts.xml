@@ -13,7 +13,7 @@
             android:targetPackage="com.danthecodinggui.recipes"/>
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="com.danthecodinggui.recipes.view.activity_add_recipe.AddRecipeActivity"
+            android:targetClass="com.danthecodinggui.recipes.view.activity_add_recipe.AddEditRecipeActivity"
             android:targetPackage="com.danthecodinggui.recipes"/>
     </shortcut>
 </shortcuts>

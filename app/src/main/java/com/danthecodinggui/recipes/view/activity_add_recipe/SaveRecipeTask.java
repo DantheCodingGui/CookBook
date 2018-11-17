@@ -19,7 +19,8 @@ import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.model.object_models.MethodStep;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
-import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.msc.utility.FileUtils;
+import com.danthecodinggui.recipes.msc.utility.Utility;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -64,66 +65,14 @@ public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
 
         //Deal with saving photo to external storage if from camera
         if (item.hasPhoto() && isImageFromCam) {
-            //Check that external storage is available for write
-            if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
 
-                //First must read image file from private storage
-                Bitmap camImage = BitmapFactory.decodeFile(item.getImagePath());
-
-                //Also must extract bitmap internal rotation
-                int internalOrientation = ExifInterface.ORIENTATION_NORMAL;
-                try {
-                    internalOrientation = new ExifInterface(item.getImagePath()).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-                } catch (IOException e) {
-                    Log.e(SAVE_RECIPE, "Failed to read Exif information from internal image file", e);
-                    e.printStackTrace();
-                }
-
-                //Then save the image into external storage (recipes folder)
-                File dirFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), RECIPES_CAM_DIR_NAME);
-                String dirPath = dirFile.getPath();
-                Utility.CreateDir(dirPath);
-
-                File imageFile = new File(new File(dirPath), CreateFileName(dirPath, item.getTitle(),0));
-
-                try {
-                    FileOutputStream out = new FileOutputStream(imageFile);
-                    camImage.compress(Bitmap.CompressFormat.JPEG, 100, out);
-                    out.flush();
-                    out.close();
-                } catch (FileNotFoundException e) {
-                    Log.e(SAVE_RECIPE, "External recipes directory not found", e);
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    Log.e(SAVE_RECIPE, "Saving camera bitmap failed", e);
-                    e.printStackTrace();
-                }
-
-                //As Exif orientation will be overwritten, need to preserve orientation in new file
-                if (internalOrientation != ExifInterface.ORIENTATION_NORMAL) {
-                    try {
-                        ExifInterface externalMetaData = new ExifInterface(imageFile.getAbsolutePath());
-                        externalMetaData.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(internalOrientation));
-                        externalMetaData.saveAttributes();
-                    } catch (IOException e) {
-                        Log.e(SAVE_RECIPE, "Failed to copy file Exif information to external file", e);
-                        e.printStackTrace();
-                    }
-                }
-
-                //Alert media scanner that new file has been added
-                MediaScannerConnection.scanFile(
-                        context,
-                        new String[] {imageFile.getAbsolutePath()},
-                        null,
-                        null);
-
-                item.setImagePath(imageFile.getPath());
-            }
+            String externPhotoPath = FileUtils.SavePhotoToExternalDir(context, item);
+            if (externPhotoPath != null)
+                item.setImagePath(externPhotoPath);
         }
 
         //Now can delete all camera files in the private storage directory
-        Utility.ClearDir(camDirPath);
+        FileUtils.ClearDir(camDirPath);
 
         //Save the recipe into database record
 

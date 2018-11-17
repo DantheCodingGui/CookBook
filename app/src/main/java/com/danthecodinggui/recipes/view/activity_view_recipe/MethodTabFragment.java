@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.FragmentMethodBinding;
 import com.danthecodinggui.recipes.databinding.ViewMethodItemBinding;
+import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.model.object_models.MethodStep;
 import com.danthecodinggui.recipes.view.Loaders.GetMethodStepsLoader;
 
@@ -86,6 +87,8 @@ public class MethodTabFragment extends Fragment {
         public void onLoadFinished(@NonNull Loader<List<MethodStep>> loader, List<MethodStep> data) {
             methodStepsList = new ArrayList<>(data);
             methodStepsAdapter.notifyDataSetChanged();
+
+            ((onMethodStepsLoadedListener)getActivity()).onMethodStepsLoaded(data);
         }
 
         @Override
@@ -128,5 +131,9 @@ public class MethodTabFragment extends Fragment {
                 binding.executePendingBindings();
             }
         }
+    }
+
+    interface onMethodStepsLoadedListener {
+        void onMethodStepsLoaded(List<MethodStep> steps);
     }
 }

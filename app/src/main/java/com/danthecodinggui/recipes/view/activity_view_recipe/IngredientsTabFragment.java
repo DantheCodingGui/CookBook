@@ -18,7 +18,7 @@ import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.FragmentIngredientsBinding;
 import com.danthecodinggui.recipes.databinding.ViewIngredientItemBinding;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
-import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.msc.utility.Utility;
 import com.danthecodinggui.recipes.view.Loaders.GetIngredientsLoader;
 
 import java.util.ArrayList;
@@ -82,6 +82,8 @@ public class IngredientsTabFragment extends Fragment {
         public void onLoadFinished(@NonNull Loader<List<Ingredient>> loader, List<Ingredient> data) {
             ingredientsList = new ArrayList<>(data);
             ingredientsAdapter.notifyDataSetChanged();
+
+            ((onIngredientsLoadedListener)getActivity()).onIngredientsLoaded(data);
         }
 
         @Override
@@ -126,5 +128,9 @@ public class IngredientsTabFragment extends Fragment {
                 binding.executePendingBindings();
             }
         }
+    }
+
+    interface onIngredientsLoadedListener {
+        void onIngredientsLoaded(List<Ingredient> ingredients);
     }
 }

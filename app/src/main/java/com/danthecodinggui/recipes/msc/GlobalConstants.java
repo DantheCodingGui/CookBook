@@ -23,6 +23,8 @@ public class GlobalConstants {
     public static final String SAVE_TASK_RECIPE = "SAVE_TASK_RECIPE";
     public static final String SAVE_TASK_INGREDIENTS = "SAVE_TASK_INGREDIENTS";
     public static final String SAVE_TASK_METHOD = "SAVE_TASK_METHOD";
+    public static final String SAVE_TASK_OLD_INGREDIENTS = "SAVE_TASK_OLD_INGREDIENTS";
+    public static final String SAVE_TASK_OLD_METHOD = "SAVE_TASK_OLD_METHOD";
     public static final String SAVE_TASK_IS_IMAGE_CAMERA = "SAVE_TASK_IS_IMAGE_CAMERA";
     public static final String SAVE_TASK_CAMERA_DIR_PATH = "SAVE_TASK_CAMERA_DIR_PATH";
 

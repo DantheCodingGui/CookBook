@@ -32,12 +32,12 @@
             android:parentActivityName=".view.activity_home.HomeActivity"
             android:theme="@style/ViewRecipeTheme" />
         <activity
-            android:name=".view.activity_add_recipe.AddRecipeActivity"
+            android:name=".view.activity_add_recipe.AddEditRecipeActivity"
             android:parentActivityName=".view.activity_home.HomeActivity"
             android:theme="@style/AddRecipeTheme"
             android:windowSoftInputMode="adjustPan" />
         <activity android:name=".view.CameraActivity"
-            android:parentActivityName=".view.activity_add_recipe.AddRecipeActivity"
+            android:parentActivityName=".view.activity_add_recipe.AddEditRecipeActivity"
             android:theme="@style/CameraTheme"/>
         
         <provider

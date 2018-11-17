@@ -5,6 +5,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
+import com.danthecodinggui.recipes.model.object_models.Ingredient;
+
 import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_ID;
@@ -23,6 +25,9 @@ public class RecipePagerAdapter extends FragmentStatePagerAdapter {
 
     private long recipeId;
 
+    private IngredientsTabFragment ingFrag;
+    private MethodTabFragment methFrag;
+
     RecipePagerAdapter(FragmentManager fm, int tabsNo, List<String> tabTitles, long recipeId) {
         super(fm);
         this.tabsNo = tabsNo;
@@ -38,11 +43,11 @@ public class RecipePagerAdapter extends FragmentStatePagerAdapter {
 
         switch (position) {
             case INGREDIENTS_TAB:
-                IngredientsTabFragment ingFrag = new IngredientsTabFragment();
+                ingFrag = new IngredientsTabFragment();
                 ingFrag.setArguments(recipeBundle);
                 return ingFrag;
             case METHOD_TAB:
-                MethodTabFragment methFrag = new MethodTabFragment();
+                methFrag = new MethodTabFragment();
                 methFrag.setArguments(recipeBundle);
                 return methFrag;
             default:

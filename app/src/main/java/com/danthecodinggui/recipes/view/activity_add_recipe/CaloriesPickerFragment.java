@@ -10,7 +10,7 @@ import android.text.TextWatcher;
 import android.widget.EditText;
 
 import com.danthecodinggui.recipes.R;
-import com.danthecodinggui.recipes.msc.Utility;
+import com.danthecodinggui.recipes.msc.utility.Utility;
 
 /**
  * Shows simple dialog to enter number of kcal per person for a recipe
