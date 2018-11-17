@@ -15,7 +15,6 @@ import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.LogTags;
 import com.danthecodinggui.recipes.msc.utility.FileUtils;
-import com.danthecodinggui.recipes.msc.utility.Utility;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -78,7 +77,7 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
                     onContentChanged();
                 }
             };
-            contentResolver.registerContentObserver(ProviderContract.METHOD_URI, false, contentObserver);
+            contentResolver.registerContentObserver(ProviderContract.RECIPES_URI, false, contentObserver);
         }
     }
 

@@ -79,10 +79,16 @@ public class UpdateRecipeTask extends AsyncTask<Bundle, Void, Void> {
         int kcal = item.getCalories();
         if (duration != 0)
             record.put(ProviderContract.RecipeEntry.DURATION, duration);
+        else
+            record.putNull(ProviderContract.RecipeEntry.DURATION);
         if (kcal != 0)
             record.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, kcal);
+        else
+            record.putNull(ProviderContract.RecipeEntry.CALORIES_PER_PERSON);
         if (item.hasPhoto())
             record.put(ProviderContract.RecipeEntry.IMAGE_PATH, item.getImagePath());
+        else
+            record.putNull(ProviderContract.RecipeEntry.IMAGE_PATH);
 
         resolver.update(ProviderContract.RECIPES_URI,
                 record,
