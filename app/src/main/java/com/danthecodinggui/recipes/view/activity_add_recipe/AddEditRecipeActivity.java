@@ -985,6 +985,8 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         int recyclerBottomMargin = recyclerviewParams.bottomMargin;
         int recyclerPaddingTop = binding.rvwNewIngredients.getPaddingTop();
         int recyclerPaddingBottom = binding.rvwNewIngredients.getPaddingBottom();
+
+        //Add button is View.GONE so must manually provide height here
         int AddButtonHeight = Utility.dpToPx(this, 47);
 
         return  rootHeight -
@@ -1181,8 +1183,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         ToggleEditMethViews(true);
 
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewSteps.getLayoutParams();
-        params.height = binding.rvwNewSteps.getHeight();
-        int temp = getRecyclerviewRetractHeight();
+        params.height = getRecyclerviewRetractHeight();
 
         //Reset elevation AFTER size reduction to avoid toolbar and card cross-fading
         final LayoutTransition transition = binding.ctlyMethodContainer.getLayoutTransition();

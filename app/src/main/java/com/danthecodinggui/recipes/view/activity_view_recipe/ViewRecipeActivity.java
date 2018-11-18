@@ -2,6 +2,7 @@ package com.danthecodinggui.recipes.view.activity_view_recipe;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
@@ -18,6 +19,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.Toolbar;
 import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.Menu;
@@ -251,9 +253,26 @@ public class ViewRecipeActivity extends AppCompatActivity
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_view_recipe);
 
-        if (recipe.hasExtendedInfo()) {
-            binding.clyVwOptionals.setVisibility(View.VISIBLE);
+        //Resize Toolbar title text size based on title length
+        int titleSize = recipe.getTitle().length();
+
+        int orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_PORTRAIT || Utility.isMultiWindow(this)) {
+
+            if (titleSize <= 20)
+                binding.tbarVwRecipe.setTitleTextAppearance(this, R.style.ToolbarTitleMax);
+            else if (titleSize <= 24)
+                binding.tbarVwRecipe.setTitleTextAppearance(this, R.style.ToolbarTitleLarge);
+            else if (titleSize <= 28)
+                binding.tbarVwRecipe.setTitleTextAppearance(this, R.style.ToolbarTitleMedium);
+            else if (titleSize <= 32)
+                binding.tbarVwRecipe.setTitleTextAppearance(this, R.style.ToolbarTitleSmall);
+            else
+                binding.tbarVwRecipe.setTitleTextAppearance(this, R.style.ToolbarTitleMin);
         }
+
+        if (recipe.hasExtendedInfo())
+            binding.clyVwOptionals.setVisibility(View.VISIBLE);
 
         binding.setRecipe(recipe);
 
