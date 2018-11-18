@@ -124,7 +124,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
     private static final String METHOD_LIST = "METHOD_LIST";
     private static final String EDITING_POSITION = "EDITING_POSITION";
     private static final String HAS_ASKED_WRITE_PERM = "HAS_ASKED_WRITE_PERM";
-    private static final String RECYCLERVIEW_RETRACT_HEIGHT = "RECYCLERVIEW_RETRACT_HEIGHT";
 
     //Various Flags
     private boolean fabMenuOpen = false;
@@ -151,7 +150,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
     private MethodStepAddAdapter methAdapter;
 
     private int editingPosition = -1;
-    private int recyclerviewRetractHeight;
 
     private BottomSheetBehavior photoSheetBehaviour;
 
@@ -292,8 +290,14 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                 //  handle this with asynctask to get data
             }
 
-            ShowRetractedIngredients();
-            ShowRetractedSteps();
+            //Must wait briefly until view dimensions can be accessed
+            new Handler(getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    ShowRetractedIngredients();
+                    ShowRetractedSteps();
+                }
+            }, 10);
         }
         else {
             newIngredients = new ArrayList<>();
@@ -314,7 +318,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         outState.putBoolean(HAS_ASKED_WRITE_PERM, hasAskedWritePerm);
 
         outState.putInt(EDITING_POSITION, editingPosition);
-        outState.putInt(RECYCLERVIEW_RETRACT_HEIGHT, recyclerviewRetractHeight);
 
         //Flags
         outState.putBoolean(INGREDIENTS_EXPANDED, ingredientsExpanded);
@@ -341,8 +344,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         boolean fabMenuOpen = savedInstanceState.getBoolean(FAB_MENU_OPEN);
         photoSheetExpanded = savedInstanceState.getBoolean(PHOTO_SHEET_OPEN);
         hasAskedWritePerm = savedInstanceState.getBoolean(HAS_ASKED_WRITE_PERM);
-
-        recyclerviewRetractHeight = savedInstanceState.getInt(RECYCLERVIEW_RETRACT_HEIGHT);
 
         //Restore ingredient and method steps
         newIngredients = savedInstanceState.getParcelableArrayList(INGREDIENTS_LIST);
@@ -398,11 +399,11 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         if (!ingredientsExpanded) {
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.rvwNewIngredients.getLayoutParams();
-            params.height = recyclerviewRetractHeight;
+            params.height = getRecyclerviewRetractHeight();
             uiThread.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    RemoveEditIngViews(false);
+                    ToggleEditIngViews(false);
                     binding.rvwNewIngredients.setLayoutFrozen(true);
                 }
             }, 50);
@@ -418,11 +419,11 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         if (!methodExpanded) {
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.rvwNewSteps.getLayoutParams();
-            params.height = recyclerviewRetractHeight;
+            params.height = getRecyclerviewRetractHeight();
             uiThread.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    RemoveEditMethViews(false);
+                    ToggleEditMethViews(false);
                     binding.rvwNewSteps.setLayoutFrozen(true);
                 }
             }, 50);
@@ -972,6 +973,27 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         recipeKcalPerPerson = 0;
     }
 
+    private int getRecyclerviewRetractHeight() {
+
+        ConstraintLayout.LayoutParams cardParams = (ConstraintLayout.LayoutParams)binding.crdvIngredients.getLayoutParams();
+        ConstraintLayout.LayoutParams recyclerviewParams = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
+
+        int rootHeight = binding.cdlyAddRoot.getHeight();
+        int cardTopMargin = cardParams.topMargin;
+        int cardBottomMargin = cardParams.bottomMargin;
+        int recyclerTopMargin = recyclerviewParams.topMargin;
+        int recyclerBottomMargin = recyclerviewParams.bottomMargin;
+        int recyclerPaddingTop = binding.rvwNewIngredients.getPaddingTop();
+        int recyclerPaddingBottom = binding.rvwNewIngredients.getPaddingBottom();
+        int AddButtonHeight = binding.butAddIngredient.getHeight();
+
+        return  rootHeight -
+                cardTopMargin - cardBottomMargin -
+                recyclerTopMargin - recyclerBottomMargin -
+                recyclerPaddingTop - recyclerPaddingBottom -
+                AddButtonHeight;
+    }
+
     private void ExpandIngredientsCard() {
 
         if (photoSheetExpanded)
@@ -989,10 +1011,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         if (newIngredients.isEmpty())
             binding.txtNoIngredients.setVisibility(View.VISIBLE);
 
-        binding.rvwNewIngredients.setLayoutFrozen(false);
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
-        params.height = 0;
-
         binding.crdvMethod.setVisibility(View.GONE);
         binding.llyToolbarContainer.setVisibility(View.GONE);
         if (isPortrait)
@@ -1003,21 +1021,13 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         AnimateOutFabMenu();
 
-        //Fade in all non-essential views
-        for (int i = 0; i < newIngredients.size(); ++i) {
-            IngredientsAddAdapter.IngredientViewHolder holder = (IngredientsAddAdapter.IngredientViewHolder)
-                    binding.rvwNewIngredients.findViewHolderForAdapterPosition(i);
-            if (holder != null) {
-                TransitionManager.beginDelayedTransition((ViewGroup)holder.itemView,
-                        TransitionInflater.from(this).inflateTransition(R.transition.ingredient_card));
-
-                holder.holderBinding.imvIngredientDragHandle.setVisibility(View.VISIBLE);
-                holder.holderBinding.imbRemoveIngredient.setVisibility(View.VISIBLE);
-                holder.holderBinding.imvEditIngredient.setVisibility(View.VISIBLE);
-            }
-        }
-
         ingredientsExpanded = true;
+
+        binding.rvwNewIngredients.setLayoutFrozen(false);
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
+        params.height = 0;
+
+        ToggleEditIngViews(true);
     }
 
     private void RetractIngredientsCard() {
@@ -1047,10 +1057,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             });
         }
 
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
-        params.height = binding.rvwNewIngredients.getHeight();
-        recyclerviewRetractHeight = params.height;
-
         binding.llyToolbarContainer.setVisibility(View.VISIBLE);
         binding.crdvMethod.setVisibility(View.VISIBLE);
         if (isPortrait)
@@ -1058,6 +1064,16 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         binding.etxtAddIngredient.setVisibility(View.GONE);
         binding.butAddIngredient.setVisibility(View.GONE);
+
+        AnimateInFabMenu();
+
+        ingredientsExpanded = false;
+
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
+        params.height = getRecyclerviewRetractHeight();
+
+        //Fade out all non-essential views
+        ToggleEditIngViews(true);
 
         //Reset elevation AFTER size reduction to avoid toolbar and card cross-fading
         final LayoutTransition transition = binding.ctlyIngredientsContainer.getLayoutTransition();
@@ -1071,16 +1087,9 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                 transition.removeTransitionListener(this);
             }
         });
-
-        AnimateInFabMenu();
-
-        //Fade out all non-essential views
-        RemoveEditIngViews(true);
-
-        ingredientsExpanded = false;
     }
 
-    private void RemoveEditIngViews(boolean shouldAnimate) {
+    private void ToggleEditIngViews(boolean shouldAnimate) {
         for (int i = 0; i < newIngredients.size(); ++i) {
             IngredientsAddAdapter.IngredientViewHolder holder = (IngredientsAddAdapter.IngredientViewHolder)
                     binding.rvwNewIngredients.findViewHolderForAdapterPosition(i);
@@ -1090,9 +1099,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                             TransitionInflater.from(this).inflateTransition(R.transition.ingredient_card));
 
 
-                holder.holderBinding.imvIngredientDragHandle.setVisibility(View.GONE);
-                holder.holderBinding.imbRemoveIngredient.setVisibility(View.GONE);
-                holder.holderBinding.imvEditIngredient.setVisibility(View.GONE);
+                    holder.holderBinding.setCanEdit(ingredientsExpanded);
             }
         }
     }
@@ -1113,10 +1120,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         if (newSteps.isEmpty())
             binding.txtNoSteps.setVisibility(View.VISIBLE);
 
-        binding.rvwNewSteps.setLayoutFrozen(false);
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewSteps.getLayoutParams();
-        params.height = 0;
-
         binding.crdvIngredients.setVisibility(View.GONE);
         binding.llyToolbarContainer.setVisibility(View.GONE);
         if (isPortrait)
@@ -1127,21 +1130,13 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         AnimateOutFabMenu();
 
-        //Fade in all non-essential views
-        for (int i = 0; i < newSteps.size(); ++i) {
-            MethodStepAddAdapter.StepViewHolder holder = (MethodStepAddAdapter.StepViewHolder)
-                    binding.rvwNewSteps.findViewHolderForAdapterPosition(i);
-            if (holder != null) {
-                TransitionManager.beginDelayedTransition((ViewGroup)holder.itemView,
-                        TransitionInflater.from(this).inflateTransition(R.transition.method_card));
-
-                holder.holderBinding.imvStepDragHandle.setVisibility(View.VISIBLE);
-                holder.holderBinding.imbRemoveStep.setVisibility(View.VISIBLE);
-                holder.holderBinding.imvEditStep.setVisibility(View.VISIBLE);
-            }
-        }
-
         methodExpanded = true;
+
+        binding.rvwNewSteps.setLayoutFrozen(false);
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewSteps.getLayoutParams();
+        params.height = 0;
+
+        ToggleEditMethViews(true);
     }
 
     private void RetractMethodCard() {
@@ -1170,10 +1165,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             });
         }
 
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewSteps.getLayoutParams();
-        params.height = binding.rvwNewSteps.getHeight();
-        recyclerviewRetractHeight = params.height;
-
         binding.llyToolbarContainer.setVisibility(View.VISIBLE);
         binding.crdvIngredients.setVisibility(View.VISIBLE);
         if (isPortrait)
@@ -1181,6 +1172,16 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         binding.etxtAddStep.setVisibility(View.GONE);
         binding.butAddStep.setVisibility(View.GONE);
+
+        AnimateInFabMenu();
+
+        methodExpanded = false;
+
+        //Fade out all non-essential views
+        ToggleEditMethViews(true);
+
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewSteps.getLayoutParams();
+        params.height = getRecyclerviewRetractHeight();
 
         //Reset elevation AFTER size reduction to avoid toolbar and card cross-fading
         final LayoutTransition transition = binding.ctlyMethodContainer.getLayoutTransition();
@@ -1194,16 +1195,9 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                 transition.removeTransitionListener(this);
             }
         });
-
-        AnimateInFabMenu();
-
-        //Fade out all non-essential views
-        RemoveEditMethViews(true);
-
-        methodExpanded = false;
     }
 
-    private void RemoveEditMethViews(boolean shouldAnimate) {
+    private void ToggleEditMethViews(boolean shouldAnimate) {
         for (int i = 0; i < newSteps.size(); ++i) {
             MethodStepAddAdapter.StepViewHolder holder = (MethodStepAddAdapter.StepViewHolder)
                     binding.rvwNewSteps.findViewHolderForAdapterPosition(i);
@@ -1212,9 +1206,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     TransitionManager.beginDelayedTransition((ViewGroup)holder.itemView,
                             TransitionInflater.from(this).inflateTransition(R.transition.method_card));
 
-                holder.holderBinding.imvStepDragHandle.setVisibility(View.GONE);
-                holder.holderBinding.imbRemoveStep.setVisibility(View.GONE);
-                holder.holderBinding.imvEditStep.setVisibility(View.GONE);
+                holder.holderBinding.setCanEdit(methodExpanded);
             }
         }
     }
@@ -1314,6 +1306,8 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     return false;
                 }
             });
+
+            holder.holderBinding.setCanEdit(ingredientsExpanded);
 
             holder.holderBinding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1423,6 +1417,8 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     return false;
                 }
             });
+
+            holder.holderBinding.setCanEdit(methodExpanded);
 
             holder.holderBinding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override

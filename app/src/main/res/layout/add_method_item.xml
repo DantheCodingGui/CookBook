@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
     <data>
+        <import type="android.view.View"/>
         <variable
             name="methodStep"
             type="com.danthecodinggui.recipes.model.object_models.MethodStep"/>
+        <variable
+            name="canEdit"
+            type="boolean"/>
     </data>
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
@@ -18,6 +22,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="10dp"
+            android:visibility="@{canEdit ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -41,7 +46,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.6"
             app:stepNum="@{methodStep.getStepNumber()}"
-            app:stepText="@{methodStep.getStepText()}" />
+            app:stepText="@{methodStep.getStepText()}"
+            tools:text="Do some thing this way"/>
 
         <ImageView
             android:id="@+id/imv_edit_step"
@@ -49,6 +55,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
+            android:visibility="@{canEdit ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/imv_step_drag_handle"
             app:layout_constraintTop_toTopOf="parent" />
@@ -59,6 +66,7 @@
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:scaleType="center"
+            android:visibility="@{canEdit ? View.VISIBLE : View.GONE}"
             android:src="@drawable/ic_drag_handle"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

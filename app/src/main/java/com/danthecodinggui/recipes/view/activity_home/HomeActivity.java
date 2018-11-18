@@ -631,6 +631,7 @@ public class HomeActivity extends AppCompatActivity
     public void onResume() {
         super.onResume();
         transitioningActivity = false;
+
         recyclerViewState = null;
         recyclerViewScroll = 0;
     }
