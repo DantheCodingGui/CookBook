@@ -245,7 +245,7 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
         String sortDir = isSortDirAsc ? " ASC" : " DESC";
 
         if (recipesSortOrder == SORT_ORDER_ALPHABETICAL)
-            return ProviderContract.RecipeEntry.TITLE + sortDir;
+            return ProviderContract.RecipeEntry.TITLE + " COLLATE NOCASE" + sortDir;
         else
             return ProviderContract.RecipeEntry._ID + sortDir;
     }
