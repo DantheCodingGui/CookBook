@@ -16,10 +16,12 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.GridLayoutManager;
 import android.transition.Slide;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -48,6 +50,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -100,6 +103,9 @@ public class HomeActivity extends AppCompatActivity
     private RecipesViewAdapter recipesAdapter;
     private ItemTouchHelper recipesTouchHelper;
 
+    private Parcelable recyclerViewState;
+    private int recyclerViewScroll;
+
     private ActionMode actionMode;
 
     //Flag determines if app can show local images (does the app have read external permission)
@@ -137,6 +143,8 @@ public class HomeActivity extends AppCompatActivity
     private static final String SORT_BY_SHEET_OPEN = "SORT_BY_SHEET_OPEN";
     private static final String CURRENT_SORT_ORDER = "CURRENT_SORT_ORDER";
     private static final String IS_SORT_ASC = "IS_SORT_ASC";
+    private static final String RECYCLERVIEW_STATE = "RECYCLERVIEW_STATE";
+    private static final String RECYCLERVIEW_SCROLL = "RECYCLERVIEW_SCROLL";
 
     //TODO remove later
     private boolean inserting = false;
@@ -222,6 +230,11 @@ public class HomeActivity extends AppCompatActivity
             binding.includeSortSheet.imvSortDir.setImageDrawable(
                     getDrawable(R.drawable.ic_sort_dir_desc));
 
+        if (savedInstanceState != null) {
+            recyclerViewState = savedInstanceState.getParcelable(RECYCLERVIEW_STATE);
+            recyclerViewScroll = savedInstanceState.getInt(RECYCLERVIEW_SCROLL);
+        }
+
         if (!inserting)
             getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, loaderCallbacks);
         else {
@@ -244,6 +257,22 @@ public class HomeActivity extends AppCompatActivity
         outState.putInt(CURRENT_SORT_ORDER, currentSortOrder);
         outState.putBoolean(IS_SORT_ASC, isSortAsc);
         outState.putIntegerArrayList(ACTION_MODE_SELECTION, new ArrayList<>(recipesAdapter.GetSelection()));
+
+        outState.putParcelable(RECYCLERVIEW_STATE, recyclerViewState);
+        outState.putInt(RECYCLERVIEW_SCROLL, recyclerViewScroll);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        RecyclerView.LayoutManager layoutManager = binding.rvwRecipes.getLayoutManager();
+
+        recyclerViewState = layoutManager.onSaveInstanceState();
+        if (layoutManager instanceof LinearLayoutManager)
+            recyclerViewScroll = ((LinearLayoutManager)layoutManager).findFirstVisibleItemPosition();
+        else
+            recyclerViewScroll = ((StaggeredGridLayoutManager)layoutManager).findFirstVisibleItemPositions(null)[0];
     }
 
     @Override
@@ -602,6 +631,8 @@ public class HomeActivity extends AppCompatActivity
     public void onResume() {
         super.onResume();
         transitioningActivity = false;
+        recyclerViewState = null;
+        recyclerViewScroll = 0;
     }
 
     @Override
@@ -668,6 +699,13 @@ public class HomeActivity extends AppCompatActivity
                 searchTextChangedListener.onQueryTextChange(lastSearchFilter);
             else
                 recipesAdapter.UpdateRecords(loadedRecipes);
+
+            if (recyclerViewState != null) {
+                binding.rvwRecipes.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+                recyclerViewState = null;
+                binding.rvwRecipes.scrollToPosition(recyclerViewScroll);
+                recyclerViewScroll = 0;
+            }
 
             Log.v(DATA_LOADING, "HomeActivity Recipes Load Complete");
         }

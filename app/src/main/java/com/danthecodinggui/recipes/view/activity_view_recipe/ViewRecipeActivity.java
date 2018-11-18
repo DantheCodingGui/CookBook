@@ -76,6 +76,7 @@ public class ViewRecipeActivity extends AppCompatActivity
 
     //Instance State tags
     private static final String STATE_MATERIAL_COLOUR = "STATE_MATERIAL_COLOUR";
+    private static final String ADDED_PHOTO = "ADDED_PHOTO";
 
     private String imageTransitionName;
 
@@ -86,6 +87,7 @@ public class ViewRecipeActivity extends AppCompatActivity
     private List<MethodStep> recipeSteps;
 
     private boolean closingAnimating = false;
+    private boolean addedPhoto = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,8 +102,10 @@ public class ViewRecipeActivity extends AppCompatActivity
             AskPhotoLayoutPerm();
         }
         else {
-            if (savedInstanceState != null)
+            if (savedInstanceState != null) {
                 randIngredientsCol = savedInstanceState.getInt(STATE_MATERIAL_COLOUR);
+                addedPhoto = savedInstanceState.getBoolean(ADDED_PHOTO);
+            }
             SetupNoPhotoLayout();
         }
 
@@ -113,7 +117,14 @@ public class ViewRecipeActivity extends AppCompatActivity
                         new UpdateViewedRecipeTask.onRecipeReadListener() {
                     @Override
                     public void onRecipeRead(Recipe updatedRecipe) {
+
+                        //Needed to ensure that added photo doesn't mess with activity transitions
+                        if (!recipe.hasPhoto() && updatedRecipe.hasPhoto())
+                            addedPhoto = true;
+
                         recipe = updatedRecipe;
+                        binding = null;
+                        bindingPhoto = null;
 
                         //Pretty much just load the whole ui again
                         // (should make new ingredient/method fragments and update their values)
@@ -154,6 +165,7 @@ public class ViewRecipeActivity extends AppCompatActivity
         super.onSaveInstanceState(savedInstanceState);
 
         savedInstanceState.putInt(STATE_MATERIAL_COLOUR, randIngredientsCol);
+        savedInstanceState.putBoolean(ADDED_PHOTO, addedPhoto);
     }
 
     @Override
@@ -374,8 +386,10 @@ public class ViewRecipeActivity extends AppCompatActivity
             bindingPhoto.ablViewRecipe.setExpanded(true, true);
             closingAnimating = true;
         }
-        else
+        else if (!addedPhoto)
             supportFinishAfterTransition();
+        else
+            finish();
     }
 
     @Override
@@ -390,14 +404,14 @@ public class ViewRecipeActivity extends AppCompatActivity
         bindingPhoto.ivwToolbarPreview.setImageAlpha(Math.round(f));
 
         //When AppBarLayout expansion fully animated, THEN the activity can close
-        if (closingAnimating && verticalOffset == 0)
+        if (closingAnimating && !addedPhoto && verticalOffset == 0)
             supportFinishAfterTransition();
+        else if (addedPhoto)
+            finish();
 
         float adjustedF = (f - 102) / 0.255f - 200;
         if (adjustedF < 0)
             adjustedF = 0;
-
-        Log.d("temp", "adjustedF = " + (400 - adjustedF));
 
         bindingPhoto.txtVwDuration.setTranslationX(400 - adjustedF);
         bindingPhoto.txtVwKcal.setTranslationX(400 - adjustedF);

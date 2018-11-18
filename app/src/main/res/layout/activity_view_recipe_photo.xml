@@ -57,7 +57,7 @@
                 <!--Gradient mask to make back button more visible-->
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="70dp"
+                    android:layout_height="120dp"
                     android:layout_gravity="top"
                     android:background="@drawable/top_scrim"
                     android:fitsSystemWindows="true"
@@ -66,7 +66,7 @@
                 <!--Gradient mask to make title text/tab buttons more visible-->
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="220dp"
+                    android:layout_height="250dp"
                     android:layout_gravity="bottom"
                     android:layout_marginBottom="-57dp"
                     android:background="@drawable/bottom_scrim"
