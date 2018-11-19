@@ -9,6 +9,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
+
+import static com.danthecodinggui.recipes.msc.LogTags.CONTENT_PROVIDER;
 
 /**
  * Content provider for accessing all application data
@@ -83,6 +86,11 @@ public class RecipeProvider extends ContentProvider {
 
         db = dbHelper.getWritableDatabase();
         long id = db.insert(tableName, null, values);
+
+        Log.i(CONTENT_PROVIDER, "Provider insertion, notifying any listeners...");
+
+        getContext().getContentResolver().notifyChange(uri, null);
+
         return ContentUris.withAppendedId(uri, id);
     }
 
@@ -113,7 +121,7 @@ public class RecipeProvider extends ContentProvider {
                 null
                 );
 
-        //Ingredient is not already in table, must add it
+        //Ingredient is not already in table, must add_activity_toolbar it
         if (ingredients.getCount() <= 0) {
             ContentValues newIngredient = new ContentValues();
             newIngredient.put(DBSchema.IngredientEntry.NAME, ingredientName);
@@ -257,6 +265,10 @@ public class RecipeProvider extends ContentProvider {
                 throw new IllegalArgumentException("Invalid URI for updating: " + uri);
         }
 
+        Log.i(CONTENT_PROVIDER, "Provider update, notifying any listeners...");
+
+        getContext().getContentResolver().notifyChange(uri, null);
+
         return rowNumUpdated;
     }
 
@@ -312,6 +324,7 @@ public class RecipeProvider extends ContentProvider {
             case RECIPE_INGREDIENTS_TABLE:
                 //TODO Maybe in future look for references to a specific ingredient in recipeIngredients,
                 //and delete in ingredients if no refs to it (not a big deal for now)
+
                 rowNumDeleted = db.delete(
                         DBSchema.RecipeIngredientEntry.TABLE_NAME,
                         selection,

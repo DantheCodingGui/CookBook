@@ -5,15 +5,20 @@
         <variable
             name="recipe"
             type="com.danthecodinggui.recipes.model.object_models.Recipe"/>
+
         <variable
             name="imageLoadedCallback"
             type="com.bumptech.glide.request.RequestListener&lt;Drawable&gt;"/>
+        <variable
+            name="isSelected"
+            type="boolean"/>
     </data>
     <android.support.v7.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/crd_basic_photo"
+        android:id="@+id/crd_root"
+        app:cardBackgroundColor="@{isSelected ? @color/colorCardSelected : @android:color/white}"
         style="@style/RecipeCard">
 
         <LinearLayout
@@ -21,27 +26,12 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <!--Todo test for fully rounded card images
-            <android.support.v7.widget.CardView
-                android:id="@+id/crd_imageview_wrapper"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:transitionName="@string/transition_rounded_to_square"
-                app:cardCornerRadius="10dp">
-                <ImageView
-                    android:id="@+id/ivw_crd_preview"
-                    style="@style/CardImagePreview"
-                    app:imageFilePath="@{recipe.getImageFilePath()}"
-                    tools:src="@drawable/sample_image"/>
-
-            </android.support.v7.widget.CardView>-->
-
             <com.makeramen.roundedimageview.RoundedImageView
                 android:id="@+id/ivw_crd_preview"
                 style="@style/CardImagePreview"
                 app:riv_corner_radius_top_left="10dp"
                 app:riv_corner_radius_top_right="10dp"
-                app:imageFilePath="@{recipe.getImageFilePath()}"
+                app:imagePath="@{recipe.getImagePath()}"
                 app:onLoadedListener="@{imageLoadedCallback}"
                 tools:src="@drawable/sample_image"/>
 
@@ -51,7 +41,7 @@
 
                 <TextView
                     android:id="@+id/txt_crd_title"
-                    style="@style/CardRecipeTitle"
+                    style="@style/Title"
                     android:text="@{recipe.getTitle()}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

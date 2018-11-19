@@ -26,7 +26,6 @@ public final class ProviderContract {
     //Projection to access whole Recipe record
     public static final String[] RECIPE_PROJECTION_FULL = {
             RecipeEntry._ID,
-            RecipeEntry.VIEW_ORDER,
             RecipeEntry.TITLE,
             RecipeEntry.CALORIES_PER_PERSON,
             RecipeEntry.DURATION,
@@ -53,7 +52,6 @@ public final class ProviderContract {
      */
     public final class RecipeEntry implements BaseColumns {
 
-        public static final String VIEW_ORDER = "ViewOrder";
         public static final String TITLE = "Title";
         public static final String CALORIES_PER_PERSON = "Calories";
         public static final String DURATION = "Duration";
@@ -76,6 +74,6 @@ public final class ProviderContract {
 
         public static final String RECIPE_ID = "Recipe";
         public static final String STEP_NO = "StepNo";
-        public static final String TEXT = "Text";
+        public static final String STEP_TEXT = "Text";
     }
 }

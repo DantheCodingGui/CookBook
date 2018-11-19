@@ -1,50 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.danthecodinggui.recipes.view.activity_view_recipe.ViewRecipeActivity">
     <data>
+        <import type="com.danthecodinggui.recipes.msc.utility.StringUtils"/>
         <variable
             name="recipe"
             type="com.danthecodinggui.recipes.model.object_models.Recipe"/>
     </data>
-    <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.danthecodinggui.recipes.view.view_recipe.ViewRecipeActivity"
         android:id="@+id/view_recipe_root">
 
         <android.support.design.widget.AppBarLayout
             android:id="@+id/abl_view_recipe"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:elevation="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/tbar_vw_recipe"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:title="@{recipe.getTitle()}"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:title="@{recipe.getTitle()}"/>
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/cly_vw_optionals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/txt_vw_kcal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="@font/open_sans_light"
+                    android:text="@{StringUtils.minsToHourMins(recipe.getTimeInMins())}"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/txt_vw_duration"
+                    app:layout_constraintHorizontal_bias="0.031"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    tools:text="25kcal" />
+
+                <TextView
+                    android:id="@+id/txt_vw_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="@font/open_sans_light"
+                    android:text="@{(recipe.getCalories == 0) ? @string/empty : @plurals/txt_calories(recipe.getCalories(), recipe.getCalories())}"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="1.0"
+                    tools:text="15 mins" />
+            </android.support.constraint.ConstraintLayout>
 
             <android.support.design.widget.TabLayout
                 android:id="@+id/tly_view_recipe"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_gravity="bottom"
+                android:overScrollMode="never"
                 app:tabGravity="center"
                 app:tabIndicatorColor="@android:color/white"
-                app:tabMode="fixed"
-                android:overScrollMode="never"/>
-
+                app:tabMode="fixed" />
         </android.support.design.widget.AppBarLayout>
+
+        <View
+            android:id="@+id/vw_frag_background"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:visibility="visible"
+            android:background="@android:color/transparent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/abl_view_recipe"/>
 
         <android.support.v4.view.ViewPager
             android:id="@+id/vpr_view_recipe"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+            android:layout_height="0dp"
+            android:layout_marginTop="20dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:layout_constraintTop_toBottomOf="@+id/abl_view_recipe"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <!--need activity_margin_content in root for rest of view-->
-
-    </android.support.design.widget.CoordinatorLayout>
+    </android.support.constraint.ConstraintLayout>
 </layout>

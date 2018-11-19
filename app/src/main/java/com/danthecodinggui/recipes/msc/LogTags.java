@@ -8,4 +8,6 @@ public class LogTags {
     public static final String PERMISSIONS = "Permissions";
     public static final String GLIDE = "Glide";
     public static final String DATA_LOADING = "DataLoading";
+    public static final String CAMERA = "Camera";
+    public static final String SAVE_RECIPE = "SaveRecipe";
 }

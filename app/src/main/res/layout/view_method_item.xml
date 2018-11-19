@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <data>
+        <variable
+            name="methodStep"
+            type="com.danthecodinggui.recipes.model.object_models.MethodStep"/>
+    </data>
+    <TextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/txt_method_item"
+        android:fontFamily="@font/open_sans_light"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="2dp"
+        android:textSize="20sp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:padding="5dp"
+        android:textColor="@color/grey_text"
+        app:stepNum="@{methodStep.getStepNumber()}"
+        app:stepText="@{methodStep.getStepText()}"/>
+</layout>

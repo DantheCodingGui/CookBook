@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#009900</color>
-    <color name="colorPrimaryDark">#009900</color>
-    <color name="colorAccent">#006600</color>
+    <color name="colorPrimary">#8BC34A</color>
+    <color name="colorPrimaryDark">#8BC34A</color>
+    <color name="colorAccent">#558B2F</color>
     <color name="fab_label">#333333</color>
     <color name="black_faded">#77222222</color>
     <color name="backToolbar">#E2E2E2</color>
+
+    <color name="snackbar_action_default">#03A9F4</color>
 
     <color name="material_light_primary_text">#DE000000</color>
     <color name="material_light_hint_text">#61000000</color>
@@ -15,6 +17,9 @@
     <color name="active_icon_color">#8A000000</color>
     <color name="cards_and_dialogs_color">@android:color/white</color>
     <color name="grey_text">#757575</color>
-    <color name="colorIngredients">#1A237E</color>
-    <color name="colorMethodStep">#E65100</color>
+    <color name="scrimGrey">#77000000</color>
+    <color name="colorAccentFaded">#44558B2F</color>
+    <color name="colorBackground">#EEEEEE</color>
+    <!--<color name="colorCardSelected">#E0F7FA</color>-->
+    <color name="colorCardSelected">#E0F7FA</color>
 </resources>

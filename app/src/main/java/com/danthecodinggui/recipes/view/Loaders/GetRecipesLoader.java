@@ -1,27 +1,37 @@
 package com.danthecodinggui.recipes.view.Loaders;
 
-
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.BaseColumns;
-import android.support.annotation.Nullable;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.LogTags;
+import com.danthecodinggui.recipes.msc.utility.FileUtils;
+import com.danthecodinggui.recipes.msc.utility.Utility;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_KEY_HOME_SORT_DIR;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_KEY_HOME_SORT_ORDER;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.SORT_ORDER_ALPHABETICAL;
 import static com.danthecodinggui.recipes.msc.LogTags.DATA_LOADING;
 
-public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
+/**
+ * Loads recipes from database into HomeActivity view
+ */
+public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
+        implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private ContentResolver contentResolver;
 
@@ -30,17 +40,23 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
     private ImagePermissionsListener permissionsCallback;
 
     private boolean waitingForPermissionResponse = false;
-//
-//    private ForceLoadContentObserver contentObserver;
-//
+
+    private ContentObserver recipesObserver;
+
     private Handler uiThread;
 
+    private int recipesSortOrder;
+    private boolean isSortDirAsc;
+
     public GetRecipesLoader(Context context, Handler uiThread,
-                     ImagePermissionsListener permissionCallback) {
+                     ImagePermissionsListener permissionCallback,
+                        int recipesSortOrder, boolean recipesSortDir) {
         super(context);
         this.uiThread = uiThread;
         contentResolver = context.getContentResolver();
         this.permissionsCallback = permissionCallback;
+        this.recipesSortOrder = recipesSortOrder;
+        this.isSortDirAsc = recipesSortDir;
     }
 
     @Override
@@ -55,10 +71,15 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
             forceLoad();
         }
 
-//        if (contentObserver == null) {
-//            contentObserver = new ForceLoadContentObserver();
-//            contentResolver.registerContentObserver(ProviderContract.METHOD_URI, false, contentObserver);
-//        }
+        if (recipesObserver == null) {
+            recipesObserver = new ContentObserver(uiThread) {
+                @Override
+                public void onChange(boolean selfChange, Uri uri) {
+                    onContentChanged();
+                }
+            };
+            contentResolver.registerContentObserver(ProviderContract.RECIPES_URI, false, recipesObserver);
+        }
     }
 
 
@@ -73,7 +94,7 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
                 ProviderContract.RECIPE_PROJECTION_FULL,
                 null,
                 null,
-                ProviderContract.RecipeEntry.VIEW_ORDER + " ASC"
+                 ParseSortOrder()
         );
         //Cursor for the ingredients/method queries afterwards
         Cursor countCursor;
@@ -83,7 +104,7 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
 
         while (baseCursor.moveToNext()) {
             //Get base recipe data
-            temp = BuildBaseModel(baseCursor);
+            temp = Utility.BuildModelFromCursor(baseCursor);
 
             //Add ingredients data to record
             String[] countSelArgs = { Long.toString(
@@ -116,8 +137,8 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
                 temp = AddStepsCount(countCursor, temp);
 
 
-            //Need to ask for permission if a recipe includes a photo
-            if (temp.hasPhoto() && permissionsCallback != null) {
+            //Need to ask for permission if a recipe includes a local photo
+            if (temp.hasPhoto() && FileUtils.isImageLocal(temp.getImagePath()) && permissionsCallback != null) {
                 AskForReadPermission();
 
                 while (waitingForPermissionResponse) {
@@ -152,10 +173,10 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
         if (cachedRecords != null)
             cachedRecords = null;
 
-//        if (contentObserver != null) {
-//            contentResolver.unregisterContentObserver(contentObserver);
-//            contentObserver = null;
-//        }
+        if (recipesObserver != null) {
+            contentResolver.unregisterContentObserver(recipesObserver);
+            recipesObserver = null;
+        }
     }
 
     @Override
@@ -197,40 +218,6 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
     }
 
     /**
-     * Decides what type of Recipe to build based on what data is saved in the table
-     * record
-     * @return The base Recipe constructed with the data found in the record
-     */
-    private Recipe BuildBaseModel(Cursor cursor) {
-
-        //Constant values, always used in constructor
-        long pk = cursor.getLong(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry._ID));
-        String recipeTitle = cursor.getString(cursor.getColumnIndexOrThrow(
-                ProviderContract.RecipeEntry.TITLE));
-
-        int calories = 0;
-        int timeInMins = 0;
-        String photoPath = null;
-
-        //If optional values exist assign to variables
-        if (!cursor.isNull(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.CALORIES_PER_PERSON)))
-            calories = cursor.getInt(cursor.getColumnIndexOrThrow(
-                    ProviderContract.RecipeEntry.CALORIES_PER_PERSON));
-        if (!cursor.isNull(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.DURATION)))
-            timeInMins = cursor.getInt(cursor.getColumnIndexOrThrow(
-                    ProviderContract.RecipeEntry.DURATION));
-        if (!cursor.isNull(cursor.getColumnIndexOrThrow(ProviderContract.RecipeEntry.IMAGE_PATH)))
-            photoPath = cursor.getString(cursor.getColumnIndexOrThrow(
-                    ProviderContract.RecipeEntry.IMAGE_PATH));
-
-        return new Recipe.RecipeBuilder(pk, recipeTitle)
-                .calories(calories)
-                .timeInMins(timeInMins)
-                .imageFilePath(photoPath)
-                .build();
-    }
-
-    /**
      * Add the number of ingredients to the current record being loaded
      * @return The updated record
      */
@@ -252,6 +239,68 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>> {
                 cursor.getColumnIndexOrThrow(BaseColumns._COUNT))
         );
         return currentModel;
+    }
+
+    private String ParseSortOrder() {
+        String sortDir = isSortDirAsc ? " ASC" : " DESC";
+
+        if (recipesSortOrder == SORT_ORDER_ALPHABETICAL)
+            return ProviderContract.RecipeEntry.TITLE + " COLLATE NOCASE" + sortDir;
+        else
+            return ProviderContract.RecipeEntry._ID + sortDir;
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String prefKey) {
+        switch (prefKey) {
+            case PREF_KEY_HOME_SORT_ORDER:
+                recipesSortOrder = sharedPreferences.getInt(prefKey, SORT_ORDER_ALPHABETICAL);
+
+                onRecipeSortChanged();
+                break;
+            case PREF_KEY_HOME_SORT_DIR:
+                isSortDirAsc = sharedPreferences.getBoolean(prefKey, true);
+
+                onRecipeSortChanged();
+                break;
+        }
+    }
+
+    private void onRecipeSortChanged() {
+
+        if (cachedRecords == null) {
+            startLoading();
+            return;
+        }
+
+        Comparator<Recipe> comparator;
+
+        //Sort cached list and resend to activity
+        if (recipesSortOrder == SORT_ORDER_ALPHABETICAL)
+            comparator = new Comparator<Recipe>() {
+                @Override
+                public int compare(Recipe recipe1, Recipe recipe2) {
+                    if (isSortDirAsc)
+                        return recipe1.getTitle().compareToIgnoreCase(recipe2.getTitle());
+                    else
+                        return recipe2.getTitle().compareToIgnoreCase(recipe1.getTitle());
+                }
+            };
+        else
+            comparator = new Comparator<Recipe>() {
+                @Override
+                public int compare(Recipe recipe1, Recipe recipe2) {
+                    if (isSortDirAsc ?
+                            (recipe1.getRecipeId() > recipe2.getRecipeId()) :
+                            (recipe1.getRecipeId() < recipe2.getRecipeId()))
+                        return 1;
+                    else
+                        return -1;
+                }
+            };
+
+        Collections.sort(cachedRecords, comparator);
+        onStartLoading();
     }
 
     public interface ImagePermissionsListener {

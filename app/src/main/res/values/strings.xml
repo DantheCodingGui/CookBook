@@ -2,13 +2,13 @@
     <string name="app_name">CookBook</string>
 
 
-    <string name="tab_ingredients">Ingredients</string>
-    <string name="tab_method">Method</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="method">Method</string>
 
     <string name="txt_time_to_make"></string>
-    <string name="search_title">Search Recipes</string>
+    <string name="menu_search_title">Search Recipes</string>
     <string name="main_card_transition_name">transition_card</string>
-    <string name="txt_add_photo">Add Photo</string>
+    <string name="txt_add_image">Add Photo</string>
     <string name="txt_add_time">Add Time</string>
     <string name="txt_add_kcal">Add Calorie Count</string>
     <string name="title_hint">Name</string>
@@ -16,18 +16,57 @@
     <string name="txt_add_method_step">Steps</string>
     <string name="txt_ingredient_item">\u25CB %s</string>
     <string name="txt_method_step_item">%1$d. %2$s</string>
+    <string name="txt_kcal_per_person">%d Kcal Per Person</string>
     <string name="add_transition">add_recipe_transition</string>
     <string name="txt_search_no_recipes">Uh oh, can\'t seem to find that one...</string>
     <string name="search_hint">Search...</string>
-    <string name="perm_dialog_read_external">This permission is required to display recipe images,
-        do you still want to disable this functionality?</string>
-    <string name="perm_dialog_butt_deny">Yes</string>
-    <string name="perm_dialog_butt_permit">No</string>
-    <string name="perm_snackbar_msg">You can re-enable this permission in your device\'s settings</string>
+    <string name="perm_dialog_butt_deny">Deny</string>
+    <string name="perm_dialog_butt_permit">Enable</string>
+    <string name="perm_reenable_snackbar_msg">Enable the %s permission here</string>
     <string name="txt_no_recipes">You haven\'t got any recipes yet,\n Lets Get Started!</string>
 
     <string name="transition_navbar">transition_nav_bar</string>
     <string name="transition_image_preview">CardToView_image_preview</string>
 
     <string name="empty" />
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">CANCEL</string>
+    <string name="dialog_kcal_title">Calories Per Person</string>
+    <string name="etxt_hint_addTitle">Name</string>
+
+    <string name="btn_add_photo_library">From Library</string>
+    <string name="btn_add_photo">From Camera</string>
+    <string name="btn_add_photo_web">From The Web</string>
+    <string name="etxt_hint_addIngredient">Ingredient Name</string>
+    <string name="etxt_hint_addStep">Step Text</string>
+    <string name="txt_no_steps">Let\'s Add the Steps</string>
+    <string name="txt_no_ingredients">Lets Add the Ingredients</string>
+    <string name="dialog_url_title">Image URL</string>
+    <string name="url_invalid">URL isn\'t valid</string>
+    <string name="url_not_image">URL isn\'t an image</string>
+    <string name="snackbar_settings">Settings</string>
+    <string name="perm_denied_snackbar_msg">You can Re-Enable permissions at any time in \'App Info\'</string>
+    <string name="menu_add_recipe_title">Add Recipe</string>
+    <string name="snackbar_no_title">Please Enter a Recipe Name</string>
+    <string name="snackbar_title_invalid">Please enter a valid name</string>
+    <string name="snackbar_no_ingredients">Please enter at least one ingredient</string>
+    <string name="snackbar_no_steps">Please enter at least one step for the method</string>
+    <string name="perm_camera_denied">Without this permission, the photo cannot be saved</string>
+    <string name="recipe_removed">Recipe Deleted</string>
+    <string name="multiple_recipes_removed">Recipes Deleted</string>
+    <string name="snackbar_undo">UNDO</string>
+    <string name="menu_delete_recipe">Delete</string>
+    <string name="menu_select_all">Select All</string>
+    <string name="action_mode_title">%d Selected</string>
+    <string name="menu_sort_by">Sort By</string>
+    <string name="btn_sort_by_name">Name</string>
+    <string name="btn_sort_by_date">Last Added</string>
+    <string name="sort_by_sheet_title">Sort By</string>
+
+    <string name="shortcut_add_recipe_short">Add Recipe</string>
+    <string name="shortcut_add_recipe_long">Add New Recipe</string>
+    <string name="are_you_sure_discard">Are you sure you want to leave?</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
+    <string name="menu_edit_recipe">Edit Recipe</string>
 </resources>

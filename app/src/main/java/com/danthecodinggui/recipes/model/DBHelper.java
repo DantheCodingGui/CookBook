@@ -16,7 +16,6 @@ class DBHelper extends SQLiteOpenHelper {
     private static final String CREATE_RECIPE = "CREATE TABLE " +
             DBSchema.RecipeEntry.TABLE_NAME + "(" +
             DBSchema.RecipeEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            DBSchema.RecipeEntry.VIEW_ORDER + " INTEGER NOT NULL, " +
             DBSchema.RecipeEntry.TITLE + " TEXT NOT NULL, " +
             DBSchema.RecipeEntry.CALORIES_PER_PERSON + " INTEGER, " +
             DBSchema.RecipeEntry.DURATION + " INTEGER, " +

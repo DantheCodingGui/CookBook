@@ -1,199 +1,445 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <import type="android.graphics.drawable.Drawable"/>
+        <variable name="imagePath" type="String"/>
+        <variable
+            name="imageLoadedCallback"
+            type="com.bumptech.glide.request.RequestListener&lt;Drawable&gt;"/>
+    </data>
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/cdly_add_root"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/background_light"
-        android:id="@+id/add_root"
-        android:orientation="vertical"
-        tools:context="com.danthecodinggui.recipes.view.AddRecipeActivity">
+        android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/tbar_add"
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/cly_add_container"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.Light"/>
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true">
 
-        <android.support.design.widget.CoordinatorLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ScrollView
+            <LinearLayout
+                android:id="@+id/lly_toolbar_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:background="@color/backToolbar"
+                android:elevation="5dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <LinearLayout
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/tbar_add"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="@color/backToolbar" />
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/imv_image_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:visibility="gone">
 
-                    <android.support.design.widget.TextInputLayout
-                        android:id="@+id/til_title"
+                    <ImageButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="10dp">
+                        android:layout_margin="5dp"
+                        android:background="@android:color/transparent"
+                        android:elevation="2dp"
+                        android:onClick="RemoveImage"
+                        android:padding="5dp"
+                        android:src="@drawable/ic_close"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                        <EditText
-                            android:id="@+id/etxt_title"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:minWidth="200dp"
-                            android:maxLength="40"
-                            android:maxLines="1"
-                            android:inputType="text"
-                            android:hint="@string/title_hint"/>
-
-                    </android.support.design.widget.TextInputLayout>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="75dp"
+                        android:layout_gravity="top"
+                        android:background="@drawable/top_scrim"
+                        android:elevation="1dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/imv_add_preview"
+                        android:id="@+id/imv_add_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:imagePath="@{imagePath}"
+                        app:onLoadedListener="@{imageLoadedCallback}"
+                        tools:src="@drawable/sample_image" />
+                </android.support.constraint.ConstraintLayout>
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/cly_add_tbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
+                    android:background="@color/backToolbar"
+                    android:paddingStart="20dp"
+                    android:paddingTop="15dp"
+                    android:paddingEnd="5dp"
+                    android:paddingBottom="15dp">
+
+                    <EditText
+                        android:id="@+id/etxt_recipe_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:maxHeight="200dp"
-                        android:adjustViewBounds="true"
-                        android:scaleType="centerCrop"
-                        tools:src="@drawable/sample_image"/>
-
-                    <android.support.v4.widget.Space
-                        android:layout_width="match_parent"
-                        android:layout_height="20dp" />
+                        android:background="@android:color/transparent"
+                        android:hint="@string/etxt_hint_addTitle"
+                        android:inputType="text|textNoSuggestions"
+                        android:maxLength="40"
+                        android:singleLine="true"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="10dp">
+                        android:id="@+id/but_kcal"
+                        style="@style/AddRecipeClickable"
+                        android:onClick="AddKcal"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/etxt_recipe_name"
+                        app:layout_constraintVertical_bias="0.0">
 
                         <TextView
-                            android:layout_width="match_parent"
+                            android:id="@+id/txt_kcal"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/txt_add_ingredients"
-                            android:textSize="18sp"/>
+                            android:layout_gravity="center_vertical"
+                            tools:text="340 Kcal" />
 
-                        <android.support.v4.widget.Space
-                            android:layout_width="match_parent"
-                            android:layout_height="20dp" />
+                        <ImageView style="@style/EditTextViewIcon" />
 
-                        <android.support.v7.widget.RecyclerView
-                            android:id="@+id/rvw_add_ingredients"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            tools:listitem="@layout/ingredient_item"
-                            tools:itemCount="5"/>
-
-                        <!--RecyclerView item but with edittext to input new ingredients-->
-                        <include
-                            android:id="@+id/inc_add_ingredient"
-                            layout="@layout/add_ingredient"/>
-
-                        <android.support.v4.widget.Space
-                            android:layout_width="match_parent"
-                            android:layout_height="20dp" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/txt_add_method_step"
-                            android:textSize="18sp"/>
-
-                        <android.support.v4.widget.Space
-                            android:layout_width="match_parent"
-                            android:layout_height="20dp" />
-
-                        <android.support.v7.widget.RecyclerView
-                            android:id="@+id/rvw_add_method"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            tools:listitem="@layout/method_item"
-                            tools:itemCount="5"/>
-
-                        <include
-                            android:id="@+id/inc_add_step"
-                            layout="@layout/add_step"/>
-
+                        <ImageButton
+                            style="@style/AddRecipeRemoveButton"
+                            android:onClick="RemoveKcal" />
                     </LinearLayout>
-                </LinearLayout>
-            </ScrollView>
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_add_menu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_add"
-                app:fabSize="normal"
-                android:focusable="false"
-                android:layout_gravity="bottom|end"
-                android:layout_margin="@dimen/fab_margin"
-                android:onClick="AnimateFabMenu"/>
+                    <LinearLayout
+                        android:id="@+id/but_time"
+                        style="@style/AddRecipeClickable"
+                        android:onClick="AddTime"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/etxt_recipe_name">
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_add_photo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_photo"
-                android:visibility="invisible"
-                android:focusable="false"
-                app:fabSize="mini"
-                android:layout_gravity="bottom|end"
-                android:layout_margin="70dp" />
+                        <TextView
+                            android:id="@+id/txt_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            tools:text="20 Minutes" />
 
-            <TextView
-                android:id="@+id/txt_add_photo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/FabTag"
-                android:layout_gravity="bottom|end"
-                android:layout_marginBottom="77dp"
-                android:layout_marginEnd="119dp"
-                android:text="@string/txt_add_photo"/>
+                        <ImageView style="@style/EditTextViewIcon" />
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_add_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_time"
-                android:visibility="invisible"
-                android:focusable="false"
-                app:fabSize="mini"
-                android:layout_gravity="bottom|end"
+                        <ImageButton
+                            style="@style/AddRecipeRemoveButton"
+                            android:onClick="RemoveDuration" />
+                    </LinearLayout>
+                </android.support.constraint.ConstraintLayout>
+            </LinearLayout>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/crdv_ingredients"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:layout_marginBottom="10dp"
-                android:layout_marginEnd="86dp" />
+                android:clickable="true"
+                android:elevation="4dp"
+                android:focusable="true"
+                android:onClick="ViewIngredients"
+                app:cardCornerRadius="4dp"
+                app:layout_constraintBottom_toTopOf="@+id/crdv_method"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lly_toolbar_container">
 
-            <TextView
-                android:id="@+id/txt_add_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/FabTag"
-                android:layout_gravity="bottom|end"
-                android:layout_marginBottom="17dp"
-                android:layout_marginEnd="135dp"
-                android:text="@string/txt_add_time"/>
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/ctly_ingredients_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:animateLayoutChanges="true"
+                    android:padding="10dp">
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_add_kcal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_kcal"
-                android:visibility="invisible"
-                android:focusable="false"
-                app:fabSize="mini"
-                android:layout_gravity="bottom|end"
-                android:layout_marginBottom="86dp"
-                android:layout_marginEnd="10dp" />
+                    <TextView
+                        android:id="@+id/txt_ingredients_title"
+                        style="@style/Title"
+                        android:textColor="@color/colorAccent"
+                        android:text="@string/ingredients"
+                        android:textSize="25sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/txt_add_kcal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/FabTag"
-                android:layout_gravity="bottom|end"
-                android:layout_marginBottom="135dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/txt_add_kcal"/>
+                    <TextView
+                        android:id="@+id/txt_no_ingredients"
+                        android:text="@string/txt_no_ingredients"
+                        style="@style/AddNone"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
 
-        </android.support.design.widget.CoordinatorLayout>
-    </LinearLayout>
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rvw_new_ingredients"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="70dp"
+                        android:overScrollMode="never"
+                        android:padding="10dp"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toTopOf="@+id/etxt_add_ingredient"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.094" />
+
+                    <ImageView
+                        android:id="@+id/imv_no_ingredients"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:src="@drawable/ic_add_light"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/txt_ingredients_title" />
+
+                    <ImageButton
+                        android:id="@+id/but_add_ingredient"
+                        android:layout_width="47dp"
+                        android:layout_height="47dp"
+                        android:elevation="1dp"
+                        android:background="@drawable/circular_imagebutton"
+                        android:onClick="AddIngredient"
+                        android:src="@drawable/ic_add"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toTopOf="@+id/etxt_add_ingredient"
+                        app:layout_constraintBottom_toBottomOf="@+id/etxt_add_ingredient"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <EditText
+                        android:id="@+id/etxt_add_ingredient"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginEnd="2dp"
+                        android:visibility="gone"
+                        android:background="@drawable/rounded_corner_edittext"
+                        android:padding="10dp"
+                        android:paddingStart="15dp"
+                        android:paddingEnd="50dp"
+                        android:singleLine="true"
+                        android:hint="@string/etxt_hint_addIngredient"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </android.support.constraint.ConstraintLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/crdv_method"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="10dp"
+                android:clickable="true"
+                android:elevation="4dp"
+                android:focusable="true"
+                android:onClick="ViewMethod"
+                app:cardCornerRadius="4dp"
+                app:layout_constraintBottom_toTopOf="@+id/spc_add"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/crdv_ingredients">
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/ctly_method_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:animateLayoutChanges="true"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/txt_method_title"
+                        style="@style/Title"
+                        android:textColor="@color/colorAccent"
+                        android:text="@string/method"
+                        android:textSize="25sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txt_no_steps"
+                        android:text="@string/txt_no_steps"
+                        style="@style/AddNone"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rvw_new_steps"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="70dp"
+                        android:overScrollMode="never"
+                        android:padding="10dp"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toTopOf="@+id/etxt_add_step"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.094" />
+
+                    <ImageView
+                        android:id="@+id/imv_no_method"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:src="@drawable/ic_add_light"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/txt_method_title" />
+
+                    <ImageButton
+                        android:id="@+id/but_add_step"
+                        android:layout_width="47dp"
+                        android:layout_height="47dp"
+                        android:elevation="1dp"
+                        android:background="@drawable/circular_imagebutton"
+                        android:onClick="AddMethodStep"
+                        android:src="@drawable/ic_add"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toTopOf="@+id/etxt_add_step"
+                        app:layout_constraintBottom_toBottomOf="@+id/etxt_add_step"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <EditText
+                        android:id="@+id/etxt_add_step"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginEnd="2dp"
+                        android:visibility="gone"
+                        android:background="@drawable/rounded_corner_edittext"
+                        android:padding="10dp"
+                        android:paddingStart="15dp"
+                        android:paddingEnd="50dp"
+                        android:maxLines="3"
+                        android:inputType="textMultiLine"
+                        android:hint="@string/etxt_hint_addStep"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </android.support.constraint.ConstraintLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v4.widget.Space
+                android:id="@+id/spc_add"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/crdv_method" />
+        </android.support.constraint.ConstraintLayout>
+
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_add_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_add"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:onClick="AnimateFabMenu"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_add_photo"
+            style="@style/FabMenuItem"
+            app:fabSize="mini"
+            android:layout_margin="70dp"
+            android:src="@drawable/ic_image"
+            app:layout_behavior="com.danthecodinggui.recipes.view.activity_add_recipe.SnackBarBehavior"
+            android:onClick="addImage" />
+        <TextView
+            android:id="@+id/txt_add_photo"
+            style="@style/FabTag"
+            app:layout_behavior="com.danthecodinggui.recipes.view.activity_add_recipe.SnackBarBehavior"
+            android:layout_marginBottom="77dp"
+            android:layout_marginEnd="119dp"
+            android:text="@string/txt_add_image"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_add_time"
+            style="@style/FabMenuItem"
+            app:fabSize="mini"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="86dp"
+            android:src="@drawable/ic_time"
+            app:layout_behavior="com.danthecodinggui.recipes.view.activity_add_recipe.SnackBarBehavior"
+            android:onClick="AddTime"/>
+        <TextView
+            android:id="@+id/txt_add_time"
+            style="@style/FabTag"
+            app:layout_behavior="com.danthecodinggui.recipes.view.activity_add_recipe.SnackBarBehavior"
+            android:layout_marginBottom="17dp"
+            android:layout_marginEnd="135dp"
+            android:text="@string/txt_add_time"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_add_kcal"
+            style="@style/FabMenuItem"
+            app:fabSize="mini"
+            android:layout_marginBottom="86dp"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/ic_kcal"
+            app:layout_behavior="com.danthecodinggui.recipes.view.activity_add_recipe.SnackBarBehavior"
+            android:onClick="AddKcal"/>
+        <TextView
+            android:id="@+id/txt_add_kcal"
+            style="@style/FabTag"
+            app:layout_behavior="com.danthecodinggui.recipes.view.activity_add_recipe.SnackBarBehavior"
+            android:layout_marginBottom="135dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/txt_add_kcal"/>
+
+        <include
+            android:id="@+id/includeImageSheet"
+            layout="@layout/add_image_sheet"/>
+
+    </android.support.design.widget.CoordinatorLayout>
 </layout>

@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * MainActivity RecyclerView model
+ * HomeActivity RecyclerView model
  */
 public class Recipe implements Parcelable {
 
@@ -15,7 +15,8 @@ public class Recipe implements Parcelable {
     private int ingredientsNo;
     private int stepsNo;
 
-    private String imageFilePath;
+    //Can be a URL of a filepath
+    private String imagePath;
 
     private int calories;
     private int timeInMins;
@@ -25,7 +26,7 @@ public class Recipe implements Parcelable {
         this.title = title;
         this.calories = calories;
         this.timeInMins = timeInMins;
-        this.imageFilePath = imagefilePath;
+        this.imagePath = imagefilePath;
     }
 
     /**
@@ -41,7 +42,7 @@ public class Recipe implements Parcelable {
      * @return
      */
     public boolean hasPhoto() {
-        return imageFilePath != null;
+        return imagePath != null;
     }
 
     public long getRecipeId() {
@@ -69,8 +70,11 @@ public class Recipe implements Parcelable {
         this.stepsNo = stepsNo;
     }
 
-    public String getImageFilePath() {
-        return imageFilePath;
+    public String getImagePath() {
+        return imagePath;
+    }
+    public void setImagePath(String newPath) {
+        imagePath = newPath;
     }
 
     public int getCalories() {
@@ -92,7 +96,7 @@ public class Recipe implements Parcelable {
         parcel.writeString(title);
         parcel.writeInt(ingredientsNo);
         parcel.writeInt(stepsNo);
-        parcel.writeString(imageFilePath);
+        parcel.writeString(imagePath);
         parcel.writeInt(calories);
         parcel.writeInt(timeInMins);
     }
@@ -102,7 +106,7 @@ public class Recipe implements Parcelable {
         this.title = parcel.readString();
         this.ingredientsNo = parcel.readInt();
         this.stepsNo = parcel.readInt();
-        this.imageFilePath = parcel.readString();
+        this.imagePath = parcel.readString();
         this.calories = parcel.readInt();
         this.timeInMins = parcel.readInt();
     }
@@ -121,6 +125,21 @@ public class Recipe implements Parcelable {
             return new Recipe[size];
         }
     };
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Recipe))
+            return false;
+
+        Recipe ob = (Recipe) obj;
+        return ob.recipePk == recipePk &&
+                ob.getTitle().equals(title) &&
+                ob.getCalories() == calories &&
+                ob.getTimeInMins() == timeInMins &&
+                (imagePath == null ? ob.getImagePath() == null : imagePath.equals(ob.getImagePath())) &&
+                ob.getIngredientsNo() == ingredientsNo &&
+                ob.getStepsNo() == stepsNo;
+    }
 
     /**
      * Builds recipe objects, required due to large amount of constructor params and the fact that

@@ -22,37 +22,36 @@ public class PermissionsHandler{
      * */
     private static final boolean runtimePermissions = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
 
-    //Permission strings used in the application
+    //Permission that this application should need
     private static final String[] APPLICATION_PERMISSIONS = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA
     };
 
     //Permission request return codes
-    public static final int PERMISSION_GRANTING = 0;
-    public static final int PERMISSION_ALREADY_GRANTED = 1;
-    public static final int PERMISSION_PREVIOUSLY_DENIED = 2;
+    public static final int PERMISSION_REQUESTING = 0;
+    public static final int PERMISSION_GRANTED = 1;
+    public static final int PERMISSION_DENIED = 2;
 
     /**
      *
      * @param permission The permission being requested
-     * @param requestId A unique id for the request to be used in identifying the request later.
-     * @param rationalOverride States whether user has denied a permission, and changed their mind
-     *                         after reading the rational dialog
+     * @param requestId A unique id for the request to be used in identifying the request later
+     * @param overrideRational Force permission to be asked, even if user has denied previously
      * @return The response code, being one of: <br/>
      * <ul>
-     *     <li><code>PERMISSION_GRANTING</code> - The permission has not been granted yet, but now
+     *     <li><code>PERMISSION_REQUESTING</code> - The permission has not been granted yet, but now
      *         a permission request bas been filed. Override the Activities <code>onRequestPermissionsResult()</code>
      *         method to see the asynchronous result.</li>
-     *     <li><code>PERMISSION_ALREADY_GRANTED</code> - The permission has already been granted.
+     *     <li><code>PERMISSION_GRANTED</code> - The permission has already been granted.
      *     The caller is allowed to run the code requiring this permission.</li>
-     *     <li><code>PERMISSION_PREVIOUSLY_DENIED</code> - The user has previously denied the permission.
+     *     <li><code>PERMISSION_DENIED</code> - The user has previously denied the permission.
      *     If intent not obvious then present some kind of explanation dialogue (async) before asking again.</li>
      * </ul>
      *
      */
-    public static int AskForPermission(Context context, String permission, int requestId,
-                                       boolean rationalOverride) {
+    public static int AskForPermission(Context context, String permission, int requestId, boolean overrideRational) {
 
         Activity srcActivity = (Activity) context;
 
@@ -67,33 +66,51 @@ public class PermissionsHandler{
         if (!isValidPermission)
             throw new InvalidPermissionException("Requested permission is not in the manifest");
 
-        //Precaution to avoid unnecessary checks if not needed
+        //Avoids unnecessary checks if not needed
         if (!runtimePermissions)
-            return PERMISSION_ALREADY_GRANTED;
+            return PERMISSION_GRANTED;
 
         //Does the app already have the requested permission??
         if (ContextCompat.checkSelfPermission(context, permission)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(srcActivity, permission)
-                    && !rationalOverride) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(srcActivity, permission) && !overrideRational) {
                 Log.i(PERMISSIONS, "Permission " + permission + " previously been denied");
-                return PERMISSION_PREVIOUSLY_DENIED;
+                return PERMISSION_DENIED;
             }
             else {
                 ActivityCompat.requestPermissions(srcActivity, new String[]{permission}, requestId);
                 Log.i(PERMISSIONS, "Permission " + permission + " being granted");
-                return PERMISSION_GRANTING;
+                return PERMISSION_REQUESTING;
             }
         }
         else {
             Log.i(PERMISSIONS, "Permission " + permission + " already granted");
-            return PERMISSION_ALREADY_GRANTED;
+            return PERMISSION_GRANTED;
         }
     }
 
-    private static class InvalidPermissionException extends RuntimeException {
+    /**
+     *
+     * @param permission The permission being requested
+     * @param requestId A unique id for the request to be used in identifying the request later
+     * @return The response code, being one of: <br/>
+     * <ul>
+     *     <li><code>PERMISSION_REQUESTING</code> - The permission has not been granted yet, but now
+     *         a permission request bas been filed. Override the Activities <code>onRequestPermissionsResult()</code>
+     *         method to see the asynchronous result.</li>
+     *     <li><code>PERMISSION_GRANTED</code> - The permission has already been granted.
+     *     The caller is allowed to run the code requiring this permission.</li>
+     *     <li><code>PERMISSION_DENIED</code> - The user has previously denied the permission.
+     *     If intent not obvious then present some kind of explanation dialogue (async) before asking again.</li>
+     * </ul>
+     *
+     */
+    public static int AskForPermission(Context context, String permission, int requestId) {
+        return AskForPermission(context, permission, requestId, false);
+    }
 
+    private static class InvalidPermissionException extends RuntimeException {
         private InvalidPermissionException(String message) {
             super(message);
         }

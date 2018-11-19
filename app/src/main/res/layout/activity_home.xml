@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/cly_main_root"
+        tools:context="com.danthecodinggui.recipes.view.activity_home.HomeActivity">
+
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/abl_main"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="10dp">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/tbar_home"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorPrimary"
+                app:titleTextColor="@android:color/white"
+                app:collapseIcon="@drawable/ic_arrow_back"
+                app:layout_scrollFlags="scroll|enterAlways|snap" />
+        </android.support.design.widget.AppBarLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rvw_recipes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:itemCount="5"
+            tools:listitem="@layout/recipe_card_photo_basic"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:layoutAnimation="@anim/layout_animation_enter_upwards"
+            android:overScrollMode="never"/>
+
+        <!--View shown when RecyclerView filtered and no matches found-->
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="50dp">
+
+            <TextView
+                android:id="@+id/txt_search_no_items"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/open_sans_light"
+                android:text="@string/txt_search_no_recipes"
+                android:visibility="invisible"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/txt_no_items"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/open_sans_light"
+                android:text="@string/txt_no_recipes"
+                android:visibility="invisible"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_add_recipe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_add"
+            app:fabSize="normal"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            app:layout_anchor="@+id/rvw_recipes"
+            app:layout_anchorGravity="bottom|right|end"
+            android:onClick="AddRecipe"
+            android:transitionName="bg"/>
+
+        <include
+            android:id="@+id/includeSortSheet"
+            layout="@layout/sort_by_sheet"/>
+
+    </android.support.design.widget.CoordinatorLayout>
+</layout>
