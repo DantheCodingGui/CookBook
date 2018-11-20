@@ -111,6 +111,9 @@ public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
             resolver.insert(ProviderContract.METHOD_URI, record);
         }
 
+
+        resolver.notifyChange(ProviderContract.RECIPES_URI, null);
+
         context = null;
 
         return null;

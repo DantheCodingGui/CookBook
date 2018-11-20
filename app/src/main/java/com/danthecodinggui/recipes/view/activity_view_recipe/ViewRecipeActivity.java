@@ -88,6 +88,8 @@ public class ViewRecipeActivity extends AppCompatActivity
     private boolean closingAnimating = false;
     private boolean addedPhoto = false;
 
+    private ContentObserver contentObserver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,7 +110,7 @@ public class ViewRecipeActivity extends AppCompatActivity
             SetupNoPhotoLayout();
         }
 
-        ContentObserver contentObserver = new ContentObserver(new Handler()) {
+        contentObserver = new ContentObserver(new Handler()) {
             @Override
             public void onChange(boolean selfChange, Uri uri) {
 
@@ -139,7 +141,6 @@ public class ViewRecipeActivity extends AppCompatActivity
                 }).execute(recipe.getRecipeId());
             }
         };
-        getContentResolver().registerContentObserver(ProviderContract.RECIPES_URI, false, contentObserver);
 
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -299,6 +300,18 @@ public class ViewRecipeActivity extends AppCompatActivity
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(randIngredientsCol);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getContentResolver().registerContentObserver(ProviderContract.RECIPES_URI, false, contentObserver);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        getContentResolver().unregisterContentObserver(contentObserver);
     }
 
     @Override

@@ -312,8 +312,15 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                 newIngredients = new ArrayList<>(ingredients);
                 newSteps = new ArrayList<>(steps);
 
-                oldIngredients = new ArrayList<>(ingredients);
-                oldSteps = new ArrayList<>(steps);
+                //Must deep copy lists to copy items by value and not reference
+
+                oldIngredients = new ArrayList<>();
+                for (Ingredient in: ingredients)
+                    oldIngredients.add(new Ingredient(in));
+
+                oldSteps = new ArrayList<>();
+                for (MethodStep step: steps)
+                    oldSteps.add(new MethodStep(step));
             }
 
             //Must wait briefly until view dimensions can be accessed
