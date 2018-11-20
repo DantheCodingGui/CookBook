@@ -10,19 +10,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
-import android.support.media.ExifInterface;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.util.Patterns;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -32,14 +25,8 @@ import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.PermissionsHandler;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-
-import static com.danthecodinggui.recipes.msc.LogTags.SAVE_RECIPE;
 
 /**
  * Set of miscellaneous methods without a link to any other class

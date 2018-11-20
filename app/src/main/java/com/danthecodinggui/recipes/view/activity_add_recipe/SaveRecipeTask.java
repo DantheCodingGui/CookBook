@@ -33,19 +33,16 @@ import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_INGREDIE
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_IS_IMAGE_CAMERA;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_METHOD;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_RECIPE;
-import static com.danthecodinggui.recipes.msc.LogTags.SAVE_RECIPE;
 
 /**
  * Inserts a recipe in full into permanent storage
  */
 public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
 
-    private static final String RECIPES_CAM_DIR_NAME = "/Recipes/";
-
     @SuppressLint("StaticFieldLeak")
     private Context context;
 
-    public SaveRecipeTask(Context context) {
+    SaveRecipeTask(Context context) {
         this.context = context;
     }
 
@@ -100,6 +97,8 @@ public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
             record = new ContentValues();
             record.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
             record.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, i.getIngredientText());
+            record.put(ProviderContract.RecipeIngredientEntry.QUANTITY, i.getQuantity());
+            record.put(ProviderContract.RecipeIngredientEntry.MEASUREMENT, i.getMeasurement());
             resolver.insert(ProviderContract.RECIPE_INGREDIENTS_URI, record);
         }
 

@@ -37,7 +37,7 @@
     <string name="btn_add_photo_library">From Library</string>
     <string name="btn_add_photo">From Camera</string>
     <string name="btn_add_photo_web">From The Web</string>
-    <string name="etxt_hint_addIngredient">Ingredient Name</string>
+    <string name="etxt_hint_add_ingredient_name">Ingredient Name</string>
     <string name="etxt_hint_addStep">Step Text</string>
     <string name="txt_no_steps">Let\'s Add the Steps</string>
     <string name="txt_no_ingredients">Lets Add the Ingredients</string>
@@ -69,4 +69,16 @@
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
     <string name="menu_edit_recipe">Edit Recipe</string>
+    <string name="etxt_hint_add_ingredient_quantity">Quantity</string>
+
+    <string-array name="default_ingredient_measurements">
+        <item>-</item>
+        <item>g</item>
+        <item>lb</item>
+        <item>oz</item>
+        <item>fl oz</item>
+        <item>ml</item>
+        <item>tsp</item>
+        <item>tbsp</item>
+    </string-array>
 </resources>

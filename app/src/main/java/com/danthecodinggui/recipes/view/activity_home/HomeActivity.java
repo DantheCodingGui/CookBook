@@ -21,7 +21,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.Snackbar;
-import android.support.v7.widget.GridLayoutManager;
 import android.transition.Slide;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -50,7 +49,6 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -81,7 +79,7 @@ import java.util.List;
 import jp.wasabeef.recyclerview.animators.ScaleInAnimator;
 
 import static com.danthecodinggui.recipes.msc.GlobalConstants.IMAGE_TRANSITION_NAME;
-import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_FILE_NAME;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_PREF_FILE_NAME;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_KEY_HOME_SORT_DIR;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_KEY_HOME_SORT_ORDER;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_BUNDLE;
@@ -218,7 +216,7 @@ public class HomeActivity extends AppCompatActivity
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
         });
 
-        homePrefs = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        homePrefs = getSharedPreferences(RECIPE_PREF_FILE_NAME, Context.MODE_PRIVATE);
 
         currentSortOrder = GetCurrentSortOrder();
         isSortAsc = GetCurrentSortDir();
@@ -603,14 +601,14 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void WriteNewSortOrder() {
-        SharedPreferences pref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences pref = getSharedPreferences(RECIPE_PREF_FILE_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor prefEditor = pref.edit();
         prefEditor.putInt(PREF_KEY_HOME_SORT_ORDER, currentSortOrder);
         prefEditor.apply();
     }
 
     private void WriteNewSortDir() {
-        SharedPreferences pref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences pref = getSharedPreferences(RECIPE_PREF_FILE_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor prefEditor = pref.edit();
         prefEditor.putBoolean(PREF_KEY_HOME_SORT_DIR, isSortAsc);
         prefEditor.apply();

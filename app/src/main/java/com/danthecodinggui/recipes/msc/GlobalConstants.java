@@ -28,9 +28,11 @@ public class GlobalConstants {
     public static final String SAVE_TASK_IS_IMAGE_CAMERA = "SAVE_TASK_IS_IMAGE_CAMERA";
     public static final String SAVE_TASK_CAMERA_DIR_PATH = "SAVE_TASK_CAMERA_DIR_PATH";
 
-    public static final String PREF_FILE_NAME = "RecipeSharedPreferences";
+    public static final String RECIPE_PREF_FILE_NAME = "RecipeSharedPreferences";
+    public static final String APP_PREF_FILE_NAME = "ApplicationSharedPreferences";
 
     //Shared Preference Keys
+    public static final String PREF_KEY_FIRST_RUN = "app_first_run";
     public static final String PREF_KEY_HOME_SORT_ORDER = "home_sort_order";
     public static final String PREF_KEY_HOME_SORT_DIR = "home_sort_direction";
 

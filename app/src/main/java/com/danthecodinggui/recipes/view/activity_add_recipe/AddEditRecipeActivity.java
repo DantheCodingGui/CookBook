@@ -43,6 +43,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
+import android.widget.ArrayAdapter;
 
 import com.asksira.bsimagepicker.BSImagePicker;
 import com.danthecodinggui.recipes.R;
@@ -132,6 +133,8 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
     private boolean methodExpanded = false;
     private boolean isImageFromCam = false;
     private boolean hasAskedWritePerm = false;
+    private boolean isQuantityEmpty = true;
+    private boolean isIngredientEmpty = true;
 
     //Recipe Data
     private int recipeDuration;
@@ -207,13 +210,35 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         //Setup button enable/disable based on edittext contents
         binding.butAddIngredient.setEnabled(false);
-        binding.etxtAddIngredient.addTextChangedListener(new TextWatcher() {
+        binding.etxtAddIngredientQuantity.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Utility.CheckButtonEnabled(binding.butAddIngredient, charSequence.toString());
+                isQuantityEmpty = charSequence.length() == 0;
+
+                if (isIngredientEmpty || isQuantityEmpty)
+                    binding.butAddIngredient.setEnabled(false);
+                else
+                    binding.butAddIngredient.setEnabled(true);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
+        binding.etxtAddIngredientName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                isIngredientEmpty = charSequence.length() == 0;
+
+                if (isIngredientEmpty || isQuantityEmpty)
+                    binding.butAddIngredient.setEnabled(false);
+                else
+                    binding.butAddIngredient.setEnabled(true);
             }
 
             @Override
@@ -232,6 +257,12 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             @Override
             public void afterTextChanged(Editable editable) {}
         });
+
+        //Populate spinner for ingredients input
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
+                R.array.default_ingredient_measurements, android.R.layout.simple_spinner_item);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spnIngredientMeasurement.setAdapter(spinnerAdapter);
 
         //Setup add image photo sheet
         photoSheetBehaviour = BottomSheetBehavior.from(binding.includeImageSheet.addImage);
@@ -283,11 +314,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
                 oldIngredients = new ArrayList<>(ingredients);
                 oldSteps = new ArrayList<>(steps);
-            }
-            else {
-                ;
-                //TODO when accessing this from HomeActivity, ingredients/steps will be null,
-                //  handle this with asynctask to get data
             }
 
             //Must wait briefly until view dimensions can be accessed
@@ -832,9 +858,15 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
     private EditIngredientFragment.onIngredientEditedListener editIngredientListener = new EditIngredientFragment.onIngredientEditedListener() {
         @Override
-        public void onIngredientEdited(String ingredientName, int position) {
-            if (!Utility.isStringAllWhitespace(ingredientName)) {
-                newIngredients.get(position).setIngredientText(ingredientName);
+        public void onIngredientEdited(Ingredient editedIngredient, int position) {
+
+            if (newIngredients.get(position).equals(editedIngredient))
+                return;
+
+            if (!Utility.isStringAllWhitespace(editedIngredient.getIngredientText())) {
+                newIngredients.get(position).setIngredientText(editedIngredient.getIngredientText());
+                newIngredients.get(position).setQuantity(editedIngredient.getQuantity());
+                newIngredients.get(position).setMeasurement(editedIngredient.getMeasurement());
                 ingAdapter.notifyItemChanged(position);
                 editingPosition = -1;
             }
@@ -843,6 +875,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
     private EditMethodStepFragment.onStepEditedListener editMethodListener = new EditMethodStepFragment.onStepEditedListener() {
         @Override
         public void onStepEdited(String stepText, int position) {
+
             if (!Utility.isStringAllWhitespace(stepText)) {
                 newSteps.get(position).setStepText(stepText);
                 methAdapter.notifyItemChanged(position);
@@ -973,6 +1006,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         recipeKcalPerPerson = 0;
     }
 
+    //TODO make ingredient/method variant (as ingredient has different input height now
     private int getRecyclerviewRetractHeight() {
 
         ConstraintLayout.LayoutParams cardParams = (ConstraintLayout.LayoutParams)binding.crdvIngredients.getLayoutParams();
@@ -1018,8 +1052,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         if (isPortrait)
             binding.spcAdd.setVisibility(View.GONE);
 
-        binding.etxtAddIngredient.setVisibility(View.VISIBLE);
-        binding.butAddIngredient.setVisibility(View.VISIBLE);
+        binding.clyIngredientsInput.setVisibility(View.VISIBLE);
 
         AnimateOutFabMenu();
 
@@ -1064,8 +1097,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         if (isPortrait)
             binding.spcAdd.setVisibility(View.VISIBLE);
 
-        binding.etxtAddIngredient.setVisibility(View.GONE);
-        binding.butAddIngredient.setVisibility(View.GONE);
+        binding.clyIngredientsInput.setVisibility(View.GONE);
 
         AnimateInFabMenu();
 
@@ -1245,17 +1277,21 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
     }
 
     public void AddIngredient(View view) {
-        String ingredientName = binding.etxtAddIngredient.getText().toString();
+        String ingredientName = binding.etxtAddIngredientName.getText().toString();
+        int quantity = Integer.parseInt(binding.etxtAddIngredientQuantity.getText().toString());
+        String measurement = binding.spnIngredientMeasurement.getSelectedItem().toString();
 
         if (Utility.isStringAllWhitespace(ingredientName))
             return;
 
-        Ingredient temp = new Ingredient(ingredientName);
+        Ingredient temp = new Ingredient(ingredientName, quantity, measurement);
         newIngredients.add(temp);
         ingAdapter.notifyItemInserted(newIngredients.size() - 1);
         binding.rvwNewIngredients.smoothScrollToPosition(newIngredients.size() - 1);
 
-        binding.etxtAddIngredient.setText("");
+        binding.etxtAddIngredientName.setText("");
+        binding.etxtAddIngredientQuantity.setText("");
+        binding.spnIngredientMeasurement.setSelection(0);
 
         if (newIngredients.size() == 1)
             binding.txtNoIngredients.setVisibility(View.GONE);

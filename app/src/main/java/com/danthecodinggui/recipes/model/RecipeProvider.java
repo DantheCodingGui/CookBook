@@ -35,6 +35,8 @@ public class RecipeProvider extends ContentProvider {
         uriMatcher.addURI(ProviderContract.CONTENT_AUTHORITY, ProviderContract.PATH_METHOD + "/#", METHOD_ITEM);
         uriMatcher.addURI(ProviderContract.CONTENT_AUTHORITY, ProviderContract.PATH_RECIPE_INGREDIENTS, RECIPE_INGREDIENTS_TABLE);
         uriMatcher.addURI(ProviderContract.CONTENT_AUTHORITY, ProviderContract.PATH_RECIPE_INGREDIENTS + "/#", RECIPE_INGREDIENTS_ITEM);
+        uriMatcher.addURI(ProviderContract.CONTENT_AUTHORITY, ProviderContract.PATH_RECIPE_INGREDIENTS, RECIPE_INGREDIENTS_TABLE);
+        uriMatcher.addURI(ProviderContract.CONTENT_AUTHORITY, ProviderContract.PATH_RECIPE_INGREDIENTS + "/#", RECIPE_INGREDIENTS_ITEM);
     }
 
     private DBHelper dbHelper;
@@ -70,6 +72,10 @@ public class RecipeProvider extends ContentProvider {
                 long recipeId = values.getAsLong(ProviderContract.RecipeIngredientEntry.RECIPE_ID);
                 String ingredient = values.getAsString(
                         ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME);
+                int quantity = values.getAsInteger(
+                        ProviderContract.RecipeIngredientEntry.QUANTITY);
+                String measurement = values.getAsString(
+                        ProviderContract.RecipeIngredientEntry.MEASUREMENT);
 
                 long ingredientId = GetIngredientId(ingredient);
 
@@ -77,6 +83,8 @@ public class RecipeProvider extends ContentProvider {
                 values = new ContentValues();
                 values.put(DBSchema.RecipeIngredientEntry.RECIPE_ID, recipeId);
                 values.put(DBSchema.RecipeIngredientEntry.INGREDIENT_ID, ingredientId);
+                values.put(DBSchema.RecipeIngredientEntry.QUANTITY, quantity);
+                values.put(DBSchema.RecipeIngredientEntry.MEASUREMENT, measurement);
 
                 tableName = DBSchema.RecipeIngredientEntry.TABLE_NAME;
                 break;

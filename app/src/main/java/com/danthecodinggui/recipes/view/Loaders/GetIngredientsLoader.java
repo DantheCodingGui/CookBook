@@ -72,7 +72,9 @@ public class GetIngredientsLoader extends AsyncTaskLoader<List<Ingredient>> {
         List<Ingredient> ingredients = new ArrayList<>();
 
         String[] projection = {
-                ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME
+                ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME,
+                ProviderContract.RecipeIngredientEntry.QUANTITY,
+                ProviderContract.RecipeIngredientEntry.MEASUREMENT
         };
 
         //Link to recipe _id
@@ -90,8 +92,14 @@ public class GetIngredientsLoader extends AsyncTaskLoader<List<Ingredient>> {
 
         while (cursor.moveToNext()) {
 
-            temp = new Ingredient(cursor.getString(
-                    cursor.getColumnIndexOrThrow(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME)));
+            temp = new Ingredient(
+                    cursor.getString(cursor.getColumnIndexOrThrow(
+                            ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME)),
+                    cursor.getInt(cursor.getColumnIndex(
+                            ProviderContract.RecipeIngredientEntry.QUANTITY)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(
+                            ProviderContract.RecipeIngredientEntry.MEASUREMENT))
+                    );
             ingredients.add(temp);
         }
         cursor.close();
