@@ -182,7 +182,7 @@
                     <TextView
                         android:id="@+id/txt_ingredients_title"
                         style="@style/Title"
-                        android:textColor="@color/colorAccent"
+                        android:textColor="@color/colorAddAccent"
                         android:text="@string/ingredients"
                         android:textSize="25sp"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -319,7 +319,7 @@
                     <TextView
                         android:id="@+id/txt_method_title"
                         style="@style/Title"
-                        android:textColor="@color/colorAccent"
+                        android:textColor="@color/colorAddAccent"
                         android:text="@string/method"
                         android:textSize="25sp"
                         app:layout_constraintEnd_toEndOf="parent"

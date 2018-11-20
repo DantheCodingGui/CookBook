@@ -40,6 +40,9 @@
     </style>
 
     <style name="AddRecipeTheme" parent="HomeTheme">
+        <item name="colorPrimary">@color/colorAddPrimary</item>
+        <item name="colorPrimaryDark">@color/colorAddPrimaryDark</item>
+        <item name="colorAccent">@color/colorAddAccent</item>
         <item name="android:statusBarColor">@color/backToolbar</item>
         <item name="android:colorBackground">@android:color/white</item>
 
