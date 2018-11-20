@@ -39,11 +39,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 import com.asksira.bsimagepicker.BSImagePicker;
 import com.danthecodinggui.recipes.R;
@@ -676,12 +679,12 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     .setDuration(250L)
                     .setInterpolator(new OvershootInterpolator(1.5f))
                     .start();
-            AnimateFabItem(binding.fabAddPhoto);
-            AnimateFabItem(binding.txtAddPhoto);
-            AnimateFabItem(binding.fabAddTime);
-            AnimateFabItem(binding.txtAddTime);
-            AnimateFabItem(binding.fabAddKcal);
-            AnimateFabItem(binding.txtAddKcal);
+            AnimateFabMenuItem(binding.fabAddKcal, 0);
+            AnimateFabMenuItemTag(binding.txtAddKcal, 0);
+            AnimateFabMenuItem(binding.fabAddPhoto, 30);
+            AnimateFabMenuItemTag(binding.txtAddPhoto, 30);
+            AnimateFabMenuItem(binding.fabAddTime, 60);
+            AnimateFabMenuItemTag(binding.txtAddTime, 60);
             fabMenuOpen = false;
         }
         else {
@@ -691,21 +694,21 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     .setDuration(250L)
                     .setInterpolator(new OvershootInterpolator(1.5f))
                     .start();
-            AnimateFabItem(binding.fabAddPhoto);
-            AnimateFabItem(binding.txtAddPhoto);
-            AnimateFabItem(binding.fabAddTime);
-            AnimateFabItem(binding.txtAddTime);
-            AnimateFabItem(binding.fabAddKcal);
-            AnimateFabItem(binding.txtAddKcal);
+            AnimateFabMenuItem(binding.fabAddKcal, 0);
+            AnimateFabMenuItemTag(binding.txtAddKcal, 0);
+            AnimateFabMenuItem(binding.fabAddPhoto, 30);
+            AnimateFabMenuItemTag(binding.txtAddPhoto, 30);
+            AnimateFabMenuItem(binding.fabAddTime, 60);
+            AnimateFabMenuItemTag(binding.txtAddTime, 60);
             fabMenuOpen = true;
         }
     }
 
     /**
-     * Animates individual fab item both in/out of view
+     * Animates individual fab menu item both in/out of view
      * @param menuItem The menu fab view
      */
-    private void AnimateFabItem(View menuItem) {
+    private void AnimateFabMenuItem(View menuItem, int delay) {
         AnimationSet set = new AnimationSet(true);
         Animation rotate;
 
@@ -739,10 +742,41 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             menuItem.setClickable(true);
         }
 
-        set.setDuration(200);
+        set.setDuration(150);
+        set.setStartOffset(delay);
         set.setFillAfter(true);
 
         menuItem.startAnimation(set);
+    }
+
+    /**
+     * Animates individual fab menu item tags both in/out of view
+     * @param tag The menu tag view
+     */
+    private void AnimateFabMenuItemTag(TextView tag, int delay) {
+        AnimationSet set = new AnimationSet(true);
+        Animation translate;
+        Animation fade;
+
+        if (fabMenuOpen) {
+            translate = new TranslateAnimation(
+                    Animation.RELATIVE_TO_SELF,  -200, Animation.RELATIVE_TO_SELF, 0);
+            fade = new AlphaAnimation(1.f, 0.f);
+            set.addAnimation(translate);
+            set.addAnimation(fade);
+        }
+        else {
+            translate = new TranslateAnimation(-200, 0, 0, 0);
+            fade = new AlphaAnimation(0.f, 1.f);
+            set.addAnimation(translate);
+            set.addAnimation(fade);
+        }
+
+        set.setDuration(200);
+        set.setStartOffset(delay);
+        set.setFillAfter(true);
+
+        tag.startAnimation(set);
     }
 
     public void addImage(View view) {
