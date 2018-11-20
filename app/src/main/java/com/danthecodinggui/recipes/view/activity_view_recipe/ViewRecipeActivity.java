@@ -313,7 +313,6 @@ public class ViewRecipeActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.menu_view_edit:
-                //TODO take recipe, package into intent and start AddEditActivity
 
                 Intent editRecipe = new Intent(getApplicationContext(), AddEditRecipeActivity.class);
 

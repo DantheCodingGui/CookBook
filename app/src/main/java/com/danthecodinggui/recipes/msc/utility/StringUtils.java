@@ -40,6 +40,6 @@ public class StringUtils {
 
         return ingredient.getQuantity() +
                 (measurement.equals("-") ? "" : measurement)
-                + " " + ingredient.getIngredientText();
+                + "  " + ingredient.getIngredientText();
     }
 }

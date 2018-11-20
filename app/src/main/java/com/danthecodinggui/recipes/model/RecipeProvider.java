@@ -110,8 +110,6 @@ public class RecipeProvider extends ContentProvider {
      */
     private long GetIngredientId(String ingredientName) {
 
-        //TODO sanitise input here to prevent sql injection
-
         //Query db to see if ingredient is in table
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 

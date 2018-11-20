@@ -926,6 +926,9 @@ public class HomeActivity extends AppCompatActivity
                         }
                     }
             );
+
+            //Prevents bug where user can't scroll recyclerview to make it re-appear
+            binding.fabAddRecipe.show();
         }
 
         @Override
