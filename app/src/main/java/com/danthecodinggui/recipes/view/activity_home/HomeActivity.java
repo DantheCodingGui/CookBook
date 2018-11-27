@@ -191,10 +191,10 @@ public class HomeActivity extends AppCompatActivity
                 if (inActionMode)
                     return;
 
-                if (dy > 0 && binding.fabAddRecipe.getVisibility() == View.VISIBLE) {
-                    binding.fabAddRecipe.hide();
-                } else if (dy < 0 && binding.fabAddRecipe.getVisibility() != View.VISIBLE) {
-                    binding.fabAddRecipe.show();
+                if (dy > 0 && binding.fabHomeAddRecipe.getVisibility() == View.VISIBLE) {
+                    binding.fabHomeAddRecipe.hide();
+                } else if (dy < 0 && binding.fabHomeAddRecipe.getVisibility() != View.VISIBLE) {
+                    binding.fabHomeAddRecipe.show();
                 }
             }
         });
@@ -390,11 +390,11 @@ public class HomeActivity extends AppCompatActivity
 
             //Remove FAB
             Slide anim = new Slide();
-            anim.addTarget(binding.fabAddRecipe);
+            anim.addTarget(binding.fabHomeAddRecipe);
             anim.setSlideEdge(Gravity.END);
             anim.setInterpolator(new AnticipateOvershootInterpolator(1.f));
             TransitionManager.beginDelayedTransition(binding.clyMainRoot, anim);
-            binding.fabAddRecipe.setVisibility(View.INVISIBLE);
+            binding.fabHomeAddRecipe.setVisibility(View.INVISIBLE);
 
             recipesTouchHelper.attachToRecyclerView(null);
             return true;
@@ -432,17 +432,17 @@ public class HomeActivity extends AppCompatActivity
             //If scroll was active and fab was hidden, if all recipes have been deleted, can't scroll
             //to re-show fab, so show here
             if (recipesList.isEmpty())
-                binding.fabAddRecipe.show();
+                binding.fabHomeAddRecipe.show();
 
             recipesAdapter.DisableActionMode();
 
             //Show FAB
             Slide anim = new Slide();
-            anim.addTarget(binding.fabAddRecipe);
+            anim.addTarget(binding.fabHomeAddRecipe);
             anim.setSlideEdge(Gravity.END);
             anim.setInterpolator(new AnticipateOvershootInterpolator(1.f));
             TransitionManager.beginDelayedTransition(binding.clyMainRoot, anim);
-            binding.fabAddRecipe.setVisibility(View.VISIBLE);
+            binding.fabHomeAddRecipe.setVisibility(View.VISIBLE);
         }
     };
 
@@ -928,7 +928,7 @@ public class HomeActivity extends AppCompatActivity
             );
 
             //Prevents bug where user can't scroll recyclerview to make it re-appear
-            binding.fabAddRecipe.show();
+            binding.fabHomeAddRecipe.show();
         }
 
         @Override
@@ -1334,8 +1334,8 @@ public class HomeActivity extends AppCompatActivity
 
         if (Utility.atLeastLollipop()) {
 
-            getWindow().setExitTransition(null);
-            getWindow().setReenterTransition(null);
+            getWindow().setExitTransition(TransitionInflater.from(this).inflateTransition(R.transition.main_activity_add));
+            getWindow().setReenterTransition(TransitionInflater.from(this).inflateTransition(R.transition.main_activity_add));
 
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
             startActivity(addRecipe, options.toBundle());
