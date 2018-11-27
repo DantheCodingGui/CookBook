@@ -1,6 +1,7 @@
 package com.danthecodinggui.recipes.view.activity_view_recipe;
 
 import android.Manifest;
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
@@ -325,9 +326,9 @@ public class ViewRecipeActivity extends AppCompatActivity
 
                 editRecipe.putExtra(EDIT_RECIPE_BUNDLE, extras);
 
-                //TODO add transition version of startActivity
 
-                startActivity(editRecipe);
+                ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
+                startActivity(editRecipe, options.toBundle());
                 return true;
         }
 

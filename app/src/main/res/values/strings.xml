@@ -5,7 +5,6 @@
     <string name="ingredients">Ingredients</string>
     <string name="method">Method</string>
 
-    <string name="txt_time_to_make"></string>
     <string name="menu_search_title">Search Recipes</string>
     <string name="main_card_transition_name">transition_card</string>
     <string name="txt_add_image">Add Photo</string>
@@ -16,10 +15,10 @@
     <string name="txt_add_method_step">Steps</string>
     <string name="txt_ingredient_item">\u25CB %s</string>
     <string name="txt_method_step_item">%1$d. %2$s</string>
-    <string name="txt_kcal_per_person">%d Kcal Per Person</string>
+    <string name="txt_kcal_per_person">%d Kcal Per Serving</string>
     <string name="add_transition">add_recipe_transition</string>
-    <string name="txt_search_no_recipes">Uh oh, can\'t seem to find that one...</string>
-    <string name="search_hint">Search...</string>
+    <string name="txt_search_no_recipes">Uh oh, can\'t seem to find that one&#8230;</string>
+    <string name="search_hint">Search&#8230;</string>
     <string name="perm_dialog_butt_deny">Deny</string>
     <string name="perm_dialog_butt_permit">Enable</string>
     <string name="perm_reenable_snackbar_msg">Enable the %s permission here</string>
@@ -31,7 +30,7 @@
     <string name="empty" />
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">CANCEL</string>
-    <string name="dialog_kcal_title">Calories Per Person</string>
+    <string name="dialog_kcal_title">Calories Per Serving </string>
     <string name="etxt_hint_addTitle">Name</string>
 
     <string name="btn_add_photo_library">From Library</string>

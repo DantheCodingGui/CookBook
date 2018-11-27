@@ -1337,9 +1337,8 @@ public class HomeActivity extends AppCompatActivity
             getWindow().setExitTransition(null);
             getWindow().setReenterTransition(null);
 
-            //ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
-            //startActivity(addRecipe, options.toBundle());
-            startActivity(addRecipe);
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
+            startActivity(addRecipe, options.toBundle());
         }
         else
             startActivity(addRecipe);
