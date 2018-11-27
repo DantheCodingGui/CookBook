@@ -141,6 +141,7 @@ public class ViewRecipeActivity extends AppCompatActivity
                 }).execute(recipe.getRecipeId());
             }
         };
+        getContentResolver().registerContentObserver(ProviderContract.RECIPES_URI, false, contentObserver);
 
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -303,18 +304,6 @@ public class ViewRecipeActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        getContentResolver().registerContentObserver(ProviderContract.RECIPES_URI, false, contentObserver);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        getContentResolver().unregisterContentObserver(contentObserver);
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.view_activity_toolbar, menu);
         return true;
@@ -414,10 +403,14 @@ public class ViewRecipeActivity extends AppCompatActivity
             bindingPhoto.ablViewRecipe.setExpanded(true, true);
             closingAnimating = true;
         }
-        else if (!addedPhoto)
+        else if (!addedPhoto) {
+            getContentResolver().unregisterContentObserver(contentObserver);
             supportFinishAfterTransition();
-        else
+        }
+        else {
+            getContentResolver().unregisterContentObserver(contentObserver);
             finish();
+        }
     }
 
     @Override
@@ -432,10 +425,13 @@ public class ViewRecipeActivity extends AppCompatActivity
         bindingPhoto.ivwToolbarPreview.setImageAlpha(Math.round(f));
 
         //When AppBarLayout expansion fully animated, THEN the activity can close
-        if (closingAnimating && !addedPhoto && verticalOffset == 0)
-            supportFinishAfterTransition();
-        else if (addedPhoto)
-            finish();
+        if (closingAnimating && verticalOffset == 0) {
+            getContentResolver().unregisterContentObserver(contentObserver);
+            if (addedPhoto)
+                finish();
+            else
+                supportFinishAfterTransition();
+        }
 
         float adjustedF = (f - 102) / 0.255f - 200;
         if (adjustedF < 0)
