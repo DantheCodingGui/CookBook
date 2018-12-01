@@ -11,14 +11,14 @@
     <slide
         android:slideEdge="bottom">
         <targets>
-            <target android:targetId="@+id/crdv_ingredients"/>
-            <target android:targetId="@+id/crdv_method"/>
             <target android:targetId="@+id/fab_add_menu"/>
         </targets>
     </slide>
     <slide
         android:slideEdge="right">
         <targets>
+            <target android:targetId="@+id/crdv_ingredients"/>
+            <target android:targetId="@+id/crdv_method"/>
             <target android:targetId="@android:id/statusBarBackground"/>
         </targets>
     </slide>

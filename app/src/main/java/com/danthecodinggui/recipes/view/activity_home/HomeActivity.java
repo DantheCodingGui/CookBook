@@ -191,7 +191,7 @@ public class HomeActivity extends AppCompatActivity
                 if (inActionMode)
                     return;
 
-                if (dy > 0 && binding.fabHomeAddRecipe.getVisibility() == View.VISIBLE) {
+                if (dy > 0 && binding.fabHomeAddRecipe .getVisibility() == View.VISIBLE) {
                     binding.fabHomeAddRecipe.hide();
                 } else if (dy < 0 && binding.fabHomeAddRecipe.getVisibility() != View.VISIBLE) {
                     binding.fabHomeAddRecipe.show();
@@ -340,18 +340,8 @@ public class HomeActivity extends AppCompatActivity
         //Ensure animation doesn't run on orientation change
         if (shouldShowMenuAnims) {
             //Animate menu items in
-            uiThread.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    AnimUtils.animateVectorDrawable(searchItem.getIcon());
-                }
-            }, 300);
-            uiThread.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    AnimUtils.animateVectorDrawable(sortItem.getIcon());
-                }
-            }, 700);
+            uiThread.postDelayed(() -> AnimUtils.animateVectorDrawable(searchItem.getIcon()), 300);
+            uiThread.postDelayed(() -> AnimUtils.animateVectorDrawable(sortItem.getIcon()), 700);
         }
         else {
             AnimUtils.instaAnimateVectorDrawable(searchItem.getIcon());
@@ -393,7 +383,7 @@ public class HomeActivity extends AppCompatActivity
             anim.addTarget(binding.fabHomeAddRecipe);
             anim.setSlideEdge(Gravity.END);
             anim.setInterpolator(new AnticipateOvershootInterpolator(1.f));
-            TransitionManager.beginDelayedTransition(binding.clyMainRoot, anim);
+            TransitionManager.beginDelayedTransition(binding.cdlyRoot, anim);
             binding.fabHomeAddRecipe.setVisibility(View.INVISIBLE);
 
             recipesTouchHelper.attachToRecyclerView(null);
@@ -441,7 +431,7 @@ public class HomeActivity extends AppCompatActivity
             anim.addTarget(binding.fabHomeAddRecipe);
             anim.setSlideEdge(Gravity.END);
             anim.setInterpolator(new AnticipateOvershootInterpolator(1.f));
-            TransitionManager.beginDelayedTransition(binding.clyMainRoot, anim);
+            TransitionManager.beginDelayedTransition(binding.cdlyRoot, anim);
             binding.fabHomeAddRecipe.setVisibility(View.VISIBLE);
         }
     };
@@ -639,15 +629,18 @@ public class HomeActivity extends AppCompatActivity
         switch(requestCode) {
             case REQ_CODE_READ_EXTERNAL:
                 if (grantResults.length > 0) {
-                    if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                        noLocalImage = true;
-                        Utility.showPermissionDeniedSnackbar(binding.clyMainRoot);
+                    for (int result: grantResults) {
+                        if (result == PackageManager.PERMISSION_DENIED) {
+                            noLocalImage = true;
+                            break;
+                        }
                     }
                     UnblockLoader();
                 }
                 break;
         }
     }
+
     @Override
     public void onFeatureDisabled() {
         noLocalImage = true;
@@ -668,9 +661,7 @@ public class HomeActivity extends AppCompatActivity
             Handler uiThread = new Handler(getMainLooper());
 
             recipesLoader = new GetRecipesLoader(HomeActivity.this, uiThread,
-                    new GetRecipesLoader.ImagePermissionsListener() {
-                        @Override
-                        public void onImagePermRequested() {
+                    () -> {
                             int response = PermissionsHandler.AskForPermission(HomeActivity.this,
                                     Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL);
 
@@ -680,7 +671,7 @@ public class HomeActivity extends AppCompatActivity
                                 onFeatureDisabled();
 
                         }
-                    }, currentSortOrder, isSortAsc);
+                    , currentSortOrder, isSortAsc);
 
             homePrefs.registerOnSharedPreferenceChangeListener(recipesLoader);
             return recipesLoader;
@@ -903,28 +894,19 @@ public class HomeActivity extends AppCompatActivity
             recipesList.remove(unfilteredPos);
 
             if (recipesList.isEmpty()) {
-                TransitionManager.beginDelayedTransition(binding.clyMainRoot);
+                TransitionManager.beginDelayedTransition(binding.cdlyRoot);
                 binding.txtNoItems.setVisibility(View.VISIBLE);
             }
 
             ShowDeletedSnackbar(false,
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            recipesList.add(unfilteredPos, recipeToDelete);
+                    () -> { recipesList.add(unfilteredPos, recipeToDelete);
                             addItem(position, recipeToDelete);
 
                             binding.txtNoItems.setVisibility(View.INVISIBLE);
                         }
-                    },
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            new DeleteRecipeTask(getApplicationContext()).execute(
-                                    Collections.singletonList(recipeToDelete.getRecipeId())
-                            );
-                        }
-                    }
+                    ,
+                    () -> new DeleteRecipeTask(getApplicationContext()).execute(
+                                    Collections.singletonList(recipeToDelete.getRecipeId()))
             );
 
             //Prevents bug where user can't scroll recyclerview to make it re-appear
@@ -1009,14 +991,12 @@ public class HomeActivity extends AppCompatActivity
             InvalidateActionModeTitle();
 
             if (recipesList.isEmpty()) {
-                TransitionManager.beginDelayedTransition(binding.clyMainRoot);
+                TransitionManager.beginDelayedTransition(binding.cdlyRoot);
                 binding.txtNoItems.setVisibility(View.VISIBLE);
             }
 
             ShowDeletedSnackbar(recipesToDelete.size() > 1,
-                    new Runnable() {
-                        @Override
-                        public void run() {
+                    () -> {
                             for (int i = 0; i < selectedItems.size(); ++i) {
                                 addItem(selectedItems.get(i), recipesToDelete.get(i));
                                 recipesList.add(unfilteredRecipePositions.get(i), recipesToDelete.get(i));
@@ -1027,10 +1007,8 @@ public class HomeActivity extends AppCompatActivity
                             deleteSelectionSize = 0;
                             InvalidateActionModeTitle();
                         }
-                    },
-                    new Runnable() {
-                        @Override
-                        public void run() {
+                    ,
+                    () -> {
                             List<Long> recipePrimaryKeys = new ArrayList<>();
                             for (Recipe recipe: recipesToDelete)
                                 recipePrimaryKeys.add(recipe.getRecipeId());
@@ -1039,7 +1017,7 @@ public class HomeActivity extends AppCompatActivity
 
                             deleteSelectionSize = 0;
                         }
-                    }
+
             );
         }
 
@@ -1060,15 +1038,10 @@ public class HomeActivity extends AppCompatActivity
         }
 
         private void ShowDeletedSnackbar(boolean isMultiDelete, final Runnable onActionClicked, final Runnable onDismissed) {
-            Snackbar.make(binding.clyMainRoot,
+            Snackbar.make(binding.cdlyRoot,
                     isMultiDelete ? R.string.multiple_recipes_removed : R.string.recipe_removed,
                     Snackbar.LENGTH_LONG)
-                    .setAction(R.string.snackbar_undo, new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            new Handler(getMainLooper()).post(onActionClicked);
-                        }
-                    })
+                    .setAction(R.string.snackbar_undo, (view) -> new Handler(getMainLooper()).post(onActionClicked))
                     .addCallback(new Snackbar.Callback() {
                         @Override
                         public void onDismissed(Snackbar snackbar, int event) {

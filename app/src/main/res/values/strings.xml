@@ -21,7 +21,7 @@
     <string name="search_hint">Search&#8230;</string>
     <string name="perm_dialog_butt_deny">Deny</string>
     <string name="perm_dialog_butt_permit">Enable</string>
-    <string name="perm_reenable_snackbar_msg">Enable the %s permission here</string>
+    <string name="perm_reenable_snackbar_msg">Permissions can be enabled in the App\'s </string>
     <string name="txt_no_recipes">You haven\'t got any recipes yet,\n Lets Get Started!</string>
 
     <string name="transition_navbar">transition_nav_bar</string>

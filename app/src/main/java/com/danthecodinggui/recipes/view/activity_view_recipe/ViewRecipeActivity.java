@@ -116,9 +116,7 @@ public class ViewRecipeActivity extends AppCompatActivity
             public void onChange(boolean selfChange, Uri uri) {
 
                 new UpdateViewedRecipeTask(ViewRecipeActivity.this,
-                        new UpdateViewedRecipeTask.onRecipeReadListener() {
-                    @Override
-                    public void onRecipeRead(Recipe updatedRecipe) {
+                        (updatedRecipe) -> {
 
                         //Needed to ensure that added photo doesn't mess with activity transitions
                         if (!recipe.hasPhoto() && updatedRecipe.hasPhoto())
@@ -139,7 +137,7 @@ public class ViewRecipeActivity extends AppCompatActivity
                         if (getSupportActionBar() != null)
                             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                     }
-                }).execute(recipe.getRecipeId());
+                ).execute(recipe.getRecipeId());
             }
         };
         getContentResolver().registerContentObserver(ProviderContract.RECIPES_URI, false, contentObserver);
@@ -221,7 +219,7 @@ public class ViewRecipeActivity extends AppCompatActivity
             collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarTitleMin);
 
         if (!recipe.hasExtendedInfo())
-            collapsingToolbarLayout.setExpandedTitleMarginEnd(Utility.dpToPx(this, 30));
+            collapsingToolbarLayout.setExpandedTitleMarginEnd(Utility.dpToPx(30));
 
         if (Utility.atLeastLollipop()) {
             //Set the shared elements transition name
@@ -342,13 +340,11 @@ public class ViewRecipeActivity extends AppCompatActivity
         BitmapDrawable drawable = (BitmapDrawable) res;
         Bitmap bitmap = drawable.getBitmap();
 
-        Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
-            @Override
-            public void onGenerated(Palette palette) {
+        Palette.from(bitmap).generate((palette) -> {
                 int mutedColor = palette.getMutedColor(R.attr.colorPrimary);
                 appBar.setBackgroundColor(mutedColor);
             }
-        });
+        );
     }
 
     /**

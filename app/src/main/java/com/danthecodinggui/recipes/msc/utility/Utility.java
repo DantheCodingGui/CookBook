@@ -1,31 +1,18 @@
 package com.danthecodinggui.recipes.msc.utility;
 
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
-import android.provider.Settings;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
-import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
-import com.danthecodinggui.recipes.msc.PermissionsHandler;
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,96 +39,6 @@ public class Utility {
      */
     public static boolean atLeastLollipop() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-    }
-
-    /**
-     * Shows permission request rationale dialog, if a user has denied a permission and needs an
-     * explanation on why it is needed.
-     * @param message The explanation on why the permission is required
-     * @param snackbarAnchor The view that a snackbar can be anchored to, to alert user where
-     *                       permission settings can be altered
-     * @param permission The permission requested
-     * @param permissionRequestCode The request-specific code for this query
-     * @param callback Deals with any code needing to be run if a feature is being disabled as part of
-     *                 denying the permission
-     */
-    public static void showPermissionDeniedDialog(final Context context, String message,
-                                                  final View snackbarAnchor,
-                                                  final String permission,
-                                                  final int permissionRequestCode,
-                                                  final PermissionDialogListener callback) {
-        AlertDialog dialog = new AlertDialog.Builder(context)
-                .setMessage(message)
-                .setNegativeButton(R.string.perm_dialog_butt_deny, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        if (callback != null)
-                            callback.onFeatureDisabled();
-                        showPermissionReenableSnackbar(snackbarAnchor, permission);
-                    }
-                })
-                .setPositiveButton(R.string.perm_dialog_butt_permit, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                        PermissionsHandler.AskForPermission(context, permission,
-                                permissionRequestCode, true);
-                    }
-                })
-                .create();
-
-        dialog.show();
-    }
-
-    /**
-     * Method using string resource rather than string
-     * @see #showPermissionDeniedDialog(Context, String, View, String, int, PermissionDialogListener)
-     */
-    public static void showPermissionDeniedDialog(final Context context, int stringResource,
-                                                  final View snackbarAnchor,
-                                                  final String permissionCode,
-                                                  final int permissionRequestCode,
-                                                  final PermissionDialogListener callback) {
-        showPermissionDeniedDialog(context, context.getResources().getString(stringResource),
-                snackbarAnchor, permissionCode, permissionRequestCode, callback);
-    }
-
-    /**
-     * Display snackbar informing users where they can change the application's permission settings
-     * @param snackbarAnchor The view that a snackbar can be anchored to, to alert user where
-     *                       permission settings can be altered
-     * @param permissionName The name of the permission you are referencing
-     */
-    public static void showPermissionReenableSnackbar(View snackbarAnchor, String permissionName) {
-        Context context = snackbarAnchor.getContext();
-
-        String text = context.getResources().getString(R.string.perm_reenable_snackbar_msg, permissionName);
-        Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_LONG)
-                .setAction(R.string.snackbar_settings, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Context context = view.getContext();
-                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                Uri.fromParts("package", context.getPackageName(), null));
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
-                    }
-                })
-                .setActionTextColor(context.getResources().getColor(android.R.color.holo_blue_light))
-                .show();
-    }
-
-    /**
-     * Display snackbar informing users they can reenable permissions in settings
-     * @param snackbarAnchor The view that a snackbar can be anchored to, to alert user where
-     *                       permission settings can be altered
-     */
-    public static void showPermissionDeniedSnackbar(View snackbarAnchor) {
-        Context context = snackbarAnchor.getContext();
-
-        String text = context.getResources().getString(R.string.perm_denied_snackbar_msg);
-        Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_LONG)
-                .show();
     }
 
     /**
@@ -248,9 +145,8 @@ public class Utility {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && activity.isInMultiWindowMode();
     }
 
-    public static int dpToPx(Context context, int dp) {
-        Resources res = context.getResources();
-        return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, res.getDisplayMetrics());
+    public static int dpToPx(int dp) {
+        return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, Resources.getSystem().getDisplayMetrics());
     }
 
     public static void setKeyboardVisibility(Activity activity, boolean shouldShow) {
@@ -363,6 +259,7 @@ public class Utility {
         }
     }
 
+    //todo look into moving this
     public interface PermissionDialogListener {
         /**
          * When user has verified that they have denied a permission, this method should handle

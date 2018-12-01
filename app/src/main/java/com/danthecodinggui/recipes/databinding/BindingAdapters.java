@@ -3,19 +3,16 @@ package com.danthecodinggui.recipes.databinding;
 import android.content.Context;
 import android.content.res.Resources;
 import android.databinding.BindingAdapter;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.danthecodinggui.recipes.R;
@@ -93,9 +90,8 @@ public class BindingAdapters {
     @BindingAdapter(value = "shouldShowLandscapePadding")
     public static void setLandscapeLayout(View view, boolean isLandscapeLayout) {
 
-        Context context = view.getContext();
-        int landscapePadding = Utility.dpToPx(context, 99);
-        int portraitPadding = Utility.dpToPx(context, 19);
+        int landscapePadding = Utility.dpToPx(99);
+        int portraitPadding = Utility.dpToPx(19);
 
         if (isLandscapeLayout)
             view.setPadding(landscapePadding, 0, landscapePadding, 0);

@@ -159,10 +159,10 @@ public class CameraActivity extends AppCompatActivity {
                 initOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 
                 params = (CoordinatorLayout.LayoutParams) binding.imbConfirmImage.getLayoutParams();
-                params.setMargins(Utility.dpToPx(this, 16),
-                        Utility.dpToPx(this, 16),
-                        Utility.dpToPx(this, 60),
-                        Utility.dpToPx(this, 16));
+                params.setMargins(Utility.dpToPx(16),
+                        Utility.dpToPx(16),
+                        Utility.dpToPx(60),
+                        Utility.dpToPx(16));
                 binding.imbConfirmImage.setLayoutParams(params);
                 break;
             case ROTATION_180:
@@ -172,14 +172,14 @@ public class CameraActivity extends AppCompatActivity {
                 initOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 
                 params = (CoordinatorLayout.LayoutParams) binding.imbDiscardImage.getLayoutParams();
-                params.setMargins(Utility.dpToPx(this, 50), Utility.dpToPx(this, 30), 0, 0);
+                params.setMargins(Utility.dpToPx(50), Utility.dpToPx(30), 0, 0);
                 binding.imbDiscardImage.setLayoutParams(params);
 
                 params = (CoordinatorLayout.LayoutParams) binding.imbConfirmImage.getLayoutParams();
-                params.setMargins(Utility.dpToPx(this, 16),
-                        Utility.dpToPx(this, 16),
-                        Utility.dpToPx(this, 16),
-                        Utility.dpToPx(this, 16));
+                params.setMargins(Utility.dpToPx(16),
+                        Utility.dpToPx(16),
+                        Utility.dpToPx(16),
+                        Utility.dpToPx(16));
                 binding.imbConfirmImage.setLayoutParams(params);
                 break;
         }
