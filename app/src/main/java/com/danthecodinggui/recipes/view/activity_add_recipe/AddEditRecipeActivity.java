@@ -6,7 +6,6 @@ import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -274,8 +273,14 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
             binding.includeImageSheet.btnAddPhoto.setVisibility(View.GONE);
 
-        //TODO move this into its own function to clean up onCreate
-        Bundle editBundle = getIntent().getBundleExtra(EDIT_RECIPE_BUNDLE);
+        PopulateEditRecipe(getIntent().getBundleExtra(EDIT_RECIPE_BUNDLE));
+    }
+
+    /**
+     * Populate input views with existing data on recipe to edit
+     * @param editBundle Bundle containing recipe to edit
+     */
+    private void PopulateEditRecipe(Bundle editBundle) {
         Recipe recipeToEdit;
         if (editBundle != null) {
             //We know we are editing a recipe
@@ -316,10 +321,10 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
             //Must wait briefly until view dimensions can be accessed
             new Handler(getMainLooper()).postDelayed(() -> {
-                    ShowRetractedIngredients();
-                    ShowRetractedSteps();
-                }
-            , 10);
+                        ShowRetractedIngredients();
+                        ShowRetractedSteps();
+                    }
+                    , 10);
         }
         else {
             newIngredients = new ArrayList<>();
@@ -419,7 +424,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         if (!ingredientsExpanded) {
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.rvwNewIngredients.getLayoutParams();
-            params.height = getRecyclerviewRetractHeight();
+            params.height = getRecyclerviewRetractHeight(true);
             uiThread.postDelayed(() -> {
                     ToggleEditIngViews(false);
                     binding.rvwNewIngredients.setLayoutFrozen(true);
@@ -437,7 +442,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         if (!methodExpanded) {
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.rvwNewSteps.getLayoutParams();
-            params.height = getRecyclerviewRetractHeight();
+            params.height = getRecyclerviewRetractHeight(false);
             uiThread.postDelayed(() -> {
                     ToggleEditMethViews(false);
                     binding.rvwNewSteps.setLayoutFrozen(true);
@@ -768,8 +773,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
     }
 
     private void OpenGallery() {
-        //TODO replace string literal with string resource (may as well)
-        BSImagePicker addGalleryFrag = new BSImagePicker.Builder("com.danthecodinggui.fileprovider")
+        BSImagePicker addGalleryFrag = new BSImagePicker.Builder(getString(R.string.gallery_provider_authority))
                 .setSpanCount(3)
                 .setGridSpacing(0)
                 .setPeekHeight(Utility.dpToPx(500))
@@ -980,8 +984,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         recipeKcalPerPerson = 0;
     }
 
-    //TODO make ingredient/method variant (as ingredient has different input height now
-    private int getRecyclerviewRetractHeight() {
+    private int getRecyclerviewRetractHeight(boolean isIngredients) {
 
         ConstraintLayout.LayoutParams cardParams = (ConstraintLayout.LayoutParams)binding.crdvIngredients.getLayoutParams();
         ConstraintLayout.LayoutParams recyclerviewParams = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
@@ -995,7 +998,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         int recyclerPaddingBottom = binding.rvwNewIngredients.getPaddingBottom();
 
         //Add button is View.GONE so must manually provide height here
-        int AddButtonHeight = Utility.dpToPx(47);
+        int AddButtonHeight = isIngredients ? Utility.dpToPx(47) : 0;
 
         return  rootHeight -
                 cardTopMargin - cardBottomMargin -
@@ -1078,7 +1081,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         ingredientsExpanded = false;
 
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
-        params.height = getRecyclerviewRetractHeight();
+        params.height = getRecyclerviewRetractHeight(true);
 
         //Fade out all non-essential views
         ToggleEditIngViews(true);
@@ -1189,7 +1192,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         ToggleEditMethViews(true);
 
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewSteps.getLayoutParams();
-        params.height = getRecyclerviewRetractHeight();
+        params.height = getRecyclerviewRetractHeight(false);
 
         //Reset elevation AFTER size reduction to avoid toolbar and card cross-fading
         final LayoutTransition transition = binding.ctlyMethodContainer.getLayoutTransition();

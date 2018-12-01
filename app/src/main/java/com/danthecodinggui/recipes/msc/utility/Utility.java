@@ -258,13 +258,4 @@ public class Utility {
             return false;
         }
     }
-
-    //todo look into moving this
-    public interface PermissionDialogListener {
-        /**
-         * When user has verified that they have denied a permission, this method should handle
-         * disabling any functionality that the permission was needed for
-         */
-        void onFeatureDisabled();
-    }
 }

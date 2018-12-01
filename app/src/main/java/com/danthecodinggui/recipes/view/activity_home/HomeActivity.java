@@ -93,7 +93,7 @@ import static com.danthecodinggui.recipes.msc.LogTags.GLIDE;
  * Display all stored recipes
  */
 public class HomeActivity extends AppCompatActivity
-        implements Utility.PermissionDialogListener {
+        implements PermissionsHandler.PermissionDialogListener {
 
     ActivityHomeBinding binding;
 

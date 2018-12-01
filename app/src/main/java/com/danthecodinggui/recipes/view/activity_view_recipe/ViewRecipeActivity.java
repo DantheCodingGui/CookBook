@@ -70,7 +70,6 @@ public class ViewRecipeActivity extends AppCompatActivity
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
 
-    //TODO duplicate static value, find way to push into 1 class
     //Permission request codes
     private static final int REQ_CODE_READ_EXTERNAL = 211;
 
