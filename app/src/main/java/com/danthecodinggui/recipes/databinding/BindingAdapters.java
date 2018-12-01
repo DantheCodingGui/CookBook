@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.danthecodinggui.recipes.R;
@@ -35,8 +36,8 @@ public class BindingAdapters {
      * @param imagePath The path to the image (either local or remote)
      * @param onLoadedListener A callback to be used for any actions once the image is loaded
      */
-    @BindingAdapter(value = {"imagePath", "onLoadedListener"}, requireAll = false)
-    public static void setImageResource(final ImageView view, String imagePath, RequestListener<Drawable> onLoadedListener) {
+    @BindingAdapter(value = {"imagePath", "onLoadedListener", "noCache"}, requireAll = false)
+    public static void setImageResource(final ImageView view, String imagePath, RequestListener<Drawable> onLoadedListener, boolean noCache) {
 
         if (imagePath == null)
             return;
@@ -52,6 +53,8 @@ public class BindingAdapters {
 
         RequestOptions options = new RequestOptions()
                 .dontTransform()
+                .skipMemoryCache(noCache)
+                .diskCacheStrategy(noCache ? DiskCacheStrategy.NONE : DiskCacheStrategy.AUTOMATIC)
                 .error(R.drawable.ic_imageload_error);
 
         if (isURL) {

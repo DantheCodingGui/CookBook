@@ -76,6 +76,7 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:imagePath="@{imagePath}"
+                        app:noCache="@{true}"
                         app:onLoadedListener="@{imageLoadedCallback}"
                         tools:src="@drawable/sample_image" />
                 </android.support.constraint.ConstraintLayout>

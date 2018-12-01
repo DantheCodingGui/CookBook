@@ -18,11 +18,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.transition.TransitionManager;
 import android.view.OrientationEventListener;
+import android.view.OrientationListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.request.RequestOptions;
@@ -259,12 +261,9 @@ public class CameraActivity extends AppCompatActivity {
             fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(torch()).build());
         PhotoResult result = fotoapparat.takePicture();
         if (cameraFlash == CAM_FLASH_ON)
-            new Handler(getMainLooper()).postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(off()).build());
-                }
-            }, 400);
+            new Handler(getMainLooper()).postDelayed(() ->
+                            fotoapparat.updateConfiguration(UpdateConfiguration.builder().flash(off()).build())
+                    , 400);
 
 
         FileUtils.CreateDir(photoFilesDir);
@@ -277,12 +276,7 @@ public class CameraActivity extends AppCompatActivity {
 
         result.saveToFile(tempPhoto);
 
-        result.toBitmap().whenDone(new WhenDoneListener<BitmapPhoto>() {
-            @Override
-            public void whenDone(BitmapPhoto bitmapPhoto) {
-                ShowConfirmationView(true, bitmapPhoto);
-            }
-        });
+        result.toBitmap().whenDone((bitmapPhoto) -> ShowConfirmationView(true, bitmapPhoto));
     }
 
     /**
@@ -300,7 +294,9 @@ public class CameraActivity extends AppCompatActivity {
         float rotateCompensation = CompensateForRotation(b.rotationDegrees);
 
         RequestOptions options = new RequestOptions()
-                .transform(new RotateTransformation(-rotateCompensation));
+                .transform(new RotateTransformation(-rotateCompensation))
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true);
 
         Glide.with(CameraActivity.this)
                 .setDefaultRequestOptions(options)
