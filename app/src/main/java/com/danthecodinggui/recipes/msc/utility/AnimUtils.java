@@ -6,6 +6,7 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.graphics.drawable.AnimatedVectorDrawableCompat;
@@ -21,6 +22,9 @@ import android.view.animation.TranslateAnimation;
 
 import com.danthecodinggui.recipes.R;
 
+/**
+ * Set of utility methods related to animating views
+ */
 public class AnimUtils {
 
     /**
@@ -38,12 +42,8 @@ public class AnimUtils {
                 newColour);
         if (interpolator != null)
             fadeStatusBar.setInterpolator(interpolator);
-        fadeStatusBar.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                window.setStatusBarColor((int)valueAnimator.getAnimatedValue());
-            }
-        });
+        fadeStatusBar.addUpdateListener((valueAnimator) ->
+                window.setStatusBarColor((int)valueAnimator.getAnimatedValue()));
         fadeStatusBar.start();
     }
 
@@ -86,6 +86,14 @@ public class AnimUtils {
         }
     }
 
+    /**
+     * Run a circular reveal animation on a searchview
+     * @param activity The source activity
+     * @param toolbar The toolbar the searchview resides in
+     * @param numberOfMenuIcon The quantity of icons in the toolbar
+     * @param containsOverflow Does the toolbar contain an overflow icon
+     * @param shouldShow Should this animation reveal or collapse
+     */
     public static void animateSearchToolbar(final Activity activity, final Toolbar toolbar, int numberOfMenuIcon, boolean containsOverflow, boolean shouldShow) {
 
         toolbar.setBackgroundColor(ContextCompat.getColor(activity, android.R.color.white));
@@ -148,5 +156,18 @@ public class AnimUtils {
                 toolbar.startAnimation(animationSet);
             }
         }
+    }
+
+    /**
+     * Interpolate between two colours
+     * @param bAmount Percentage between the two to go
+     * @return Interpolated colour
+     */
+    public static int interpolateRGB(final int colorA, final int colorB, final float bAmount) {
+        final float aAmount = 1.0f - bAmount;
+        final int red = (int) (Color.red(colorA) * aAmount + Color.red(colorB) * bAmount);
+        final int green = (int) (Color.green(colorA) * aAmount + Color.green(colorB) * bAmount);
+        final int blue = (int) (Color.blue(colorA) * aAmount + Color.blue(colorB) * bAmount);
+        return Color.rgb(red, green, blue);
     }
 }

@@ -1,6 +1,7 @@
 package com.danthecodinggui.recipes.view.activity_view_recipe;
 
 import android.Manifest;
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
@@ -19,13 +20,10 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
-import android.support.v7.widget.Toolbar;
 import android.transition.TransitionInflater;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -72,7 +70,6 @@ public class ViewRecipeActivity extends AppCompatActivity
     ActivityViewRecipeBinding binding;
     ActivityViewRecipePhotoBinding bindingPhoto;
 
-    //TODO duplicate static value, find way to push into 1 class
     //Permission request codes
     private static final int REQ_CODE_READ_EXTERNAL = 211;
 
@@ -90,6 +87,8 @@ public class ViewRecipeActivity extends AppCompatActivity
 
     private boolean closingAnimating = false;
     private boolean addedPhoto = false;
+
+    private ContentObserver contentObserver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,14 +110,12 @@ public class ViewRecipeActivity extends AppCompatActivity
             SetupNoPhotoLayout();
         }
 
-        ContentObserver contentObserver = new ContentObserver(new Handler()) {
+        contentObserver = new ContentObserver(new Handler()) {
             @Override
             public void onChange(boolean selfChange, Uri uri) {
 
                 new UpdateViewedRecipeTask(ViewRecipeActivity.this,
-                        new UpdateViewedRecipeTask.onRecipeReadListener() {
-                    @Override
-                    public void onRecipeRead(Recipe updatedRecipe) {
+                        (updatedRecipe) -> {
 
                         //Needed to ensure that added photo doesn't mess with activity transitions
                         if (!recipe.hasPhoto() && updatedRecipe.hasPhoto())
@@ -139,7 +136,7 @@ public class ViewRecipeActivity extends AppCompatActivity
                         if (getSupportActionBar() != null)
                             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                     }
-                }).execute(recipe.getRecipeId());
+                ).execute(recipe.getRecipeId());
             }
         };
         getContentResolver().registerContentObserver(ProviderContract.RECIPES_URI, false, contentObserver);
@@ -221,7 +218,7 @@ public class ViewRecipeActivity extends AppCompatActivity
             collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarTitleMin);
 
         if (!recipe.hasExtendedInfo())
-            collapsingToolbarLayout.setExpandedTitleMarginEnd(Utility.dpToPx(this, 30));
+            collapsingToolbarLayout.setExpandedTitleMarginEnd(Utility.dpToPx(30));
 
         if (Utility.atLeastLollipop()) {
             //Set the shared elements transition name
@@ -316,7 +313,6 @@ public class ViewRecipeActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.menu_view_edit:
-                //TODO take recipe, package into intent and start AddEditActivity
 
                 Intent editRecipe = new Intent(getApplicationContext(), AddEditRecipeActivity.class);
 
@@ -327,9 +323,9 @@ public class ViewRecipeActivity extends AppCompatActivity
 
                 editRecipe.putExtra(EDIT_RECIPE_BUNDLE, extras);
 
-                //TODO add transition version of startActivity
 
-                startActivity(editRecipe);
+                ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
+                startActivity(editRecipe, options.toBundle());
                 return true;
         }
 
@@ -343,13 +339,11 @@ public class ViewRecipeActivity extends AppCompatActivity
         BitmapDrawable drawable = (BitmapDrawable) res;
         Bitmap bitmap = drawable.getBitmap();
 
-        Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
-            @Override
-            public void onGenerated(Palette palette) {
+        Palette.from(bitmap).generate((palette) -> {
                 int mutedColor = palette.getMutedColor(R.attr.colorPrimary);
                 appBar.setBackgroundColor(mutedColor);
             }
-        });
+        );
     }
 
     /**
@@ -405,10 +399,14 @@ public class ViewRecipeActivity extends AppCompatActivity
             bindingPhoto.ablViewRecipe.setExpanded(true, true);
             closingAnimating = true;
         }
-        else if (!addedPhoto)
+        else if (!addedPhoto) {
+            getContentResolver().unregisterContentObserver(contentObserver);
             supportFinishAfterTransition();
-        else
+        }
+        else {
+            getContentResolver().unregisterContentObserver(contentObserver);
             finish();
+        }
     }
 
     @Override
@@ -423,10 +421,13 @@ public class ViewRecipeActivity extends AppCompatActivity
         bindingPhoto.ivwToolbarPreview.setImageAlpha(Math.round(f));
 
         //When AppBarLayout expansion fully animated, THEN the activity can close
-        if (closingAnimating && !addedPhoto && verticalOffset == 0)
-            supportFinishAfterTransition();
-        else if (addedPhoto)
-            finish();
+        if (closingAnimating && verticalOffset == 0) {
+            getContentResolver().unregisterContentObserver(contentObserver);
+            if (addedPhoto)
+                finish();
+            else
+                supportFinishAfterTransition();
+        }
 
         float adjustedF = (f - 102) / 0.255f - 200;
         if (adjustedF < 0)

@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -35,6 +36,8 @@ public class RecipeProvider extends ContentProvider {
         uriMatcher.addURI(ProviderContract.CONTENT_AUTHORITY, ProviderContract.PATH_METHOD + "/#", METHOD_ITEM);
         uriMatcher.addURI(ProviderContract.CONTENT_AUTHORITY, ProviderContract.PATH_RECIPE_INGREDIENTS, RECIPE_INGREDIENTS_TABLE);
         uriMatcher.addURI(ProviderContract.CONTENT_AUTHORITY, ProviderContract.PATH_RECIPE_INGREDIENTS + "/#", RECIPE_INGREDIENTS_ITEM);
+        uriMatcher.addURI(ProviderContract.CONTENT_AUTHORITY, ProviderContract.PATH_RECIPE_INGREDIENTS, RECIPE_INGREDIENTS_TABLE);
+        uriMatcher.addURI(ProviderContract.CONTENT_AUTHORITY, ProviderContract.PATH_RECIPE_INGREDIENTS + "/#", RECIPE_INGREDIENTS_ITEM);
     }
 
     private DBHelper dbHelper;
@@ -45,7 +48,7 @@ public class RecipeProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         if (uri.getLastPathSegment() == null)
             return "vnd.android.cursor.dir/RecipeProvider.data.text";
         else
@@ -53,7 +56,7 @@ public class RecipeProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(@NonNull Uri uri, ContentValues values) {
 
         SQLiteDatabase db;
         String tableName;
@@ -70,6 +73,10 @@ public class RecipeProvider extends ContentProvider {
                 long recipeId = values.getAsLong(ProviderContract.RecipeIngredientEntry.RECIPE_ID);
                 String ingredient = values.getAsString(
                         ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME);
+                int quantity = values.getAsInteger(
+                        ProviderContract.RecipeIngredientEntry.QUANTITY);
+                String measurement = values.getAsString(
+                        ProviderContract.RecipeIngredientEntry.MEASUREMENT);
 
                 long ingredientId = GetIngredientId(ingredient);
 
@@ -77,6 +84,8 @@ public class RecipeProvider extends ContentProvider {
                 values = new ContentValues();
                 values.put(DBSchema.RecipeIngredientEntry.RECIPE_ID, recipeId);
                 values.put(DBSchema.RecipeIngredientEntry.INGREDIENT_ID, ingredientId);
+                values.put(DBSchema.RecipeIngredientEntry.QUANTITY, quantity);
+                values.put(DBSchema.RecipeIngredientEntry.MEASUREMENT, measurement);
 
                 tableName = DBSchema.RecipeIngredientEntry.TABLE_NAME;
                 break;
@@ -101,8 +110,6 @@ public class RecipeProvider extends ContentProvider {
      * @return The primary key of the ingredient
      */
     private long GetIngredientId(String ingredientName) {
-
-        //TODO sanitise input here to prevent sql injection
 
         //Query db to see if ingredient is in table
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -135,12 +142,16 @@ public class RecipeProvider extends ContentProvider {
 
         //Ingredient is already/now in table, just return it's ID
         ingredients.moveToFirst();
-        return ingredients.getLong(
+        long id = ingredients.getLong(
                 ingredients.getColumnIndexOrThrow(DBSchema.IngredientEntry._ID));
+
+        ingredients.close();
+
+        return id;
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection,
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
 
         SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
@@ -189,7 +200,7 @@ public class RecipeProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection,
+    public int update(@NonNull Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -273,7 +284,7 @@ public class RecipeProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
 
         //Same structure as update with changed var names and db methods
 
@@ -348,6 +359,5 @@ public class RecipeProvider extends ContentProvider {
         }
 
         return rowNumDeleted;
-
     }
 }

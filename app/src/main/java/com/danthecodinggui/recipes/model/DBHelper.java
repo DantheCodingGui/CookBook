@@ -40,6 +40,8 @@ class DBHelper extends SQLiteOpenHelper {
             DBSchema.RecipeIngredientEntry. _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             DBSchema.RecipeIngredientEntry.RECIPE_ID + " TEXT NOT NULL, " +
             DBSchema.RecipeIngredientEntry.INGREDIENT_ID + " INTEGER NOT NULL, " +
+            DBSchema.RecipeIngredientEntry.QUANTITY + " INTEGER NOT NULL, " +
+            DBSchema.RecipeIngredientEntry.MEASUREMENT + " TEXT NOT NULL, " +
             "FOREIGN KEY(" + DBSchema.RecipeIngredientEntry.RECIPE_ID + ") REFERENCES " +
             DBSchema.RecipeEntry.TABLE_NAME + "(" + DBSchema.RecipeEntry._ID + "), " +
             "FOREIGN KEY(" + DBSchema.RecipeIngredientEntry.INGREDIENT_ID + ") REFERENCES " +

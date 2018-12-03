@@ -31,7 +31,6 @@ public class Recipe implements Parcelable {
 
     /**
      * States whether or not recipe record includes time and/or Calorie information
-     * @return
      */
     public boolean hasExtendedInfo() {
         return calories != 0 || timeInMins != 0;
@@ -39,7 +38,6 @@ public class Recipe implements Parcelable {
 
     /**
      * States whether or not recipe record includes an attached photo or the completed dish
-     * @return
      */
     public boolean hasPhoto() {
         return imagePath != null;

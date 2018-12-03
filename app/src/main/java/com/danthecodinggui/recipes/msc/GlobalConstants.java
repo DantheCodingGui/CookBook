@@ -1,7 +1,7 @@
 package com.danthecodinggui.recipes.msc;
 
 /**
- * Holds intent extra constants referred to by multiple activities
+ * Holds any extra constants referred to by multiple activities/classes
  */
 public class GlobalConstants {
     public static final String RECIPE_DETAIL_OBJECT = "RECIPE_DETAIL_OBJECT";
@@ -12,7 +12,6 @@ public class GlobalConstants {
     public static final String IMAGE_TRANSITION_NAME = "IMAGE_TRANSITION";
 
     public static final String PHOTOS_DIRECTORY_PATH = "PHOTOS_DIRECTORY_PATH";
-    public static final String CAMERA_PHOTO_SAVED = "CAMERA_PHOTO_SAVED";
     public static final String CAMERA_PHOTO_PATH = "CAMERA_PHOTO_PATH";
 
     public static final String EDIT_RECIPE_BUNDLE = "EDIT_RECIPE_BUNDLE";
@@ -28,7 +27,7 @@ public class GlobalConstants {
     public static final String SAVE_TASK_IS_IMAGE_CAMERA = "SAVE_TASK_IS_IMAGE_CAMERA";
     public static final String SAVE_TASK_CAMERA_DIR_PATH = "SAVE_TASK_CAMERA_DIR_PATH";
 
-    public static final String PREF_FILE_NAME = "RecipeSharedPreferences";
+    public static final String RECIPE_PREF_FILE_NAME = "RecipeSharedPreferences";
 
     //Shared Preference Keys
     public static final String PREF_KEY_HOME_SORT_ORDER = "home_sort_order";

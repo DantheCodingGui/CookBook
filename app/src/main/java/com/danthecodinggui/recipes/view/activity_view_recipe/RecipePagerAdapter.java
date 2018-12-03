@@ -23,9 +23,6 @@ public class RecipePagerAdapter extends FragmentStatePagerAdapter {
 
     private long recipeId;
 
-    private IngredientsTabFragment ingFrag;
-    private MethodTabFragment methFrag;
-
     RecipePagerAdapter(FragmentManager fm, int tabsNo, List<String> tabTitles, long recipeId) {
         super(fm);
         this.tabsNo = tabsNo;
@@ -41,11 +38,11 @@ public class RecipePagerAdapter extends FragmentStatePagerAdapter {
 
         switch (position) {
             case INGREDIENTS_TAB:
-                ingFrag = new IngredientsTabFragment();
+                IngredientsTabFragment ingFrag = new IngredientsTabFragment();
                 ingFrag.setArguments(recipeBundle);
                 return ingFrag;
             case METHOD_TAB:
-                methFrag = new MethodTabFragment();
+                MethodTabFragment methFrag = new MethodTabFragment();
                 methFrag.setArguments(recipeBundle);
                 return methFrag;
             default:

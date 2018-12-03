@@ -31,7 +31,7 @@ public class UpdateRecipeTask extends AsyncTask<Bundle, Void, Void> {
     @SuppressLint("StaticFieldLeak")
     private Context context;
 
-    public UpdateRecipeTask(Context context) {
+    UpdateRecipeTask(Context context) {
         this.context = context;
     }
 
@@ -90,6 +90,8 @@ public class UpdateRecipeTask extends AsyncTask<Bundle, Void, Void> {
                 record = new ContentValues();
                 record.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
                 record.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, i.getIngredientText());
+                record.put(ProviderContract.RecipeIngredientEntry.QUANTITY, i.getQuantity());
+                record.put(ProviderContract.RecipeIngredientEntry.MEASUREMENT, i.getMeasurement());
                 resolver.insert(ProviderContract.RECIPE_INGREDIENTS_URI, record);
             }
         }

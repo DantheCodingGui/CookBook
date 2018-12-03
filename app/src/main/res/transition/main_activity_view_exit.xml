@@ -3,6 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:duration="0">
     <targets>
-        <target android:targetId="@+id/fab_add_recipe"/>
+        <target android:targetId="@+id/fab_home_add_recipe"/>
     </targets>
 </fade>

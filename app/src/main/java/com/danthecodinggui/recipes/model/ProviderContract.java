@@ -65,6 +65,9 @@ public final class ProviderContract {
 
         public static final String RECIPE_ID = "RecipeId";
         public static final String INGREDIENT_NAME = "IngredientName";
+
+        public static final String QUANTITY = "Quantity";
+        public static final String MEASUREMENT = "Measurement";
     }
 
     /**

@@ -27,6 +27,10 @@ public class FileUtils {
     //the camera
     private static final String RECIPES_CAM_DIR_NAME = "/Recipes/";
 
+    /**
+     * Delete a file at a particular file path
+     * @return Whether the file was deleted
+     */
     public static boolean DeleteFile(String path) {
 
         if (path == null)
@@ -38,6 +42,9 @@ public class FileUtils {
         return false;
     }
 
+    /**
+     * Delete all children of a particular directory
+     */
     public static void ClearDir(String dirPath) {
 
         if (dirPath == null)
@@ -50,6 +57,10 @@ public class FileUtils {
                 child.delete();
     }
 
+    /**
+     * Create a new directory at the specified path
+     * @return Whether the directory was created
+     */
     public static boolean CreateDir(String path) {
 
         if (path == null)
@@ -67,10 +78,18 @@ public class FileUtils {
         return isImageLocal(imagePath);
     }
 
+    /**
+     * Is a particular image path local to a device
+     */
     public static boolean isImageLocal(String filepath) {
         return new File(filepath).exists();
     }
 
+    /**
+     * Save an image file to the external recipes directory for camera-sourced images
+     * @param item The recipe associated with the photo
+     * @return The path of the newly created image
+     */
     public static String SavePhotoToExternalDir(Context context, Recipe item) {
         //Check that external storage is available for write
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {

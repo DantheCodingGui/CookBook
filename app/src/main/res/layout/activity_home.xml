@@ -5,7 +5,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/cly_main_root"
+        android:id="@+id/cdly_root"
         tools:context="com.danthecodinggui.recipes.view.activity_home.HomeActivity">
 
         <android.support.design.widget.AppBarLayout
@@ -73,7 +73,7 @@
         </android.support.constraint.ConstraintLayout>
 
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_add_recipe"
+            android:id="@+id/fab_home_add_recipe"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_add"

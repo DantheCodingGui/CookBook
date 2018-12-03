@@ -6,7 +6,6 @@ import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -39,10 +38,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
+import android.view.animation.TranslateAnimation;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 import com.asksira.bsimagepicker.BSImagePicker;
 import com.danthecodinggui.recipes.R;
@@ -86,7 +89,7 @@ import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_RECIPE;
 public class AddEditRecipeActivity extends AppCompatActivity implements
         CaloriesPickerFragment.onCaloriesSetListener,
         DurationPickerFragment.onDurationSetListener, AddImageURLFragment.onURLSetListener,
-        BSImagePicker.OnSingleImageSelectedListener, Utility.PermissionDialogListener {
+        BSImagePicker.OnSingleImageSelectedListener {
 
     ActivityAddRecipeBinding binding;
 
@@ -105,7 +108,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
     //Permission Request Codes
     private static final int PERM_REQ_CODE_CAMERA = 201;
     private static final int PERM_REQ_CODE_READ_EXTERNAL = 202;
-    private static final int PERM_REQ_CODE_WRITE_EXTERNAL = 203;
 
     //Activity Request Codes
     private static final int ACT_REQ_CODE_CAMERA = 301;
@@ -123,7 +125,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
     private static final String INGREDIENTS_LIST = "INGREDIENTS_LIST";
     private static final String METHOD_LIST = "METHOD_LIST";
     private static final String EDITING_POSITION = "EDITING_POSITION";
-    private static final String HAS_ASKED_WRITE_PERM = "HAS_ASKED_WRITE_PERM";
 
     //Various Flags
     private boolean fabMenuOpen = false;
@@ -131,7 +132,8 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
     private boolean ingredientsExpanded = false;
     private boolean methodExpanded = false;
     private boolean isImageFromCam = false;
-    private boolean hasAskedWritePerm = false;
+    private boolean isQuantityEmpty = true;
+    private boolean isIngredientEmpty = true;
 
     //Recipe Data
     private int recipeDuration;
@@ -166,7 +168,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             if (Utility.isMultiWindow(this)) {
                 ConstraintLayout.LayoutParams params =
                         (ConstraintLayout.LayoutParams) binding.spcAdd.getLayoutParams();
-                params.height = Utility.dpToPx(this, 1);
+                params.height = Utility.dpToPx(1);
             }
         }
 
@@ -176,12 +178,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         ItemTouchHelper.Callback ingTouchCallback = new AddItemTouchHelperCallback(ingAdapter);
         final ItemTouchHelper ingTouchHelper = new ItemTouchHelper(ingTouchCallback);
         ingTouchHelper.attachToRecyclerView(binding.rvwNewIngredients);
-        ingAdapter.setStartDragListener(new OnStartDragListener() {
-            @Override
-            public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
-                ingTouchHelper.startDrag(viewHolder);
-            }
-        });
+        ingAdapter.setStartDragListener(ingTouchHelper::startDrag);
 
         binding.rvwNewSteps.setLayoutManager((new LinearLayoutManager(this)));
         methAdapter = new MethodStepAddAdapter();
@@ -189,12 +186,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         ItemTouchHelper.Callback methTouchCallback = new AddItemTouchHelperCallback(methAdapter);
         final ItemTouchHelper methTouchHelper = new ItemTouchHelper(methTouchCallback);
         methTouchHelper.attachToRecyclerView(binding.rvwNewSteps);
-        methAdapter.setStartDragListener(new OnStartDragListener() {
-            @Override
-            public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
-                methTouchHelper.startDrag(viewHolder);
-            }
-        });
+        methAdapter.setStartDragListener(methTouchHelper::startDrag);
 
         //Setup toolbar
         setSupportActionBar(binding.tbarAdd);
@@ -207,13 +199,35 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         //Setup button enable/disable based on edittext contents
         binding.butAddIngredient.setEnabled(false);
-        binding.etxtAddIngredient.addTextChangedListener(new TextWatcher() {
+        binding.etxtAddIngredientQuantity.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Utility.CheckButtonEnabled(binding.butAddIngredient, charSequence.toString());
+                isQuantityEmpty = charSequence.length() == 0;
+
+                if (isIngredientEmpty || isQuantityEmpty)
+                    binding.butAddIngredient.setEnabled(false);
+                else
+                    binding.butAddIngredient.setEnabled(true);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
+        binding.etxtAddIngredientName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                isIngredientEmpty = charSequence.length() == 0;
+
+                if (isIngredientEmpty || isQuantityEmpty)
+                    binding.butAddIngredient.setEnabled(false);
+                else
+                    binding.butAddIngredient.setEnabled(true);
             }
 
             @Override
@@ -232,6 +246,12 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             @Override
             public void afterTextChanged(Editable editable) {}
         });
+
+        //Populate spinner for ingredients input
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
+                R.array.default_ingredient_measurements, android.R.layout.simple_spinner_item);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spnIngredientMeasurement.setAdapter(spinnerAdapter);
 
         //Setup add image photo sheet
         photoSheetBehaviour = BottomSheetBehavior.from(binding.includeImageSheet.addImage);
@@ -252,8 +272,14 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA))
             binding.includeImageSheet.btnAddPhoto.setVisibility(View.GONE);
 
-        //TODO move this into its own function to clean up onCreate
-        Bundle editBundle = getIntent().getBundleExtra(EDIT_RECIPE_BUNDLE);
+        PopulateEditRecipe(getIntent().getBundleExtra(EDIT_RECIPE_BUNDLE));
+    }
+
+    /**
+     * Populate input views with existing data on recipe to edit
+     * @param editBundle Bundle containing recipe to edit
+     */
+    private void PopulateEditRecipe(Bundle editBundle) {
         Recipe recipeToEdit;
         if (editBundle != null) {
             //We know we are editing a recipe
@@ -281,23 +307,23 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                 newIngredients = new ArrayList<>(ingredients);
                 newSteps = new ArrayList<>(steps);
 
-                oldIngredients = new ArrayList<>(ingredients);
-                oldSteps = new ArrayList<>(steps);
-            }
-            else {
-                ;
-                //TODO when accessing this from HomeActivity, ingredients/steps will be null,
-                //  handle this with asynctask to get data
+                //Must deep copy lists to copy items by value and not reference
+
+                oldIngredients = new ArrayList<>();
+                for (Ingredient in: ingredients)
+                    oldIngredients.add(new Ingredient(in));
+
+                oldSteps = new ArrayList<>();
+                for (MethodStep step: steps)
+                    oldSteps.add(new MethodStep(step));
             }
 
             //Must wait briefly until view dimensions can be accessed
-            new Handler(getMainLooper()).postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    ShowRetractedIngredients();
-                    ShowRetractedSteps();
-                }
-            }, 10);
+            new Handler(getMainLooper()).postDelayed(() -> {
+                        ShowRetractedIngredients();
+                        ShowRetractedSteps();
+                    }
+                    , 10);
         }
         else {
             newIngredients = new ArrayList<>();
@@ -315,7 +341,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         outState.putString(IMAGE_PATH, currentImagePath);
         outState.putString(PHOTO_DIR_PATH, photosDirPath);
         outState.putBoolean(IS_IMAGE_CAM, isImageFromCam);
-        outState.putBoolean(HAS_ASKED_WRITE_PERM, hasAskedWritePerm);
 
         outState.putInt(EDITING_POSITION, editingPosition);
 
@@ -343,7 +368,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         methodExpanded = savedInstanceState.getBoolean(METHOD_EXPANDED);
         boolean fabMenuOpen = savedInstanceState.getBoolean(FAB_MENU_OPEN);
         photoSheetExpanded = savedInstanceState.getBoolean(PHOTO_SHEET_OPEN);
-        hasAskedWritePerm = savedInstanceState.getBoolean(HAS_ASKED_WRITE_PERM);
 
         //Restore ingredient and method steps
         newIngredients = savedInstanceState.getParcelableArrayList(INGREDIENTS_LIST);
@@ -390,6 +414,9 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         editingPosition = -1;
     }
 
+    /**
+     * Setup the view for an ingredients card occupied with values
+     */
     private void ShowRetractedIngredients() {
 
         Handler uiThread = new Handler(getMainLooper());
@@ -399,17 +426,18 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         if (!ingredientsExpanded) {
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.rvwNewIngredients.getLayoutParams();
-            params.height = getRecyclerviewRetractHeight();
-            uiThread.postDelayed(new Runnable() {
-                @Override
-                public void run() {
+            params.height = getRecyclerviewRetractHeight(true);
+            uiThread.postDelayed(() -> {
                     ToggleEditIngViews(false);
                     binding.rvwNewIngredients.setLayoutFrozen(true);
                 }
-            }, 50);
+            , 50);
         }
     }
 
+    /**
+     * Setup the view for an step card occupied with values
+     */
     private void ShowRetractedSteps() {
 
         Handler uiThread = new Handler(getMainLooper());
@@ -419,14 +447,12 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         if (!methodExpanded) {
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) binding.rvwNewSteps.getLayoutParams();
-            params.height = getRecyclerviewRetractHeight();
-            uiThread.postDelayed(new Runnable() {
-                @Override
-                public void run() {
+            params.height = getRecyclerviewRetractHeight(false);
+            uiThread.postDelayed(() -> {
                     ToggleEditMethViews(false);
                     binding.rvwNewSteps.setLayoutFrozen(true);
                 }
-            }, 50);
+            , 50);
         }
     }
 
@@ -455,16 +481,8 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         else {
             AlertDialog verification = new AlertDialog.Builder(this)
                     .setMessage(R.string.are_you_sure_discard)
-                    .setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            CloseActivity();
-                        }
-                    })
-                    .setNegativeButton(R.string.dialog_no, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {}
-                    })
+                    .setPositiveButton(R.string.dialog_yes, (dialogInterface, i) -> CloseActivity())
+                    .setNegativeButton(R.string.dialog_no, (dialogInterface, i) -> {})
                     .create();
             verification.show();
         }
@@ -515,44 +533,26 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         String title = binding.etxtRecipeName.getText().toString();
 
         if (title.isEmpty()) {
-            Snackbar.make(binding.cdlyAddRoot, R.string.snackbar_no_title, Snackbar.LENGTH_SHORT)
+            Snackbar.make(binding.cdlyRoot, R.string.snackbar_no_title, Snackbar.LENGTH_SHORT)
                     .show();
             return;
         }
-        else if (Utility.isStringAllWhitespace(title)) {
-            Snackbar.make(binding.cdlyAddRoot, R.string.snackbar_title_invalid, Snackbar.LENGTH_SHORT)
+        else if (StringUtils.isStringAllWhitespace(title)) {
+            Snackbar.make(binding.cdlyRoot, R.string.snackbar_title_invalid, Snackbar.LENGTH_SHORT)
                     .show();
             return;
         }
         if (newIngredients.isEmpty()) {
-            Snackbar.make(binding.cdlyAddRoot, R.string.snackbar_no_ingredients, Snackbar.LENGTH_SHORT)
+            Snackbar.make(binding.cdlyRoot, R.string.snackbar_no_ingredients, Snackbar.LENGTH_SHORT)
                     .show();
             return;
         }
         if (newSteps.isEmpty()) {
-            Snackbar.make(binding.cdlyAddRoot, R.string.snackbar_no_steps, Snackbar.LENGTH_SHORT)
+            Snackbar.make(binding.cdlyRoot, R.string.snackbar_no_steps, Snackbar.LENGTH_SHORT)
                     .show();
             return;
         }
 
-        if (isImageFromCam) {
-            int response = PermissionsHandler.AskForPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    PERM_REQ_CODE_WRITE_EXTERNAL);
-
-            if (response == PermissionsHandler.PERMISSION_GRANTED)
-                SaveRecipe();
-            else if (response == PermissionsHandler.PERMISSION_DENIED) {
-                onFeatureDisabled();
-            }
-        }
-        else
-            SaveRecipe();
-    }
-
-    @Override
-    public void onFeatureDisabled() {
-        currentImagePath = null;
-        isImageFromCam = false;
         SaveRecipe();
     }
 
@@ -643,12 +643,12 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     .setDuration(250L)
                     .setInterpolator(new OvershootInterpolator(1.5f))
                     .start();
-            AnimateFabItem(binding.fabAddPhoto);
-            AnimateFabItem(binding.txtAddPhoto);
-            AnimateFabItem(binding.fabAddTime);
-            AnimateFabItem(binding.txtAddTime);
-            AnimateFabItem(binding.fabAddKcal);
-            AnimateFabItem(binding.txtAddKcal);
+            AnimateFabMenuItem(binding.fabAddKcal, 0);
+            AnimateFabMenuItemTag(binding.txtAddKcal, 0);
+            AnimateFabMenuItem(binding.fabAddPhoto, 30);
+            AnimateFabMenuItemTag(binding.txtAddPhoto, 30);
+            AnimateFabMenuItem(binding.fabAddTime, 60);
+            AnimateFabMenuItemTag(binding.txtAddTime, 60);
             fabMenuOpen = false;
         }
         else {
@@ -658,21 +658,21 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     .setDuration(250L)
                     .setInterpolator(new OvershootInterpolator(1.5f))
                     .start();
-            AnimateFabItem(binding.fabAddPhoto);
-            AnimateFabItem(binding.txtAddPhoto);
-            AnimateFabItem(binding.fabAddTime);
-            AnimateFabItem(binding.txtAddTime);
-            AnimateFabItem(binding.fabAddKcal);
-            AnimateFabItem(binding.txtAddKcal);
+            AnimateFabMenuItem(binding.fabAddKcal, 0);
+            AnimateFabMenuItemTag(binding.txtAddKcal, 0);
+            AnimateFabMenuItem(binding.fabAddPhoto, 30);
+            AnimateFabMenuItemTag(binding.txtAddPhoto, 30);
+            AnimateFabMenuItem(binding.fabAddTime, 60);
+            AnimateFabMenuItemTag(binding.txtAddTime, 60);
             fabMenuOpen = true;
         }
     }
 
     /**
-     * Animates individual fab item both in/out of view
+     * Animates individual fab menu item both in/out of view
      * @param menuItem The menu fab view
      */
-    private void AnimateFabItem(View menuItem) {
+    private void AnimateFabMenuItem(View menuItem, int delay) {
         AnimationSet set = new AnimationSet(true);
         Animation rotate;
 
@@ -706,21 +706,62 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             menuItem.setClickable(true);
         }
 
-        set.setDuration(200);
+        set.setDuration(150);
+        set.setStartOffset(delay);
         set.setFillAfter(true);
 
         menuItem.startAnimation(set);
     }
 
+    /**
+     * Animates individual fab menu item tags both in/out of view
+     * @param tag The menu tag view
+     */
+    private void AnimateFabMenuItemTag(TextView tag, int delay) {
+        AnimationSet set = new AnimationSet(true);
+        Animation translate;
+        Animation fade;
+
+        if (fabMenuOpen) {
+            translate = new TranslateAnimation(
+                    Animation.RELATIVE_TO_SELF,  -200, Animation.RELATIVE_TO_SELF, 0);
+            fade = new AlphaAnimation(1.f, 0.f);
+            set.addAnimation(translate);
+            set.addAnimation(fade);
+        }
+        else {
+            translate = new TranslateAnimation(-200, 0, 0, 0);
+            fade = new AlphaAnimation(0.f, 1.f);
+            set.addAnimation(translate);
+            set.addAnimation(fade);
+        }
+
+        set.setDuration(200);
+        set.setStartOffset(delay);
+        set.setFillAfter(true);
+
+        tag.startAnimation(set);
+    }
+
+    /**
+     * Open the photo bottom sheet
+     */
     public void addImage(View view) {
         photoSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
+
+    /**
+     * Remove image from the recipe
+     */
     public void RemoveImage(View view) {
         HideImage();
         currentImagePath = null;
         isImageFromCam = false;
     }
 
+    /**
+     * Open the dialog fragment to add an image url
+     */
     public void AddImageURL(View view) {
         AddImageURLFragment addUrlFrag= new AddImageURLFragment();
         addUrlFrag.SetURLListener(this);
@@ -732,6 +773,9 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         SetImage(url);
     }
 
+    /**
+     * Open gallery selection bottom sheet
+     */
     public void AddImageGallery(View view) {
 
         int response = PermissionsHandler.AskForPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE, PERM_REQ_CODE_READ_EXTERNAL);
@@ -742,16 +786,18 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                 break;
             case PermissionsHandler.PERMISSION_DENIED:
                 ClosePhotoSheet();
-                Utility.showPermissionReenableSnackbar(binding.cdlyAddRoot, "Storage");
                 break;
         }
     }
 
+    /**
+     * Initialise and show gallery selection bottom sheet
+     */
     private void OpenGallery() {
-        BSImagePicker addGalleryFrag = new BSImagePicker.Builder("com.danthecodinggui.fileprovider")
+        BSImagePicker addGalleryFrag = new BSImagePicker.Builder(getString(R.string.gallery_provider_authority))
                 .setSpanCount(3)
                 .setGridSpacing(0)
-                .setPeekHeight(Utility.dpToPx(this, 500))
+                .setPeekHeight(Utility.dpToPx(500))
                 .hideCameraTile()
                 .hideGalleryTile()
                 .build();
@@ -764,9 +810,17 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         SetImage(uri.getPath());
     }
 
+    /**
+     * Open camera activity to take a photo
+     */
     public void AddImageCamera(View view) {
 
-        int response = PermissionsHandler.AskForPermission(this, Manifest.permission.CAMERA, PERM_REQ_CODE_CAMERA);
+        int response = PermissionsHandler.AskForPermission(
+                this,
+                new String[] {
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                PERM_REQ_CODE_CAMERA);
 
         switch (response) {
             case PermissionsHandler.PERMISSION_GRANTED:
@@ -774,13 +828,16 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                 break;
             case PermissionsHandler.PERMISSION_DENIED:
                 ClosePhotoSheet();
-                Utility.showPermissionReenableSnackbar(binding.cdlyAddRoot, "Camera");
                 break;
         }
     }
 
+    /**
+     * Load and show a recipe image from a path
+     * @param path The path to the image (either URL or local filepath)
+     */
     private void SetImage(String path) {
-        if (Utility.isStringAllWhitespace(path))
+        if (StringUtils.isStringAllWhitespace(path))
             return;
 
         isImageFromCam = false;
@@ -832,9 +889,15 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
     private EditIngredientFragment.onIngredientEditedListener editIngredientListener = new EditIngredientFragment.onIngredientEditedListener() {
         @Override
-        public void onIngredientEdited(String ingredientName, int position) {
-            if (!Utility.isStringAllWhitespace(ingredientName)) {
-                newIngredients.get(position).setIngredientText(ingredientName);
+        public void onIngredientEdited(Ingredient editedIngredient, int position) {
+
+            if (newIngredients.get(position).equals(editedIngredient))
+                return;
+
+            if (!StringUtils.isStringAllWhitespace(editedIngredient.getIngredientText())) {
+                newIngredients.get(position).setIngredientText(editedIngredient.getIngredientText());
+                newIngredients.get(position).setQuantity(editedIngredient.getQuantity());
+                newIngredients.get(position).setMeasurement(editedIngredient.getMeasurement());
                 ingAdapter.notifyItemChanged(position);
                 editingPosition = -1;
             }
@@ -843,7 +906,8 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
     private EditMethodStepFragment.onStepEditedListener editMethodListener = new EditMethodStepFragment.onStepEditedListener() {
         @Override
         public void onStepEdited(String stepText, int position) {
-            if (!Utility.isStringAllWhitespace(stepText)) {
+
+            if (!StringUtils.isStringAllWhitespace(stepText)) {
                 newSteps.get(position).setStepText(stepText);
                 methAdapter.notifyItemChanged(position);
                 editingPosition = -1;
@@ -860,52 +924,34 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         switch(requestCode) {
             case PERM_REQ_CODE_CAMERA:
                 if (grantResults.length > 0) {
-                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                        new Handler(getMainLooper()).postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                OpenCamera();
-                            }
-                        }, 10);
-                    else {
-                        ClosePhotoSheet();
-                        Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot);
+                    for (int result: grantResults) {
+                        if (result == PackageManager.PERMISSION_DENIED) {
+                            ClosePhotoSheet();
+                            return;
+                        }
                     }
+
+                    new Handler(getMainLooper()).postDelayed(this::OpenCamera, 10);
                 }
                 break;
             case PERM_REQ_CODE_READ_EXTERNAL:
                 if (grantResults.length > 0) {
-                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                        OpenGallery();
-                    else {
-                        ClosePhotoSheet();
-                        Utility.showPermissionDeniedSnackbar(binding.cdlyAddRoot);
-                    }
-                }
-                break;
-            case PERM_REQ_CODE_WRITE_EXTERNAL:
-                if (grantResults.length > 0) {
-                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                        SaveRecipe();
-                    else {
-                        if (!hasAskedWritePerm &&
-                                ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
-                            Utility.showPermissionDeniedDialog(this,
-                                    R.string.perm_camera_denied,
-                                    binding.cdlyAddRoot,
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                    PERM_REQ_CODE_WRITE_EXTERNAL,
-                                    this);
+                    for (int result: grantResults) {
+                        if (result == PackageManager.PERMISSION_DENIED) {
+                            ClosePhotoSheet();
+                            return;
                         }
-                        else
-                            onFeatureDisabled();
-                        hasAskedWritePerm = true;
                     }
+
+                    OpenGallery();
                 }
                 break;
         }
     }
 
+    /**
+     * Open the camera activity to take a photo
+     */
     private void OpenCamera() {
 
         Intent openCamera = new Intent(this, CameraActivity.class);
@@ -924,20 +970,25 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             startActivityForResult(openCamera, ACT_REQ_CODE_CAMERA);
     }
 
+    /**
+     * Show the ImageView holding a recipe photo and animate the change
+     */
     private void ShowImage() {
         binding.imvImageContainer.setVisibility(View.VISIBLE);
-        binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
+        binding.tbarAdd.setElevation(Utility.dpToPx(10));
         binding.clyAddTbar.setElevation(10);
     }
+    /**
+     * Hide the ImageView holding a recipe photo and animate the change
+     */
     private void HideImage() {
         binding.imvImageContainer.setVisibility(View.GONE);
-        binding.tbarAdd.setElevation(Utility.dpToPx(this, 10));
-        binding.clyAddTbar.setElevation(Utility.dpToPx(this, 10));
+        binding.tbarAdd.setElevation(Utility.dpToPx(10));
+        binding.clyAddTbar.setElevation(Utility.dpToPx(10));
     }
 
     /**
      * Opens dialog for user to enter number of kcal
-     * @param view
      */
     public void AddKcal(View view) {
         CaloriesPickerFragment kcalFrag = new CaloriesPickerFragment();
@@ -947,7 +998,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
     /**
      * Opens dialog for user to enter duration to make recipe
-     * @param view
      */
     public void AddTime(View view) {
         DurationPickerFragment timeFrag = new DurationPickerFragment();
@@ -958,7 +1008,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
     /**
      * Resets duration value and removes view
-     * @param view
      */
     public void RemoveDuration(View view) {
         binding.butTime.setVisibility(View.GONE);
@@ -966,19 +1015,25 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
     }
     /**
      * Resets kcal value and removes view
-     * @param view
      */
     public void RemoveKcal(View view) {
         binding.butKcal.setVisibility(View.GONE);
         recipeKcalPerPerson = 0;
     }
 
-    private int getRecyclerviewRetractHeight() {
+    /**
+     * To achieve 'cutoff' effect for cards, must manually set the height of each RecyclerView to
+     * their fully expanded height. As this isn't known until the card is expanded it can be calculated
+     * based on what we know about the layout of the view (xml).
+     * @param isIngredients Is this the ingredients card (calculations are different)
+     * @return The height to set the RecyclerView
+     */
+    private int getRecyclerviewRetractHeight(boolean isIngredients) {
 
         ConstraintLayout.LayoutParams cardParams = (ConstraintLayout.LayoutParams)binding.crdvIngredients.getLayoutParams();
         ConstraintLayout.LayoutParams recyclerviewParams = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
 
-        int rootHeight = binding.cdlyAddRoot.getHeight();
+        int rootHeight = binding.cdlyRoot.getHeight();
         int cardTopMargin = cardParams.topMargin;
         int cardBottomMargin = cardParams.bottomMargin;
         int recyclerTopMargin = recyclerviewParams.topMargin;
@@ -987,7 +1042,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         int recyclerPaddingBottom = binding.rvwNewIngredients.getPaddingBottom();
 
         //Add button is View.GONE so must manually provide height here
-        int AddButtonHeight = Utility.dpToPx(this, 47);
+        int AddButtonHeight = isIngredients ? Utility.dpToPx(47) : 0;
 
         return  rootHeight -
                 cardTopMargin - cardBottomMargin -
@@ -996,6 +1051,10 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                 AddButtonHeight;
     }
 
+    /**
+     * Expand the ingredients card to full size of the screen while removing all other views in the
+     * layout and animating everything
+     */
     private void ExpandIngredientsCard() {
 
         if (photoSheetExpanded)
@@ -1006,7 +1065,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         Utility.setKeyboardVisibility(this, false);
 
         //Do this first then do rest after its done
-        binding.crdvIngredients.setElevation(Utility.dpToPx(this, 10));
+        binding.crdvIngredients.setElevation(Utility.dpToPx(10));
 
         binding.imvNoIngredients.setVisibility(View.GONE);
         binding.rvwNewIngredients.setVisibility(View.VISIBLE);
@@ -1018,8 +1077,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         if (isPortrait)
             binding.spcAdd.setVisibility(View.GONE);
 
-        binding.etxtAddIngredient.setVisibility(View.VISIBLE);
-        binding.butAddIngredient.setVisibility(View.VISIBLE);
+        binding.clyIngredientsInput.setVisibility(View.VISIBLE);
 
         AnimateOutFabMenu();
 
@@ -1032,6 +1090,10 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         ToggleEditIngViews(true);
     }
 
+    /**
+     * Retract the ingredients card to full size of the screen while re-adding all other views in the
+     * layout and animating everything
+     */
     private void RetractIngredientsCard() {
 
         if (newIngredients.isEmpty()) {
@@ -1050,7 +1112,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         else {
             binding.rvwNewIngredients.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
-                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         binding.rvwNewIngredients.setLayoutFrozen(true);
                         binding.rvwNewIngredients.removeOnScrollListener(this);
@@ -1064,15 +1126,14 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         if (isPortrait)
             binding.spcAdd.setVisibility(View.VISIBLE);
 
-        binding.etxtAddIngredient.setVisibility(View.GONE);
-        binding.butAddIngredient.setVisibility(View.GONE);
+        binding.clyIngredientsInput.setVisibility(View.GONE);
 
         AnimateInFabMenu();
 
         ingredientsExpanded = false;
 
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewIngredients.getLayoutParams();
-        params.height = getRecyclerviewRetractHeight();
+        params.height = getRecyclerviewRetractHeight(true);
 
         //Fade out all non-essential views
         ToggleEditIngViews(true);
@@ -1085,12 +1146,17 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
             @Override
             public void endTransition(LayoutTransition layoutTransition, ViewGroup viewGroup, View view, int i) {
-                binding.crdvIngredients.setElevation(Utility.dpToPx(getApplicationContext(), 3));
+                binding.crdvIngredients.setElevation(Utility.dpToPx(3));
                 transition.removeTransitionListener(this);
             }
         });
     }
 
+    /**
+     * While expanded, all card RecyclerView items have remove buttons and drag handles. To save space,
+     * this method removes them when the card is retracted.
+     * @param shouldAnimate Should the views animate out or instantly change
+     */
     private void ToggleEditIngViews(boolean shouldAnimate) {
         for (int i = 0; i < newIngredients.size(); ++i) {
             IngredientsAddAdapter.IngredientViewHolder holder = (IngredientsAddAdapter.IngredientViewHolder)
@@ -1100,12 +1166,15 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     TransitionManager.beginDelayedTransition((ViewGroup)holder.itemView,
                             TransitionInflater.from(this).inflateTransition(R.transition.ingredient_card));
 
-
-                    holder.holderBinding.setCanEdit(ingredientsExpanded);
+                holder.holderBinding.setCanEdit(ingredientsExpanded);
             }
         }
     }
 
+    /**
+     * Expand the method card to full size of the screen while removing all other views in the
+     * layout and animating everything
+     */
     private void ExpandMethodCard() {
         if (photoSheetExpanded)
             return;
@@ -1115,7 +1184,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         Utility.setKeyboardVisibility(this, false);
 
         //Do this first then do rest after its done
-        binding.crdvMethod.setElevation(Utility.dpToPx(this, 10));
+        binding.crdvMethod.setElevation(Utility.dpToPx(10));
 
         binding.imvNoMethod.setVisibility(View.GONE);
         binding.rvwNewSteps.setVisibility(View.VISIBLE);
@@ -1141,6 +1210,10 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         ToggleEditMethViews(true);
     }
 
+    /**
+     * Expand the method card to full size of the screen while re-adding all other views in the
+     * layout and animating everything
+     */
     private void RetractMethodCard() {
         if (newSteps.isEmpty()) {
             binding.imvNoMethod.setVisibility(View.VISIBLE);
@@ -1158,7 +1231,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         else {
             binding.rvwNewSteps.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
-                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         binding.rvwNewSteps.setLayoutFrozen(true);
                         binding.rvwNewSteps.removeOnScrollListener(this);
@@ -1183,7 +1256,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         ToggleEditMethViews(true);
 
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)binding.rvwNewSteps.getLayoutParams();
-        params.height = getRecyclerviewRetractHeight();
+        params.height = getRecyclerviewRetractHeight(false);
 
         //Reset elevation AFTER size reduction to avoid toolbar and card cross-fading
         final LayoutTransition transition = binding.ctlyMethodContainer.getLayoutTransition();
@@ -1193,12 +1266,17 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
             @Override
             public void endTransition(LayoutTransition layoutTransition, ViewGroup viewGroup, View view, int i) {
-                binding.crdvMethod.setElevation(Utility.dpToPx(getApplicationContext(), 3));
+                binding.crdvMethod.setElevation(Utility.dpToPx(3));
                 transition.removeTransitionListener(this);
             }
         });
     }
 
+    /**
+     * While expanded, all card RecyclerView items have remove buttons and drag handles. To save space,
+     * this method removes them when the card is retracted.
+     * @param shouldAnimate Should the views animate out or instantly change
+     */
     private void ToggleEditMethViews(boolean shouldAnimate) {
         for (int i = 0; i < newSteps.size(); ++i) {
             MethodStepAddAdapter.StepViewHolder holder = (MethodStepAddAdapter.StepViewHolder)
@@ -1219,7 +1297,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         Slide anim = new Slide();
         anim.addTarget(binding.fabAddMenu);
 
-        TransitionManager.beginDelayedTransition(binding.cdlyAddRoot, anim);
+        TransitionManager.beginDelayedTransition(binding.cdlyRoot, anim);
         binding.fabAddMenu.setVisibility(View.VISIBLE);
     }
 
@@ -1228,43 +1306,59 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         Slide anim = new Slide();
         anim.addTarget(binding.fabAddMenu);
 
-        TransitionManager.beginDelayedTransition(binding.cdlyAddRoot, anim);
+        TransitionManager.beginDelayedTransition(binding.cdlyRoot, anim);
         binding.fabAddMenu.setVisibility(View.INVISIBLE);
         if (fabMenuOpen)
             AnimateFabMenu(binding.fabAddMenu);
     }
 
+    /**
+     * Expands ingredient card
+     */
     public void ViewIngredients(View view) {
         if (!ingredientsExpanded)
             ExpandIngredientsCard();
     }
 
+    /**
+     * Expands method card
+     */
     public void ViewMethod(View view) {
         if (!methodExpanded)
             ExpandMethodCard();
     }
 
+    /**
+     * Adds a new ingredient to the list
+     */
     public void AddIngredient(View view) {
-        String ingredientName = binding.etxtAddIngredient.getText().toString();
+        String ingredientName = binding.etxtAddIngredientName.getText().toString();
+        int quantity = Integer.parseInt(binding.etxtAddIngredientQuantity.getText().toString());
+        String measurement = binding.spnIngredientMeasurement.getSelectedItem().toString();
 
-        if (Utility.isStringAllWhitespace(ingredientName))
+        if (StringUtils.isStringAllWhitespace(ingredientName))
             return;
 
-        Ingredient temp = new Ingredient(ingredientName);
+        Ingredient temp = new Ingredient(ingredientName, quantity, measurement);
         newIngredients.add(temp);
         ingAdapter.notifyItemInserted(newIngredients.size() - 1);
         binding.rvwNewIngredients.smoothScrollToPosition(newIngredients.size() - 1);
 
-        binding.etxtAddIngredient.setText("");
+        binding.etxtAddIngredientName.setText("");
+        binding.etxtAddIngredientQuantity.setText("");
+        binding.spnIngredientMeasurement.setSelection(0);
 
         if (newIngredients.size() == 1)
             binding.txtNoIngredients.setVisibility(View.GONE);
     }
 
+    /**
+     * Adds a new method step to the list
+     */
     public void AddMethodStep(View view) {
         String stepText = binding.etxtAddStep.getText().toString();
 
-        if (Utility.isStringAllWhitespace(stepText))
+        if (StringUtils.isStringAllWhitespace(stepText))
             return;
 
         MethodStep temp = new MethodStep(stepText, newSteps.size() + 1);
@@ -1278,6 +1372,9 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             binding.txtNoSteps.setVisibility(View.GONE);
     }
 
+    /**
+     * Adapter for list of Ingredients in a newly added recipe
+     */
     class IngredientsAddAdapter
             extends RecyclerView.Adapter<IngredientsAddAdapter.IngredientViewHolder>
             implements ItemTouchHelperAdapter {
@@ -1288,42 +1385,40 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             this.startDragListener = startDragListener;
         }
 
+        @NonNull
         @Override
-        public IngredientViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public IngredientViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             AddIngredientItemBinding binding = AddIngredientItemBinding.inflate(inflater, parent, false);
             return new IngredientViewHolder(binding);
         }
 
         @Override
-        public void onBindViewHolder(final IngredientViewHolder holder, final int position) {
+        public void onBindViewHolder(@NonNull final IngredientViewHolder holder, final int position) {
             Ingredient ingredient = newIngredients.get(position);
             holder.bind(ingredient);
 
-            holder.holderBinding.imvIngredientDragHandle.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
+            holder.holderBinding.imvIngredientDragHandle.setOnTouchListener((view, motionEvent) -> {
+                    view.performClick();
                     if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN && startDragListener != null)
                         startDragListener.onStartDrag(holder);
                     return false;
                 }
-            });
+            );
 
             holder.holderBinding.setCanEdit(ingredientsExpanded);
 
-            holder.holderBinding.getRoot().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+            holder.holderBinding.getRoot().setOnClickListener((view) -> {
 
-                    int position = holder.getAdapterPosition();
+                    int pos = holder.getAdapterPosition();
 
                     if (ingredientsExpanded) {
                         EditIngredientFragment editIngFrag = new EditIngredientFragment();
-                        editingPosition = position;
-                        editIngFrag.SetIngredientsListener(editIngredientListener, position);
+                        editingPosition = pos;
+                        editIngFrag.SetIngredientsListener(editIngredientListener, pos);
 
                         Bundle args = new Bundle();
-                        args.putParcelable(INGREDIENT_OBJECT, newIngredients.get(position));
+                        args.putParcelable(INGREDIENT_OBJECT, newIngredients.get(pos));
                         editIngFrag.setArguments(args);
 
                         editIngFrag.show(getFragmentManager(), FRAG_TAG_EDIT_INGREDIENT);
@@ -1331,19 +1426,17 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     else
                         ExpandIngredientsCard();
                 }
-            });
+            );
 
             //Enable remove button functionality
-            holder.holderBinding.imbRemoveIngredient.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+            holder.holderBinding.imbRemoveIngredient.setOnClickListener((view) -> {
 
-                    int position = holder.getAdapterPosition();
+                    int pos = holder.getAdapterPosition();
 
                     if (ingredientsExpanded) {
-                        newIngredients.remove(position);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, newIngredients.size());
+                        newIngredients.remove(pos);
+                        notifyItemRemoved(pos);
+                        notifyItemRangeChanged(pos, newIngredients.size());
 
                         if (newIngredients.isEmpty())
                             binding.txtNoIngredients.setVisibility(View.VISIBLE);
@@ -1351,7 +1444,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     else
                         ExpandIngredientsCard();
                 }
-            });
+            );
         }
 
         @Override
@@ -1373,6 +1466,9 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             notifyItemRemoved(position);
         }
 
+        /**
+         * ViewHolder for editable ingredient item
+         */
         class IngredientViewHolder extends RecyclerView.ViewHolder {
 
             AddIngredientItemBinding holderBinding;
@@ -1389,6 +1485,9 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Adapter for list of Method Steps in a newly added recipe
+     */
     class MethodStepAddAdapter
             extends RecyclerView.Adapter<MethodStepAddAdapter.StepViewHolder>
             implements ItemTouchHelperAdapter {
@@ -1399,32 +1498,30 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             this.startDragListener = startDragListener;
         }
 
+        @NonNull
         @Override
-        public StepViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public StepViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             AddMethodItemBinding binding = AddMethodItemBinding.inflate(inflater, parent, false);
             return new StepViewHolder(binding);
         }
 
         @Override
-        public void onBindViewHolder(final StepViewHolder holder, final int position) {
+        public void onBindViewHolder(@NonNull final StepViewHolder holder, final int position) {
             MethodStep step = newSteps.get(position);
             holder.bind(step);
 
-            holder.holderBinding.imvStepDragHandle.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
+            holder.holderBinding.imvStepDragHandle.setOnTouchListener((view, motionEvent) -> {
+                    view.performClick();
                     if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN && startDragListener != null)
                         startDragListener.onStartDrag(holder);
                     return false;
                 }
-            });
+            );
 
             holder.holderBinding.setCanEdit(methodExpanded);
 
-            holder.holderBinding.getRoot().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+            holder.holderBinding.getRoot().setOnClickListener((view) -> {
                     if (methodExpanded) {
                         EditMethodStepFragment editStepFrag = new EditMethodStepFragment();
                         editingPosition = position;
@@ -1439,12 +1536,10 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     else
                         ExpandMethodCard();
                 }
-            });
+            );
 
             //Enable remove button functionality
-            holder.holderBinding.imbRemoveStep.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+            holder.holderBinding.imbRemoveStep.setOnClickListener((view) -> {
                     if (methodExpanded) {
 
                         onItemDismiss(position);
@@ -1455,7 +1550,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     else
                         ExpandMethodCard();
                 }
-            });
+            );
         }
 
         @Override
@@ -1484,6 +1579,9 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             notifyItemRangeChanged(position, newSteps.size());
         }
 
+        /**
+         * ViewHolder for editable method step item
+         */
         class StepViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
 
             AddMethodItemBinding holderBinding;
@@ -1510,12 +1608,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
                     }
                 }
             }
-
-            @Override
-            public void onItemSelected(int actionState) {
-                //Not Required
-            }
-
         }
     }
 }

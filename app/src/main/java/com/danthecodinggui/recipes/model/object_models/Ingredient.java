@@ -9,28 +9,53 @@ import android.os.Parcelable;
 public class Ingredient implements Parcelable {
 
     private String ingredientText;
+    private int quantity;
+    private String measurement;
     private int viewOrder;
 
-    public Ingredient(String ingredientText) {
+    public Ingredient(String ingredientText, int quantity, String measurement) {
         this.ingredientText = ingredientText;
+        this.quantity = quantity;
+        this.measurement = measurement;
     }
 
-    public Ingredient(Parcel parcel) {
+    protected Ingredient(Parcel parcel) {
         this.ingredientText = parcel.readString();
+        this.quantity = parcel.readInt();
+        this.measurement = parcel.readString();
+    }
+
+    public Ingredient(Ingredient ingredient) {
+        ingredientText = ingredient.ingredientText;
+        quantity = ingredient.quantity;
+        measurement = ingredient.measurement;
+        viewOrder = ingredient.viewOrder;
     }
 
     public String getIngredientText() {
         return ingredientText;
     }
-
     public void setIngredientText(String ingredientText) {
         this.ingredientText = ingredientText;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getMeasurement() {
+        return measurement;
+    }
+    public void setMeasurement(String measurement) {
+        this.measurement = measurement;
     }
 
     public int getViewOrder() {
         return viewOrder;
     }
-
     public void setViewOrder(int viewOrder) {
         this.viewOrder = viewOrder;
     }
@@ -42,7 +67,9 @@ public class Ingredient implements Parcelable {
 
         Ingredient ob = (Ingredient) obj;
         return ob.getViewOrder() == viewOrder &&
-                ob.ingredientText.equals(ingredientText);
+                ob.ingredientText.equals(ingredientText) &&
+                ob.quantity == quantity &&
+                ob.measurement.equals(measurement);
     }
 
     @Override
@@ -52,6 +79,8 @@ public class Ingredient implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(ingredientText);
+        parcel.writeInt(quantity);
+        parcel.writeString(measurement);
     }
     public static final Creator<Ingredient> CREATOR = new Creator<Ingredient>() {
         @Override

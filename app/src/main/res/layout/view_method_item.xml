@@ -14,11 +14,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="2dp"
-        android:textSize="20sp"
+        android:textSize="23sp"
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
         android:padding="5dp"
         android:textColor="@color/grey_text"
-        app:stepNum="@{methodStep.getStepNumber()}"
-        app:stepText="@{methodStep.getStepText()}"/>
+        app:methodStep="@{methodStep}"/>
 </layout>

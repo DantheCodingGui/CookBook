@@ -3,6 +3,9 @@
     <color name="colorPrimary">#8BC34A</color>
     <color name="colorPrimaryDark">#8BC34A</color>
     <color name="colorAccent">#558B2F</color>
+    <color name="colorAddPrimary">#42A5F5</color>
+    <color name="colorAddPrimaryDark">#42A5F5</color>
+    <color name="colorAddAccent">#0288D1</color>
     <color name="fab_label">#333333</color>
     <color name="black_faded">#77222222</color>
     <color name="backToolbar">#E2E2E2</color>
@@ -18,7 +21,7 @@
     <color name="cards_and_dialogs_color">@android:color/white</color>
     <color name="grey_text">#757575</color>
     <color name="scrimGrey">#77000000</color>
-    <color name="colorAccentFaded">#44558B2F</color>
+    <color name="colorAccentFaded">#440288D1</color>
     <color name="colorBackground">#EEEEEE</color>
     <!--<color name="colorCardSelected">#E0F7FA</color>-->
     <color name="colorCardSelected">#E0F7FA</color>

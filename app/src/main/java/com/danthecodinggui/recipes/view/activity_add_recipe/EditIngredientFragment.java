@@ -8,8 +8,10 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
@@ -25,7 +27,12 @@ public class EditIngredientFragment extends DialogFragment {
     private onIngredientEditedListener callback;
     private int ingredientPosision;
 
+    private EditText editQuantity;
+    private Spinner editMeasurement;
     private EditText editIngredient;
+
+    private boolean isQuantityEmpty = false;
+    private boolean isIngredientEmpty = false;
 
     public void SetIngredientsListener(onIngredientEditedListener callback, int position) {
         this.callback = callback;
@@ -37,19 +44,18 @@ public class EditIngredientFragment extends DialogFragment {
 
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
                 .setView(R.layout.fragment_edit_ingredient)
-                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        String editedIngredient = editIngredient.getText().toString();
-                        callback.onIngredientEdited(editedIngredient, ingredientPosision);
+                .setPositiveButton(R.string.dialog_ok, (dialogInterface, i) -> {
+                        Ingredient ingredient = new Ingredient(
+                                editIngredient.getText().toString(),
+                                Integer.parseInt(editQuantity.getText().toString()),
+                                editMeasurement.getSelectedItem().toString()
+                        );
+                        callback.onIngredientEdited(ingredient, ingredientPosision);
                     }
-                })
-                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Utility.setKeyboardVisibility(getActivity(), editIngredient, false);
-                    }
-                })
+                )
+                .setNegativeButton(R.string.dialog_cancel, (dialogInterface, i) ->
+                        Utility.setKeyboardVisibility(getActivity(), editIngredient, false)
+                )
                 .create();
 
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -64,10 +70,20 @@ public class EditIngredientFragment extends DialogFragment {
         Bundle args = getArguments();
         Ingredient i = args.getParcelable(INGREDIENT_OBJECT);
 
-        editIngredient = getDialog().findViewById(R.id.etxt_edit_ingredient);
+        editQuantity = getDialog().findViewById(R.id.etxt_edit_ingredient_quantity);
+        editQuantity.setText(Integer.toString(i.getQuantity()));
+        editQuantity.setSelection(editQuantity.getText().length());
+
+        editMeasurement = getDialog().findViewById(R.id.spn_edit_ingredient_measurement);
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.default_ingredient_measurements, android.R.layout.simple_spinner_item);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        editMeasurement.setAdapter(spinnerAdapter);
+        editMeasurement.setSelection(spinnerAdapter.getPosition(i.getMeasurement()));
+
+        editIngredient = getDialog().findViewById(R.id.etxt_edit_ingredient_name);
         editIngredient.setText(i.getIngredientText());
         editIngredient.setSelection(editIngredient.getText().length());
-
 
         editIngredient.addTextChangedListener(new TextWatcher() {
             @Override
@@ -75,7 +91,23 @@ public class EditIngredientFragment extends DialogFragment {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                CheckButtonEnabled(charSequence.toString());
+                isIngredientEmpty = charSequence.length() == 0;
+
+                CheckButtonEnabled();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
+        editQuantity.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                isQuantityEmpty = charSequence.length() == 0;
+
+                CheckButtonEnabled();
             }
 
             @Override
@@ -84,12 +116,11 @@ public class EditIngredientFragment extends DialogFragment {
     }
 
     /**
-     * Check is the edit text is empty, if so it will disable the dialog's OK button
-     * @param currentText Current EditText value
+     * Check is the ingredient data is empty, if so it will disable the dialog's OK button
      */
-    private void CheckButtonEnabled(String currentText) {
+    private void CheckButtonEnabled() {
         Button positiveButton = ((AlertDialog)getDialog()).getButton(AlertDialog.BUTTON_POSITIVE);
-        if (currentText.isEmpty())
+        if (isIngredientEmpty || isQuantityEmpty)
             positiveButton.setEnabled(false);
         else
             positiveButton.setEnabled(true);
@@ -105,9 +136,9 @@ public class EditIngredientFragment extends DialogFragment {
 
         /**
          * Called when the DialogFragment's 'OK' is clicked, ie. it has a result
-         * @param ingredientName  The new name of the ingredient
-         * @param position  The position of the step edited (for view)
+         * @param editedIngredient The edited ingredient
+         * @param position  The position of the ingredient edited (for view)
          */
-        void onIngredientEdited(String ingredientName, int position);
+        void onIngredientEdited(Ingredient editedIngredient, int position);
     }
 }

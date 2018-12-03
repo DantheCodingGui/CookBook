@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fade
+<slide
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="0"
-    android:startDelay="550">
+    android:duration="200"
+    android:slideEdge="end">
     <targets>
         <target android:targetId="@+id/fab_home_add_recipe"/>
     </targets>
-</fade>
+</slide>

@@ -5,27 +5,16 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.support.media.ExifInterface;
-import android.util.Log;
-
 import com.danthecodinggui.recipes.model.ProviderContract;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.model.object_models.MethodStep;
 import com.danthecodinggui.recipes.model.object_models.Recipe;
 import com.danthecodinggui.recipes.msc.utility.FileUtils;
-import com.danthecodinggui.recipes.msc.utility.Utility;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_CAMERA_DIR_PATH;
@@ -33,19 +22,16 @@ import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_INGREDIE
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_IS_IMAGE_CAMERA;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_METHOD;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.SAVE_TASK_RECIPE;
-import static com.danthecodinggui.recipes.msc.LogTags.SAVE_RECIPE;
 
 /**
  * Inserts a recipe in full into permanent storage
  */
 public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
 
-    private static final String RECIPES_CAM_DIR_NAME = "/Recipes/";
-
     @SuppressLint("StaticFieldLeak")
     private Context context;
 
-    public SaveRecipeTask(Context context) {
+    SaveRecipeTask(Context context) {
         this.context = context;
     }
 
@@ -100,6 +86,8 @@ public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
             record = new ContentValues();
             record.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
             record.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, i.getIngredientText());
+            record.put(ProviderContract.RecipeIngredientEntry.QUANTITY, i.getQuantity());
+            record.put(ProviderContract.RecipeIngredientEntry.MEASUREMENT, i.getMeasurement());
             resolver.insert(ProviderContract.RECIPE_INGREDIENTS_URI, record);
         }
 
@@ -112,27 +100,11 @@ public class SaveRecipeTask extends AsyncTask<Bundle, Void, Void> {
             resolver.insert(ProviderContract.METHOD_URI, record);
         }
 
+
+        resolver.notifyChange(ProviderContract.RECIPES_URI, null);
+
         context = null;
 
         return null;
-    }
-
-    /**
-     * Creates filename guaranteed to not already exist (supports duplicate filenames)
-     * @param parentPath The Recipes Directory path
-     * @param recipeTitle The title of the recipe (used as a basis for the filename)
-     * @param duplicateNum Used for recursive implementation (call with 0)
-     * @return Unique filename based on recipe title
-     */
-    private String CreateFileName(String parentPath, String recipeTitle, int duplicateNum) {
-        String suffix = "";
-        if (duplicateNum != 0)
-            suffix = "(" + duplicateNum + ")";
-
-        String fileName = recipeTitle.replaceAll(" ", "_") + suffix + ".jpg";
-
-        if (new File(parentPath, fileName).exists())
-            CreateFileName(parentPath, recipeTitle, ++duplicateNum);
-        return fileName;
     }
 }

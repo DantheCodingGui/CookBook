@@ -10,7 +10,8 @@ final class DBSchema {
     //SQL join statement for combining ingredients tables into 1 for easier queries
     static final String INGREDIENTS_JOIN = "(SELECT " +
             RecipeIngredientEntry.TABLE_NAME + "." + RecipeIngredientEntry._ID + ", " +
-            RecipeIngredientEntry.RECIPE_ID + ", " + IngredientEntry.NAME + " FROM " +
+            RecipeIngredientEntry.RECIPE_ID + ", " + RecipeIngredientEntry.QUANTITY + ", " +
+            RecipeIngredientEntry.MEASUREMENT + ", " + IngredientEntry.NAME + " FROM " +
             RecipeIngredientEntry.TABLE_NAME + " INNER JOIN " + IngredientEntry.TABLE_NAME +
             " ON " + RecipeIngredientEntry.INGREDIENT_ID  + " = " + IngredientEntry.TABLE_NAME +
             "." + IngredientEntry._ID + ")";
@@ -37,6 +38,8 @@ final class DBSchema {
 
         static final String RECIPE_ID = "RecipeId";
         static final String INGREDIENT_ID = "IngredientId";
+        static final String QUANTITY = "Quantity";
+        static final String MEASUREMENT = "Measurement";
     }
 
     /**

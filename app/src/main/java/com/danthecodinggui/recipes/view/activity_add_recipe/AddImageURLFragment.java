@@ -33,15 +33,13 @@ public class AddImageURLFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+        return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.dialog_url_title)
                 .setView(R.layout.fragment_imageurl_picker)
-                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
+                .setPositiveButton(R.string.dialog_ok, (dialogInterface, i) -> {
                         String URL = editURL.getText().toString();
                         boolean isValidURL = Patterns.WEB_URL.matcher(URL).matches();
-                        boolean isImage = URL.matches("(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*\\.(?:jpg|gif|png))(?:\\?([^#]*))?(?:#(.*))?");
+                        boolean isImage = URL.matches("(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*\\.(?:jpg|bmp|png))(?:\\?([^#]*))?(?:#(.*))?");
                         if (isValidURL && isImage)
                             callback.onURLSet(URL);
                         else if (isValidURL)
@@ -49,16 +47,11 @@ public class AddImageURLFragment extends DialogFragment {
                         else
                             Toast.makeText(getActivity(), R.string.url_invalid, Toast.LENGTH_SHORT).show();
                     }
-                })
-                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Utility.setKeyboardVisibility(getActivity(), editURL, false);
-                    }
-                })
+                )
+                .setNegativeButton(R.string.dialog_cancel, (dialogInterface, i) ->
+                        Utility.setKeyboardVisibility(getActivity(), editURL, false)
+                )
                 .create();
-
-        return dialog;
     }
 
     @Override

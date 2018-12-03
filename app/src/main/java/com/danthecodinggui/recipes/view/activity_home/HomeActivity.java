@@ -21,7 +21,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.Snackbar;
-import android.support.v7.widget.GridLayoutManager;
 import android.transition.Slide;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -50,7 +49,6 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -81,7 +79,7 @@ import java.util.List;
 import jp.wasabeef.recyclerview.animators.ScaleInAnimator;
 
 import static com.danthecodinggui.recipes.msc.GlobalConstants.IMAGE_TRANSITION_NAME;
-import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_FILE_NAME;
+import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_PREF_FILE_NAME;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_KEY_HOME_SORT_DIR;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.PREF_KEY_HOME_SORT_ORDER;
 import static com.danthecodinggui.recipes.msc.GlobalConstants.RECIPE_DETAIL_BUNDLE;
@@ -95,7 +93,7 @@ import static com.danthecodinggui.recipes.msc.LogTags.GLIDE;
  * Display all stored recipes
  */
 public class HomeActivity extends AppCompatActivity
-        implements Utility.PermissionDialogListener {
+        implements PermissionsHandler.PermissionDialogListener {
 
     ActivityHomeBinding binding;
 
@@ -146,9 +144,6 @@ public class HomeActivity extends AppCompatActivity
     private static final String RECYCLERVIEW_STATE = "RECYCLERVIEW_STATE";
     private static final String RECYCLERVIEW_SCROLL = "RECYCLERVIEW_SCROLL";
 
-    //TODO remove later
-    private boolean inserting = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.HomeTheme);
@@ -187,16 +182,16 @@ public class HomeActivity extends AppCompatActivity
         binding.rvwRecipes.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
                 if (inActionMode)
                     return;
 
-                if (dy > 0 && binding.fabAddRecipe.getVisibility() == View.VISIBLE) {
-                    binding.fabAddRecipe.hide();
-                } else if (dy < 0 && binding.fabAddRecipe.getVisibility() != View.VISIBLE) {
-                    binding.fabAddRecipe.show();
+                if (dy > 0 && binding.fabHomeAddRecipe .getVisibility() == View.VISIBLE) {
+                    binding.fabHomeAddRecipe.hide();
+                } else if (dy < 0 && binding.fabHomeAddRecipe.getVisibility() != View.VISIBLE) {
+                    binding.fabHomeAddRecipe.show();
                 }
             }
         });
@@ -218,7 +213,7 @@ public class HomeActivity extends AppCompatActivity
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
         });
 
-        homePrefs = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        homePrefs = getSharedPreferences(RECIPE_PREF_FILE_NAME, Context.MODE_PRIVATE);
 
         currentSortOrder = GetCurrentSortOrder();
         isSortAsc = GetCurrentSortDir();
@@ -235,15 +230,7 @@ public class HomeActivity extends AppCompatActivity
             recyclerViewScroll = savedInstanceState.getInt(RECYCLERVIEW_SCROLL);
         }
 
-        if (!inserting)
-            getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, loaderCallbacks);
-        else {
-            String path = Environment.getExternalStorageDirectory().getPath();
-            Utility.InsertValue(this, path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", false, false);
-            Utility.InsertValue(this, path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", true, false);
-            Utility.InsertValue(this, path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", false, true);
-            Utility.InsertValue(this, path + "/Download/pxqrocxwsjcc_2VgDbVfaysKmgiECiqcICI_Spaghetti-aglio-e-olio-1920x1080-thumbnail.jpg", true, true);
-        }
+        getSupportLoaderManager().initLoader(LOADER_RECIPE_PREVIEWS, null, loaderCallbacks);
     }
 
     @Override
@@ -342,18 +329,8 @@ public class HomeActivity extends AppCompatActivity
         //Ensure animation doesn't run on orientation change
         if (shouldShowMenuAnims) {
             //Animate menu items in
-            uiThread.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    AnimUtils.animateVectorDrawable(searchItem.getIcon());
-                }
-            }, 300);
-            uiThread.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    AnimUtils.animateVectorDrawable(sortItem.getIcon());
-                }
-            }, 700);
+            uiThread.postDelayed(() -> AnimUtils.animateVectorDrawable(searchItem.getIcon()), 300);
+            uiThread.postDelayed(() -> AnimUtils.animateVectorDrawable(sortItem.getIcon()), 700);
         }
         else {
             AnimUtils.instaAnimateVectorDrawable(searchItem.getIcon());
@@ -392,11 +369,11 @@ public class HomeActivity extends AppCompatActivity
 
             //Remove FAB
             Slide anim = new Slide();
-            anim.addTarget(binding.fabAddRecipe);
+            anim.addTarget(binding.fabHomeAddRecipe);
             anim.setSlideEdge(Gravity.END);
             anim.setInterpolator(new AnticipateOvershootInterpolator(1.f));
-            TransitionManager.beginDelayedTransition(binding.clyMainRoot, anim);
-            binding.fabAddRecipe.setVisibility(View.INVISIBLE);
+            TransitionManager.beginDelayedTransition(binding.cdlyRoot, anim);
+            binding.fabHomeAddRecipe.setVisibility(View.INVISIBLE);
 
             recipesTouchHelper.attachToRecyclerView(null);
             return true;
@@ -434,17 +411,17 @@ public class HomeActivity extends AppCompatActivity
             //If scroll was active and fab was hidden, if all recipes have been deleted, can't scroll
             //to re-show fab, so show here
             if (recipesList.isEmpty())
-                binding.fabAddRecipe.show();
+                binding.fabHomeAddRecipe.show();
 
             recipesAdapter.DisableActionMode();
 
             //Show FAB
             Slide anim = new Slide();
-            anim.addTarget(binding.fabAddRecipe);
+            anim.addTarget(binding.fabHomeAddRecipe);
             anim.setSlideEdge(Gravity.END);
             anim.setInterpolator(new AnticipateOvershootInterpolator(1.f));
-            TransitionManager.beginDelayedTransition(binding.clyMainRoot, anim);
-            binding.fabAddRecipe.setVisibility(View.VISIBLE);
+            TransitionManager.beginDelayedTransition(binding.cdlyRoot, anim);
+            binding.fabHomeAddRecipe.setVisibility(View.VISIBLE);
         }
     };
 
@@ -456,9 +433,6 @@ public class HomeActivity extends AppCompatActivity
             super.onBackPressed();
     }
 
-    /**
-     * Gets the current sort order shared preference
-     */
     private int GetCurrentSortOrder() {
         return homePrefs.getInt(PREF_KEY_HOME_SORT_ORDER, SORT_ORDER_ALPHABETICAL);
     }
@@ -488,6 +462,10 @@ public class HomeActivity extends AppCompatActivity
         return super.dispatchTouchEvent(event);
     }
 
+    /**
+     * Set the sort order indicator icon on whichever button is currently selected
+     * @param sortOrder The current sort order
+     */
     private void SetSortOrderView(int sortOrder) {
 
         //Remove selected icon from all other options
@@ -556,6 +534,9 @@ public class HomeActivity extends AppCompatActivity
         return filteredRecipes;
     }
 
+    /**
+     * Toggle the sort direction value and toggle/animate the bottom sheet icon
+     */
     public void ToggleSortDir(View view) {
 
         final ImageView imageView = (ImageView) view;
@@ -576,6 +557,9 @@ public class HomeActivity extends AppCompatActivity
             imageView.setImageDrawable(getDrawable(R.drawable.ic_sort_dir_desc));
     }
 
+    /**
+     * Set the new sort direction to sort alphabetically
+     */
     public void SortByName(View view) {
 
         if (currentSortOrder != SORT_ORDER_ALPHABETICAL) {
@@ -589,6 +573,9 @@ public class HomeActivity extends AppCompatActivity
         CloseSortBySheet();
     }
 
+    /**
+     * Set the new sort direction to sort based on newest added recipe
+     */
     public void SortByDate(View view) {
 
         if (currentSortOrder != SORT_ORDER_TIME_ADDED) {
@@ -602,15 +589,21 @@ public class HomeActivity extends AppCompatActivity
         CloseSortBySheet();
     }
 
+    /**
+     * Update the sort order shared preference
+     */
     private void WriteNewSortOrder() {
-        SharedPreferences pref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences pref = getSharedPreferences(RECIPE_PREF_FILE_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor prefEditor = pref.edit();
         prefEditor.putInt(PREF_KEY_HOME_SORT_ORDER, currentSortOrder);
         prefEditor.apply();
     }
 
+    /**
+     * Update the sort direction shared preference
+     */
     private void WriteNewSortDir() {
-        SharedPreferences pref = getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences pref = getSharedPreferences(RECIPE_PREF_FILE_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor prefEditor = pref.edit();
         prefEditor.putBoolean(PREF_KEY_HOME_SORT_DIR, isSortAsc);
         prefEditor.apply();
@@ -641,15 +634,18 @@ public class HomeActivity extends AppCompatActivity
         switch(requestCode) {
             case REQ_CODE_READ_EXTERNAL:
                 if (grantResults.length > 0) {
-                    if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                        noLocalImage = true;
-                        Utility.showPermissionDeniedSnackbar(binding.clyMainRoot);
+                    for (int result: grantResults) {
+                        if (result == PackageManager.PERMISSION_DENIED) {
+                            noLocalImage = true;
+                            break;
+                        }
                     }
                     UnblockLoader();
                 }
                 break;
         }
     }
+
     @Override
     public void onFeatureDisabled() {
         noLocalImage = true;
@@ -670,9 +666,7 @@ public class HomeActivity extends AppCompatActivity
             Handler uiThread = new Handler(getMainLooper());
 
             recipesLoader = new GetRecipesLoader(HomeActivity.this, uiThread,
-                    new GetRecipesLoader.ImagePermissionsListener() {
-                        @Override
-                        public void onImagePermRequested() {
+                    () -> {
                             int response = PermissionsHandler.AskForPermission(HomeActivity.this,
                                     Manifest.permission.READ_EXTERNAL_STORAGE, REQ_CODE_READ_EXTERNAL);
 
@@ -682,7 +676,7 @@ public class HomeActivity extends AppCompatActivity
                                 onFeatureDisabled();
 
                         }
-                    }, currentSortOrder, isSortAsc);
+                    , currentSortOrder, isSortAsc);
 
             homePrefs.registerOnSharedPreferenceChangeListener(recipesLoader);
             return recipesLoader;
@@ -719,6 +713,9 @@ public class HomeActivity extends AppCompatActivity
         }
     };
 
+    /**
+     * Bridges adapter and surrounding activity in regards to action mode interactions
+     */
     private interface ActionModeSelection {
         void EnableActionMode();
         void DisableActionMode();
@@ -763,8 +760,9 @@ public class HomeActivity extends AppCompatActivity
             selectedItems = new ArrayList<>();
         }
 
+        @NonNull
         @Override
-        public RecipeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public RecipeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
             switch (viewType) {
@@ -831,7 +829,7 @@ public class HomeActivity extends AppCompatActivity
 
         /**
          * Update adapter's own list of shown recipe records and animate to new list
-         * @param updatedRecords
+         * @param updatedRecords Updated records
          */
         void UpdateRecords(List<Recipe> updatedRecords) {
             if (updatedRecords != null) {
@@ -905,29 +903,23 @@ public class HomeActivity extends AppCompatActivity
             recipesList.remove(unfilteredPos);
 
             if (recipesList.isEmpty()) {
-                TransitionManager.beginDelayedTransition(binding.clyMainRoot);
+                TransitionManager.beginDelayedTransition(binding.cdlyRoot);
                 binding.txtNoItems.setVisibility(View.VISIBLE);
             }
 
             ShowDeletedSnackbar(false,
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            recipesList.add(unfilteredPos, recipeToDelete);
+                    () -> { recipesList.add(unfilteredPos, recipeToDelete);
                             addItem(position, recipeToDelete);
 
                             binding.txtNoItems.setVisibility(View.INVISIBLE);
                         }
-                    },
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            new DeleteRecipeTask(getApplicationContext()).execute(
-                                    Collections.singletonList(recipeToDelete.getRecipeId())
-                            );
-                        }
-                    }
+                    ,
+                    () -> new DeleteRecipeTask(getApplicationContext()).execute(
+                                    Collections.singletonList(recipeToDelete.getRecipeId()))
             );
+
+            //Prevents bug where user can't scroll recyclerview to make it re-appear
+            binding.fabHomeAddRecipe.show();
         }
 
         @Override
@@ -1008,14 +1000,12 @@ public class HomeActivity extends AppCompatActivity
             InvalidateActionModeTitle();
 
             if (recipesList.isEmpty()) {
-                TransitionManager.beginDelayedTransition(binding.clyMainRoot);
+                TransitionManager.beginDelayedTransition(binding.cdlyRoot);
                 binding.txtNoItems.setVisibility(View.VISIBLE);
             }
 
             ShowDeletedSnackbar(recipesToDelete.size() > 1,
-                    new Runnable() {
-                        @Override
-                        public void run() {
+                    () -> {
                             for (int i = 0; i < selectedItems.size(); ++i) {
                                 addItem(selectedItems.get(i), recipesToDelete.get(i));
                                 recipesList.add(unfilteredRecipePositions.get(i), recipesToDelete.get(i));
@@ -1026,10 +1016,8 @@ public class HomeActivity extends AppCompatActivity
                             deleteSelectionSize = 0;
                             InvalidateActionModeTitle();
                         }
-                    },
-                    new Runnable() {
-                        @Override
-                        public void run() {
+                    ,
+                    () -> {
                             List<Long> recipePrimaryKeys = new ArrayList<>();
                             for (Recipe recipe: recipesToDelete)
                                 recipePrimaryKeys.add(recipe.getRecipeId());
@@ -1038,7 +1026,7 @@ public class HomeActivity extends AppCompatActivity
 
                             deleteSelectionSize = 0;
                         }
-                    }
+
             );
         }
 
@@ -1058,16 +1046,17 @@ public class HomeActivity extends AppCompatActivity
                 actionMode.setTitle(getResources().getString(R.string.action_mode_title, selectedItems.size() - deleteSelectionSize));
         }
 
+        /**
+         * Shows a snackbar with 'UNDO' action when any combination of recipes are deleted
+         * @param isMultiDelete Did multiple records get deleted
+         * @param onActionClicked Action to take when action clcked
+         * @param onDismissed Action to take when snackbar dismissed/times out
+         */
         private void ShowDeletedSnackbar(boolean isMultiDelete, final Runnable onActionClicked, final Runnable onDismissed) {
-            Snackbar.make(binding.clyMainRoot,
+            Snackbar.make(binding.cdlyRoot,
                     isMultiDelete ? R.string.multiple_recipes_removed : R.string.recipe_removed,
                     Snackbar.LENGTH_LONG)
-                    .setAction(R.string.snackbar_undo, new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            new Handler(getMainLooper()).post(onActionClicked);
-                        }
-                    })
+                    .setAction(R.string.snackbar_undo, (view) -> new Handler(getMainLooper()).post(onActionClicked))
                     .addCallback(new Snackbar.Callback() {
                         @Override
                         public void onDismissed(Snackbar snackbar, int event) {
@@ -1152,7 +1141,7 @@ public class HomeActivity extends AppCompatActivity
                 if (alteredPercentSwiped > 1)
                     alteredPercentSwiped = 1;
 
-                card.setCardBackgroundColor(Utility.interpolateRGB(0xffffff, 0xff0000, alteredPercentSwiped));
+                card.setCardBackgroundColor(AnimUtils.interpolateRGB(0xffffff, 0xff0000, alteredPercentSwiped));
                 if (percentSwiped == 0 || percentSwiped == 1)
                     card.setCardBackgroundColor(Color.WHITE);
             }
@@ -1275,6 +1264,11 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Open activity to view a particular recipe
+     * @param recipe The recipe being viewed
+     * @param sharedImageView If recipe includes photo, the ImageView to run a shared element transition on
+     */
     private void ViewRecipe(Recipe recipe, ImageView sharedImageView) {
 
         //To ensure a card can only be clicked once
@@ -1328,17 +1322,19 @@ public class HomeActivity extends AppCompatActivity
         startActivity(viewRecipe);
     }
 
+    /**
+     * Opens AddEditRecipeActivity to add a new recipe
+     */
     public void AddRecipe(View view) {
         Intent addRecipe = new Intent(getApplicationContext(), AddEditRecipeActivity.class);
 
         if (Utility.atLeastLollipop()) {
 
-            getWindow().setExitTransition(null);
-            getWindow().setReenterTransition(null);
+            getWindow().setExitTransition(TransitionInflater.from(this).inflateTransition(R.transition.main_activity_add));
+            getWindow().setReenterTransition(TransitionInflater.from(this).inflateTransition(R.transition.main_activity_add));
 
-            //ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
-            //startActivity(addRecipe, options.toBundle());
-            startActivity(addRecipe);
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
+            startActivity(addRecipe, options.toBundle());
         }
         else
             startActivity(addRecipe);

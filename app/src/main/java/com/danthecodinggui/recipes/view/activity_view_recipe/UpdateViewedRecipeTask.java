@@ -15,7 +15,7 @@ public class UpdateViewedRecipeTask extends AsyncTask<Long, Void, Recipe> {
 
     private ContentResolver contentResolver;
 
-    public UpdateViewedRecipeTask(Context context,  onRecipeReadListener callback) {
+    UpdateViewedRecipeTask(Context context,  onRecipeReadListener callback) {
         this.callback = callback;
         contentResolver = context.getContentResolver();
     }
@@ -33,10 +33,8 @@ public class UpdateViewedRecipeTask extends AsyncTask<Long, Void, Recipe> {
                 null
         );
 
-        while(cursor.moveToNext())
-            return Utility.BuildModelFromCursor(cursor);
-
-        return null;
+        cursor.moveToFirst();
+        return Utility.BuildModelFromCursor(cursor);
     }
 
     @Override

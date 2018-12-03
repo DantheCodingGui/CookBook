@@ -21,6 +21,11 @@ public class MethodStep implements Parcelable {
         stepNumber = in.readInt();
     }
 
+    public MethodStep(MethodStep step) {
+        stepText = step.stepText;
+        stepNumber = step.stepNumber;
+    }
+
     public String getStepText() {
         return stepText;
     }
