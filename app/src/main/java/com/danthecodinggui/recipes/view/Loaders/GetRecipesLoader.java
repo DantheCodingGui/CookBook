@@ -201,12 +201,7 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
      * has one
      */
     private void AskForReadPermission() {
-        uiThread.post(new Runnable() {
-            @Override
-            public void run() {
-                permissionsCallback.onImagePermRequested();
-            }
-        });
+        uiThread.post(() -> permissionsCallback.onImagePermRequested());
         waitingForPermissionResponse = true;
     }
 
@@ -277,26 +272,20 @@ public class GetRecipesLoader extends AsyncTaskLoader<List<Recipe>>
 
         //Sort cached list and resend to activity
         if (recipesSortOrder == SORT_ORDER_ALPHABETICAL)
-            comparator = new Comparator<Recipe>() {
-                @Override
-                public int compare(Recipe recipe1, Recipe recipe2) {
+            comparator = (recipe1, recipe2) -> {
                     if (isSortDirAsc)
                         return recipe1.getTitle().compareToIgnoreCase(recipe2.getTitle());
                     else
                         return recipe2.getTitle().compareToIgnoreCase(recipe1.getTitle());
-                }
             };
         else
-            comparator = new Comparator<Recipe>() {
-                @Override
-                public int compare(Recipe recipe1, Recipe recipe2) {
+            comparator = (recipe1, recipe2) -> {
                     if (isSortDirAsc ?
                             (recipe1.getRecipeId() > recipe2.getRecipeId()) :
                             (recipe1.getRecipeId() < recipe2.getRecipeId()))
                         return 1;
                     else
                         return -1;
-                }
             };
 
         Collections.sort(cachedRecords, comparator);

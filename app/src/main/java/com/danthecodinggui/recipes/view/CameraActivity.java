@@ -12,13 +12,13 @@ import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.transition.TransitionManager;
 import android.view.OrientationEventListener;
-import android.view.OrientationListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
@@ -247,7 +247,6 @@ public class CameraActivity extends AppCompatActivity {
 
     /**
      * Take the photo, save into a temporary file and show the confirmation view
-     * @param view
      */
     public void CapturePhoto(View view) {
 
@@ -352,7 +351,6 @@ public class CameraActivity extends AppCompatActivity {
 
     /**
      * Toggle what flash mode fotoapparat is currently using
-     * @param view
      */
     public void ToggleFlash(View view) {
 
@@ -394,7 +392,6 @@ public class CameraActivity extends AppCompatActivity {
 
     /**
      * Toggle which camera (front/rear) the preview should show
-     * @param view
      */
     public void ToggleCameraDir(View view) {
 
@@ -426,7 +423,6 @@ public class CameraActivity extends AppCompatActivity {
 
     /**
      * Confirm photo and return to AddEditRecipeActivity
-     * @param view
      */
     public void ConfirmPhoto(View view) {
 
@@ -444,7 +440,6 @@ public class CameraActivity extends AppCompatActivity {
 
     /**
      * Return to camera view and discard saved photo
-     * @param view
      */
     public void DiscardPhoto(View view) {
 
@@ -532,7 +527,8 @@ public class CameraActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+        protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
+                                   int outWidth, int outHeight) {
             Matrix matrix = new Matrix();
 
             matrix.postRotate(rotateRotationAngle);
@@ -541,7 +537,7 @@ public class CameraActivity extends AppCompatActivity {
         }
 
         @Override
-        public void updateDiskCacheKey(MessageDigest messageDigest) {
+        public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
             messageDigest.update(("rotate" + rotateRotationAngle).getBytes());
         }
     }

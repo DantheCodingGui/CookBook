@@ -46,7 +46,7 @@ public class IngredientsTabFragment extends Fragment {
     public IngredientsTabFragment() {}
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_ingredients, container, false);
@@ -97,14 +97,15 @@ public class IngredientsTabFragment extends Fragment {
 
     class IngredientsViewAdapter extends RecyclerView.Adapter<IngredientsViewAdapter.IngredientViewHolder> {
 
+        @NonNull
         @Override
-        public IngredientViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public IngredientViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             return new IngredientViewHolder(ViewIngredientItemBinding.inflate(inflater, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(IngredientViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull IngredientViewHolder holder, int position) {
             Ingredient ingredient = ingredientsList.get(position);
             holder.bind(ingredient);
         }
@@ -132,6 +133,9 @@ public class IngredientsTabFragment extends Fragment {
         }
     }
 
+    /**
+     * Allows fragment to asynchronously let activity know when ingredients have loaded
+     */
     interface onIngredientsLoadedListener {
         void onIngredientsLoaded(List<Ingredient> ingredients);
     }

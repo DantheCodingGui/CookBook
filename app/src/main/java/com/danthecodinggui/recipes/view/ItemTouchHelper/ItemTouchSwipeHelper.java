@@ -5,7 +5,7 @@ package com.danthecodinggui.recipes.view.ItemTouchHelper;
  */
 public interface ItemTouchSwipeHelper {
     /**
-     *
+     * Called when item swipe-to-dismiss progress changes
      * @param percentSwiped The progress of the swipe
      */
     void onItemSwipe(float percentSwiped);

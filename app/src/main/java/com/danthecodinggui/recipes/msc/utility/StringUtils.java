@@ -3,7 +3,7 @@ package com.danthecodinggui.recipes.msc.utility;
 import com.danthecodinggui.recipes.model.object_models.Ingredient;
 
 /**
- * Group of helper methods related to Strings
+ * Set of utility methods related to Strings
  */
 public class StringUtils {
 
@@ -41,5 +41,9 @@ public class StringUtils {
         return ingredient.getQuantity() +
                 (measurement.equals("-") ? "" : measurement)
                 + "  " + ingredient.getIngredientText();
+    }
+
+    public static boolean isStringAllWhitespace(String s) {
+        return s.trim().length() == 0;
     }
 }

@@ -31,7 +31,7 @@ public class UpdateRecipeTask extends AsyncTask<Bundle, Void, Void> {
     @SuppressLint("StaticFieldLeak")
     private Context context;
 
-    public UpdateRecipeTask(Context context) {
+    UpdateRecipeTask(Context context) {
         this.context = context;
     }
 

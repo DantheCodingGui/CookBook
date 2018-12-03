@@ -44,9 +44,7 @@ public class EditIngredientFragment extends DialogFragment {
 
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
                 .setView(R.layout.fragment_edit_ingredient)
-                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
+                .setPositiveButton(R.string.dialog_ok, (dialogInterface, i) -> {
                         Ingredient ingredient = new Ingredient(
                                 editIngredient.getText().toString(),
                                 Integer.parseInt(editQuantity.getText().toString()),
@@ -54,13 +52,10 @@ public class EditIngredientFragment extends DialogFragment {
                         );
                         callback.onIngredientEdited(ingredient, ingredientPosision);
                     }
-                })
-                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Utility.setKeyboardVisibility(getActivity(), editIngredient, false);
-                    }
-                })
+                )
+                .setNegativeButton(R.string.dialog_cancel, (dialogInterface, i) ->
+                        Utility.setKeyboardVisibility(getActivity(), editIngredient, false)
+                )
                 .create();
 
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -142,7 +137,7 @@ public class EditIngredientFragment extends DialogFragment {
         /**
          * Called when the DialogFragment's 'OK' is clicked, ie. it has a result
          * @param editedIngredient The edited ingredient
-         * @param position  The position of the step edited (for view)
+         * @param position  The position of the ingredient edited (for view)
          */
         void onIngredientEdited(Ingredient editedIngredient, int position);
     }

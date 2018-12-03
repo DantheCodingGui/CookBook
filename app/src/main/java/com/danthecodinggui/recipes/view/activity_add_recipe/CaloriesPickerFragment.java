@@ -2,7 +2,6 @@ package com.danthecodinggui.recipes.view.activity_add_recipe;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.app.AlertDialog;
 import android.text.Editable;
@@ -31,26 +30,19 @@ public class CaloriesPickerFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+        return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.dialog_kcal_title)
                 .setView(R.layout.fragment_kcal_picker)
-                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
+                .setPositiveButton(R.string.dialog_ok, (dialogInterface, i) -> {
                         String kcal = editKcal.getText().toString();
                         callback.onCaloriesSet(Integer.parseInt(kcal));
                         Utility.setKeyboardVisibility(getActivity(), editKcal, false);
                     }
-                })
-                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Utility.setKeyboardVisibility(getActivity(), editKcal, false);
-                    }
-                })
+                )
+                .setNegativeButton(R.string.dialog_cancel, (dialogInterface, i) ->
+                        Utility.setKeyboardVisibility(getActivity(), editKcal, false)
+                )
                 .create();
-
-        return dialog;
     }
 
     @Override

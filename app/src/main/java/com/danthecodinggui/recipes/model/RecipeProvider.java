@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -47,7 +48,7 @@ public class RecipeProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         if (uri.getLastPathSegment() == null)
             return "vnd.android.cursor.dir/RecipeProvider.data.text";
         else
@@ -55,7 +56,7 @@ public class RecipeProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(@NonNull Uri uri, ContentValues values) {
 
         SQLiteDatabase db;
         String tableName;
@@ -141,12 +142,16 @@ public class RecipeProvider extends ContentProvider {
 
         //Ingredient is already/now in table, just return it's ID
         ingredients.moveToFirst();
-        return ingredients.getLong(
+        long id = ingredients.getLong(
                 ingredients.getColumnIndexOrThrow(DBSchema.IngredientEntry._ID));
+
+        ingredients.close();
+
+        return id;
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection,
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
 
         SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
@@ -195,7 +200,7 @@ public class RecipeProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection,
+    public int update(@NonNull Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -279,7 +284,7 @@ public class RecipeProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
 
         //Same structure as update with changed var names and db methods
 
@@ -354,6 +359,5 @@ public class RecipeProvider extends ContentProvider {
         }
 
         return rowNumDeleted;
-
     }
 }

@@ -3,7 +3,6 @@ package com.danthecodinggui.recipes.view.activity_add_recipe;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -18,7 +17,7 @@ import static com.danthecodinggui.recipes.msc.GlobalConstants.METHOD_STEP_OBJECT
 /**
  * Shows simple dialog to edit an method step
  */
-public class EditMethodStepFragment extends DialogFragment {
+public class  EditMethodStepFragment extends DialogFragment {
 
     private onStepEditedListener callback;
     int stepPosition;
@@ -35,19 +34,14 @@ public class EditMethodStepFragment extends DialogFragment {
 
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
                 .setView(R.layout.fragment_edit_step)
-                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
+                .setPositiveButton(R.string.dialog_ok, (dialogInterface, i) -> {
                         String editedStep = editStep.getText().toString();
                         callback.onStepEdited(editedStep, stepPosition);
                     }
-                })
-                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Utility.setKeyboardVisibility(getActivity(), editStep, false);
-                    }
-                })
+                )
+                .setNegativeButton(R.string.dialog_cancel, (dialogInterface, i) ->
+                        Utility.setKeyboardVisibility(getActivity(), editStep, false)
+                )
                 .create();
 
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -95,7 +89,7 @@ public class EditMethodStepFragment extends DialogFragment {
         /**
          * Called when the DialogFragment's 'OK' is clicked, ie. it has a result
          * @param stepText  The new text of the step
-         * @param stepText  The new text of the step
+         * @param position  The position of the step edited (for view)
          */
         void onStepEdited(String stepText, int position);
     }

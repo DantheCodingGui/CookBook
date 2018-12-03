@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Build;
 import android.util.TypedValue;
 import android.view.View;
@@ -17,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Set of miscellaneous methods without a link to any other class
+ * Set of generic utility methods
  */
 public class Utility {
 
@@ -25,6 +24,12 @@ public class Utility {
         return resources.getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
     }
 
+    /**
+     * Get a particular color in a theme
+     * @param srcActivity The activity that the theme is applied to
+     * @param id The name of the color attribute to get
+     * @return The color requested
+     */
     public static int getThemeColor(Activity srcActivity, int id) {
         Resources.Theme theme = srcActivity.getTheme();
         TypedArray a = theme.obtainStyledAttributes(new int[]{id});
@@ -42,103 +47,6 @@ public class Utility {
     }
 
     /**
-     * Test method to insert dummy recipe, used until AddEditRecipeActivity is functional
-     * @param imagePath
-     */
-    public static void InsertValue(Context context, String imagePath, boolean image, boolean complex) {
-
-//        //TODO remove later
-//
-//        ContentResolver resolver = context.getContentResolver();
-//
-//        ContentValues values = new ContentValues();
-//
-//        values.put(ProviderContract.RecipeEntry.TITLE, "Pasta Aglio E Olio");
-//        if (complex) {
-//            values.put(ProviderContract.RecipeEntry.CALORIES_PER_PERSON, 340);
-//            values.put(ProviderContract.RecipeEntry.DURATION, 20);
-//        }
-//        if (image)
-//            values.put(ProviderContract.RecipeEntry.IMAGE_PATH, imagePath);
-//
-//        Uri result = resolver.insert(
-//                ProviderContract.RECIPES_URI,
-//                values);
-//
-//        long recipeId = ContentUris.parseId(result);
-//
-//        //Ingredients
-//        values = new ContentValues();
-//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Spaghetti");
-//        resolver.insert(
-//                ProviderContract.RECIPE_INGREDIENTS_URI,
-//                values);
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Garlic");
-//        resolver.insert(
-//                ProviderContract.RECIPE_INGREDIENTS_URI,
-//                values);
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Parsley");
-//        resolver.insert(
-//                ProviderContract.RECIPE_INGREDIENTS_URI,
-//                values);
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Olive Oil");
-//        resolver.insert(
-//                ProviderContract.RECIPE_INGREDIENTS_URI,
-//                values);
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Red Pepper Flake");
-//        resolver.insert(
-//                ProviderContract.RECIPE_INGREDIENTS_URI,
-//                values);
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.RecipeIngredientEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.RecipeIngredientEntry.INGREDIENT_NAME, "Chicken (Optional)");
-//        resolver.insert(
-//                ProviderContract.RECIPE_INGREDIENTS_URI,
-//                values);
-//
-//        //Method
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.MethodStepEntry.STEP_NO, 1);
-//        values.put(ProviderContract.MethodStepEntry.STEP_TEXT, "Gradually heat up oil in pan and saute garlic until golden");
-//        resolver.insert(
-//                ProviderContract.METHOD_URI,
-//                values);
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.MethodStepEntry.STEP_NO, 2);
-//        values.put(ProviderContract.MethodStepEntry.STEP_TEXT, "Add Red Pepper Flake and chopped Parsley");
-//        resolver.insert(
-//                ProviderContract.METHOD_URI,
-//                values);
-//
-//
-//        values = new ContentValues();
-//        values.put(ProviderContract.MethodStepEntry.RECIPE_ID, recipeId);
-//        values.put(ProviderContract.MethodStepEntry.STEP_NO, 3);
-//        values.put(ProviderContract.MethodStepEntry.STEP_TEXT, "Toss with cooked spaghetti and add_activity_toolbar cooked chicken if desired");
-//        resolver.insert(
-//                ProviderContract.METHOD_URI,
-//                values);
-    }
-
-    /**
      * Verifies version of operating system, so can use features post-nougat such as split screen
      */
     public static boolean isMultiWindow(Activity activity) {
@@ -149,6 +57,9 @@ public class Utility {
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, Resources.getSystem().getDisplayMetrics());
     }
 
+    /**
+     * Set the visibility of the keyboard programmatically
+     */
     public static void setKeyboardVisibility(Activity activity, boolean shouldShow) {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
 
@@ -165,6 +76,9 @@ public class Utility {
         }
     }
 
+    /**
+     * Set the visibility of the keyboard programmatically
+     */
     public static void setKeyboardVisibility(Context context, View view, boolean shouldShow) {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
         if (shouldShow) {
@@ -177,10 +91,6 @@ public class Utility {
         }
     }
 
-    public static boolean isStringAllWhitespace(String s) {
-        return s.trim().length() == 0;
-    }
-
     /**
      * Sets a button's enable state based on the state of an associated EditText
      * @param currentText Current EditText value
@@ -190,19 +100,6 @@ public class Utility {
             button.setEnabled(false);
         else
             button.setEnabled(true);
-    }
-
-    /**
-     * Interpolate between two colours
-     * @param bAmount Percentage between the two to go
-     * @return Interpolated colour
-     */
-    public static int interpolateRGB(final int colorA, final int colorB, final float bAmount) {
-        final float aAmount = 1.0f - bAmount;
-        final int red = (int) (Color.red(colorA) * aAmount + Color.red(colorB) * bAmount);
-        final int green = (int) (Color.green(colorA) * aAmount + Color.green(colorB) * bAmount);
-        final int blue = (int) (Color.blue(colorA) * aAmount + Color.blue(colorB) * bAmount);
-        return Color.rgb(red, green, blue);
     }
 
     /**
@@ -241,10 +138,10 @@ public class Utility {
 
     /**
      * Update RecyclerView item positions when dragged
-     * @param list
-     * @param fromPosition
-     * @param toPosition
-     * @param <T>
+     * @param list List that the RecyclerView is bound to
+     * @param fromPosition Initial position
+     * @param toPosition New position
+     * @param <T> List with moved element
      * @return Has the item moved down the list
      */
     public static <T> boolean onRecyclerViewItemMoved(List<T> list, int fromPosition, int toPosition) {

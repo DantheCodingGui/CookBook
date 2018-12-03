@@ -18,7 +18,6 @@ import android.view.ViewGroup;
 import com.danthecodinggui.recipes.R;
 import com.danthecodinggui.recipes.databinding.FragmentMethodBinding;
 import com.danthecodinggui.recipes.databinding.ViewMethodItemBinding;
-import com.danthecodinggui.recipes.model.object_models.Ingredient;
 import com.danthecodinggui.recipes.model.object_models.MethodStep;
 import com.danthecodinggui.recipes.view.Loaders.GetMethodStepsLoader;
 
@@ -97,14 +96,15 @@ public class MethodTabFragment extends Fragment {
 
     class MethodViewAdapter extends RecyclerView.Adapter<MethodViewAdapter.StepViewHolder> {
 
+        @NonNull
         @Override
-        public StepViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public StepViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             return new StepViewHolder(ViewMethodItemBinding.inflate(inflater, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(StepViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull StepViewHolder holder, int position) {
             MethodStep step = methodStepsList.get(position);
             holder.bind(step);
         }
@@ -130,6 +130,9 @@ public class MethodTabFragment extends Fragment {
         }
     }
 
+    /**
+     * Allows fragment to asynchronously let activity know when method steps have loaded
+     */
     interface onMethodStepsLoadedListener {
         void onMethodStepsLoaded(List<MethodStep> steps);
     }
