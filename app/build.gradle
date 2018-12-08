@@ -1,13 +1,21 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'cookbook_key'
+            keyPassword 'shiverhardwing'
+            storeFile file('N://Dan/Work/AndroidKeystore/AndroidKeystore.jks')
+            storePassword 'naivetrashyplant'
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.danthecodinggui.recipes"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 28
         versionCode 1
-        versionName "v0.75"
+        versionName 'v0.8'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -16,6 +24,7 @@ android {
             debuggable false
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
         debug {
             minifyEnabled false

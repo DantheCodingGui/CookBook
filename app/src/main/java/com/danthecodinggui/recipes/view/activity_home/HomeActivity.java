@@ -14,13 +14,14 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v7.widget.AppCompatImageView;
 import android.transition.Slide;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -44,6 +45,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.AnticipateOvershootInterpolator;
@@ -69,6 +71,7 @@ import com.danthecodinggui.recipes.msc.utility.Utility;
 import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchHelperAdapter;
 import com.danthecodinggui.recipes.view.ItemTouchHelper.ItemTouchSwipeHelper;
 import com.danthecodinggui.recipes.view.Loaders.GetRecipesLoader;
+import com.danthecodinggui.recipes.view.PrivacyPolicyActivity;
 import com.danthecodinggui.recipes.view.activity_add_recipe.AddEditRecipeActivity;
 import com.danthecodinggui.recipes.view.activity_view_recipe.ViewRecipeActivity;
 
@@ -298,7 +301,7 @@ public class HomeActivity extends AppCompatActivity
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 // Called when SearchView is collapsing
                 if (searchItem.isActionViewExpanded()) {
-                    AnimUtils.animateSearchToolbar(HomeActivity.this, binding.tbarHome, 3, false, false);
+                    AnimUtils.animateSearchToolbar(HomeActivity.this, binding.tbarHome, 5, false, false);
                     binding.txtSearchNoItems.setVisibility(View.INVISIBLE);
                     sortItem.setVisible(true);
                     searchOpen = false;
@@ -309,7 +312,7 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 // Called when SearchView is expanding
-                AnimUtils.animateSearchToolbar(HomeActivity.this, binding.tbarHome, 3, false, true);
+                AnimUtils.animateSearchToolbar(HomeActivity.this, binding.tbarHome, 5, false, true);
                 sortItem.setVisible(false);
                 searchOpen = true;
                 return true;
@@ -330,12 +333,35 @@ public class HomeActivity extends AppCompatActivity
         if (shouldShowMenuAnims) {
             //Animate menu items in
             uiThread.postDelayed(() -> AnimUtils.animateVectorDrawable(searchItem.getIcon()), 300);
-            uiThread.postDelayed(() -> AnimUtils.animateVectorDrawable(sortItem.getIcon()), 700);
+            uiThread.postDelayed(() -> AnimUtils.animateVectorDrawable(sortItem.getIcon()), 500);
         }
         else {
             AnimUtils.instaAnimateVectorDrawable(searchItem.getIcon());
             AnimUtils.instaAnimateVectorDrawable(sortItem.getIcon());
         }
+
+        //Animate menu overflow icon in the same fashion as above
+        final String overflowDescription = getString(R.string.abc_action_menu_overflow_description);
+        final ViewGroup decorView = (ViewGroup) getWindow().getDecorView();
+        final ViewTreeObserver viewTreeObserver = decorView.getViewTreeObserver();
+        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                final ArrayList<View> outViews = new ArrayList<>();
+                decorView.findViewsWithText(outViews, overflowDescription,
+                        View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
+                if (!outViews.isEmpty()) {
+                    AppCompatImageView overflow = (AppCompatImageView) outViews.get(0);
+                    Drawable overflowIcon = overflow.getDrawable();
+
+                    if (shouldShowMenuAnims)
+                        uiThread.postDelayed(() -> AnimUtils.animateVectorDrawable(overflowIcon), 700);
+                    else
+                        AnimUtils.instaAnimateVectorDrawable(overflowIcon);
+                }
+                viewTreeObserver.removeOnGlobalLayoutListener(this);
+            }
+        });
 
         return true;
     }
@@ -352,6 +378,10 @@ public class HomeActivity extends AppCompatActivity
                     CloseSortBySheet();
                 else
                     OpenSortBySheet();
+                return true;
+            case R.id.menu_privacy_policy:
+                Intent viewPolicy = new Intent(getApplicationContext(), PrivacyPolicyActivity.class);
+                startActivity(viewPolicy);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -370,7 +400,9 @@ public class HomeActivity extends AppCompatActivity
             //Remove FAB
             Slide anim = new Slide();
             anim.addTarget(binding.fabHomeAddRecipe);
-            anim.setSlideEdge(Gravity.END);
+            anim.setSlideEdge(GravityCompat.getAbsoluteGravity(
+                    GravityCompat.END,
+                    getResources().getConfiguration().getLayoutDirection()));
             anim.setInterpolator(new AnticipateOvershootInterpolator(1.f));
             TransitionManager.beginDelayedTransition(binding.cdlyRoot, anim);
             binding.fabHomeAddRecipe.setVisibility(View.INVISIBLE);
@@ -418,7 +450,9 @@ public class HomeActivity extends AppCompatActivity
             //Show FAB
             Slide anim = new Slide();
             anim.addTarget(binding.fabHomeAddRecipe);
-            anim.setSlideEdge(Gravity.END);
+            anim.setSlideEdge(GravityCompat.getAbsoluteGravity(
+                    GravityCompat.END,
+                    getResources().getConfiguration().getLayoutDirection()));
             anim.setInterpolator(new AnticipateOvershootInterpolator(1.f));
             TransitionManager.beginDelayedTransition(binding.cdlyRoot, anim);
             binding.fabHomeAddRecipe.setVisibility(View.VISIBLE);
@@ -1330,8 +1364,13 @@ public class HomeActivity extends AppCompatActivity
 
         if (Utility.atLeastLollipop()) {
 
-            getWindow().setExitTransition(TransitionInflater.from(this).inflateTransition(R.transition.main_activity_add));
-            getWindow().setReenterTransition(TransitionInflater.from(this).inflateTransition(R.transition.main_activity_add));
+            Slide activityTransition = (Slide)TransitionInflater.from(this).inflateTransition(R.transition.main_activity_add);
+            activityTransition.setSlideEdge(GravityCompat.getAbsoluteGravity(
+                    GravityCompat.END,
+                    getResources().getConfiguration().getLayoutDirection()));
+
+            getWindow().setExitTransition(activityTransition);
+            getWindow().setReenterTransition(activityTransition);
 
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
             startActivity(addRecipe, options.toBundle());

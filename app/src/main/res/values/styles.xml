@@ -10,6 +10,8 @@
         <item name="android:windowContentTransitions">true</item>
         <item name="android:windowActivityTransitions">true</item>
 
+        <item name="android:actionOverflowButtonStyle">@style/overflow_icon</item>
+
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeStyle">@style/ActionModeStyle</item>
         <item name="android:actionModeCloseDrawable">@drawable/ic_back_arrow</item>
@@ -57,6 +59,8 @@
         <item name="android:windowEnterTransition">@transition/camera_activity</item>
         <item name="android:windowReturnTransition">@transition/camera_activity</item>
     </style>
+
+    <style name="PrivacyPolicyTheme" parent="Theme.AppCompat.NoActionBar"/>
 
     <style name="SearchView" parent="Widget.AppCompat.SearchView">
         <item name="colorControlNormal">@color/material_light_active_icon</item>
@@ -217,5 +221,9 @@
     </style>
     <style name="ToolbarTitleMin" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
         <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="overflow_icon" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_overflow</item>
     </style>
 </resources>

@@ -40,10 +40,10 @@ import java.util.UUID;
 import io.fotoapparat.Fotoapparat;
 import io.fotoapparat.configuration.CameraConfiguration;
 import io.fotoapparat.configuration.UpdateConfiguration;
+import io.fotoapparat.log.LoggersKt;
 import io.fotoapparat.parameter.ScaleType;
 import io.fotoapparat.result.BitmapPhoto;
 import io.fotoapparat.result.PhotoResult;
-import io.fotoapparat.result.WhenDoneListener;
 import io.fotoapparat.selector.LensPositionSelectorsKt;
 import io.fotoapparat.selector.ResolutionSelectorsKt;
 

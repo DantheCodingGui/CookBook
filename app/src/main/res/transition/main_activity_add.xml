@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <slide
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="200"
-    android:slideEdge="end">
+    android:duration="200">
     <targets>
         <target android:targetId="@+id/fab_home_add_recipe"/>
     </targets>

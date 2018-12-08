@@ -2,11 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.danthecodinggui.recipes">
 
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
-    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -23,9 +26,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <meta-data android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts"/>
-
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
         <activity
             android:name=".view.activity_view_recipe.ViewRecipeActivity"
@@ -36,15 +39,20 @@
             android:parentActivityName=".view.activity_home.HomeActivity"
             android:theme="@style/AddRecipeTheme"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".view.CameraActivity"
+        <activity
+            android:name=".view.CameraActivity"
             android:parentActivityName=".view.activity_add_recipe.AddEditRecipeActivity"
-            android:theme="@style/CameraTheme"/>
-        
+            android:theme="@style/CameraTheme" />
+        <activity
+            android:name=".view.PrivacyPolicyActivity"
+            android:parentActivityName=".view.activity_home.HomeActivity"
+            android:theme="@style/PrivacyPolicyTheme"/>
+
         <provider
+            android:name=".model.RecipeProvider"
             android:authorities="com.danthecodinggui.recipes.model.RecipeProvider"
-            android:multiprocess="false"
             android:exported="false"
-            android:name="com.danthecodinggui.recipes.model.RecipeProvider"/>
+            android:multiprocess="false" />
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.danthecodinggui.fileprovider"
@@ -52,11 +60,12 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_provider_paths"/>
+                android:resource="@xml/file_provider_paths" />
         </provider>
 
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
     </application>
+
 </manifest>
