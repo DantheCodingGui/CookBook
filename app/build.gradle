@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'cookbook_key'
             keyPassword 'shiverhardwing'
-            storeFile file('N://Dan/Work/AndroidKeystore/AndroidKeystore.jks')
+            storeFile file('N:/Dan/Work/AndroidKeystore/AndroidKeystore.jks')
             storePassword 'naivetrashyplant'
         }
     }
@@ -14,8 +14,8 @@ android {
         applicationId "com.danthecodinggui.recipes"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 1
-        versionName 'v0.8'
+        versionCode 3
+        versionName 'v0.82'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

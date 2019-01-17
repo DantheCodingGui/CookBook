@@ -199,23 +199,6 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
 
         //Setup button enable/disable based on edittext contents
         binding.butAddIngredient.setEnabled(false);
-        binding.etxtAddIngredientQuantity.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                isQuantityEmpty = charSequence.length() == 0;
-
-                if (isIngredientEmpty || isQuantityEmpty)
-                    binding.butAddIngredient.setEnabled(false);
-                else
-                    binding.butAddIngredient.setEnabled(true);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {}
-        });
         binding.etxtAddIngredientName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
@@ -224,7 +207,7 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 isIngredientEmpty = charSequence.length() == 0;
 
-                if (isIngredientEmpty || isQuantityEmpty)
+                if (isIngredientEmpty)
                     binding.butAddIngredient.setEnabled(false);
                 else
                     binding.butAddIngredient.setEnabled(true);
@@ -1333,13 +1316,21 @@ public class AddEditRecipeActivity extends AppCompatActivity implements
      */
     public void AddIngredient(View view) {
         String ingredientName = binding.etxtAddIngredientName.getText().toString();
-        int quantity = Integer.parseInt(binding.etxtAddIngredientQuantity.getText().toString());
-        String measurement = binding.spnIngredientMeasurement.getSelectedItem().toString();
 
         if (StringUtils.isStringAllWhitespace(ingredientName))
             return;
 
-        Ingredient temp = new Ingredient(ingredientName, quantity, measurement);
+        String quantityStr = binding.etxtAddIngredientQuantity.getText().toString();
+        String measurement = binding.spnIngredientMeasurement.getSelectedItem().toString();
+        int quantity;
+        Ingredient temp;
+        if (!quantityStr.isEmpty()) {
+            quantity = Integer.parseInt(quantityStr);
+            temp = new Ingredient(ingredientName, quantity, measurement);
+        }
+        else
+            temp = new Ingredient(ingredientName, "");
+
         newIngredients.add(temp);
         ingAdapter.notifyItemInserted(newIngredients.size() - 1);
         binding.rvwNewIngredients.smoothScrollToPosition(newIngredients.size() - 1);

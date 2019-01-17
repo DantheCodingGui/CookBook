@@ -113,8 +113,10 @@ public class BindingAdapters {
                 R.string.txt_ingredient_item, StringUtils.parseFullIngredient(ingredient));
 
         SpannableString spannableString = new SpannableString(fullText);
-        spannableString.setSpan(new RelativeSizeSpan(1.5f), 2, 2 + quantityLen, 0);
-        spannableString.setSpan(new RelativeSizeSpan(0.75f), 2 + quantityLen, 3 + quantityLen + measurementLen, 0);
+        if (ingredient.getQuantity() != 0) {
+            spannableString.setSpan(new RelativeSizeSpan(1.5f), 2, 2 + quantityLen, 0);
+            spannableString.setSpan(new RelativeSizeSpan(0.75f), 2 + quantityLen, 3 + quantityLen + measurementLen, 0);
+        }
 
         view.setText(spannableString);
     }

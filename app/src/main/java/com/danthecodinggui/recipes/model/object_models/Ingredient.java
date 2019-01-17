@@ -19,6 +19,11 @@ public class Ingredient implements Parcelable {
         this.measurement = measurement;
     }
 
+    public Ingredient(String ingredientText, String measurement) {
+        this.ingredientText = ingredientText;
+        this.measurement = measurement;
+    }
+
     protected Ingredient(Parcel parcel) {
         this.ingredientText = parcel.readString();
         this.quantity = parcel.readInt();

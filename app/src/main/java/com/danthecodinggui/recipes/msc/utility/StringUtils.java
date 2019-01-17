@@ -38,6 +38,9 @@ public class StringUtils {
 
         String measurement = ingredient.getMeasurement();
 
+        if (ingredient.getQuantity() == 0)
+            return ingredient.getIngredientText();
+
         return ingredient.getQuantity() +
                 (measurement.equals("-") ? "" : measurement)
                 + "  " + ingredient.getIngredientText();
